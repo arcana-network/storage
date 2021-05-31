@@ -17,9 +17,7 @@ export default class Encryptor{
     private iv: Uint8Array;
     constructor(key: any, counterValue: number) {
         this.key = new Uint8Array(key.split("").map((a: string) => a.charCodeAt(0)));
-        console.log("key", this.key);
         this.iv = Encryptor.create_counter(counterValue);
-        console.log("this iv",this.iv)
     }
 
     public async encrypt(data: ArrayBuffer) {

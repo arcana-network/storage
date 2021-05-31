@@ -11,7 +11,7 @@ class FileSource {
     this.size = file.size
   }
 
-  slice (start, end) {
+  async slice (start, end) {
     if (isCordova()) {
       return readAsByteArray(this._file.slice(start, end))
     }
@@ -19,8 +19,8 @@ class FileSource {
     let value = this._file.slice(start, end)
     console.log("start, end", start, end, value)
     const en = new Encryptor("d78ad95fa46c994b6551d0da85fc275fe613ce37657fb8d5e3d130840159d822", start)
-    // const buffer = await en.encrypt(await value.arrayBuffer())
-    // value = new Blob([buffer]);
+    const buffer = await en.encrypt(await value.arrayBuffer())
+    value = new Blob([buffer]);
     return Promise.resolve({ value })
   }
 
