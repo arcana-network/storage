@@ -34,8 +34,8 @@ const bytesToHexString = (bytes) => {
 
 describe('Upload File', () => {
   it('Should upload a file', async () => {
-    let theFile = MockFile("mock.txt", 10*2**20);
-    let reader = new FileReader();
-    
+    let file = MockFile("mock.txt", 10*2**20);
+    let upload = new tus.Upload();
+    upload.upload(file);
   });
 });
