@@ -4,9 +4,11 @@ import FileReader from './fileReader';
 
 export class Uploader {
   private endpoint: string;
+  private chunkSize: number;
 
-  constructor(endpoint: string) {
+  constructor(endpoint: string, chunkSize: number = 4*2**20) {
     this.endpoint = endpoint;
+    this.chunkSize = chunkSize;
   }
 
   upload = async (file: File) => {
@@ -32,7 +34,7 @@ export class Uploader {
         localStorage.setItem('download url', upload.url);
       },
       fileReader: new FileReader(key),
-      chunkSize: 4 * 2 ** 20,
+      chunkSize: this.chunkSize 
     });
 
     upload.start();
