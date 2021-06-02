@@ -6,10 +6,10 @@ export class KeyGen {
   file: File;
   chunkSize: number;
 
-  constructor(file: File) {
+  constructor(file: File, chunkSize = 10*2**20) {
     this.file = file;
     this.hasher = new Sha256();
-    this.chunkSize = 2 ** 20;
+    this.chunkSize = chunkSize;
   }
 
   async read<T>(position: number, length: number, binary?: boolean): Promise<{ data: T; length: number }> {

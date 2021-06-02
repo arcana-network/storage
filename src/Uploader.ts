@@ -12,7 +12,7 @@ export class Uploader {
   }
 
   upload = async (file: File) => {
-    const hash = new KeyGen(file);
+    const hash = new KeyGen(file, this.chunkSize);
     const key = await hash.getKey();
 
     let upload = new tus.Upload(file, {
