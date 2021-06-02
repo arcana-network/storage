@@ -5,7 +5,7 @@ const path = require('path');
 const serverConfig = ({ convergence, k, n, happy, privateKey, actor, userName, appid }) => {
     return {
         entry: {
-            "tus": path.resolve(__dirname, "src", "index.ts")
+            "arcana": path.resolve(__dirname, "src", "index.ts")
         },
         mode: 'production',
         module: {

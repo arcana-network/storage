@@ -1,5 +1,5 @@
-import "./SHA256"
-import Sha256 from "./SHA256";
+import './SHA256';
+import Sha256 from './SHA256';
 
 export class KeyGen {
   hasher: any;
@@ -12,7 +12,7 @@ export class KeyGen {
     this.chunkSize = 2 ** 20;
   }
 
-  async read<T>(position: number, length: number, binary?: boolean): Promise<{data: T, length: number}> {
+  async read<T>(position: number, length: number, binary?: boolean): Promise<{ data: T; length: number }> {
     return new Promise((resolve, reject) => {
       this._chunk_reader(position, length, binary, (evt: any) => {
         if (evt.target.error == null) {

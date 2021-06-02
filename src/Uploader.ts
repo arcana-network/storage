@@ -1,16 +1,15 @@
 import { KeyGen } from './Utils';
-import * as tus from "tus-js-client";
-import FileReader from "./fileReader";
+import * as tus from 'tus-js-client';
+import FileReader from './fileReader';
 
 export class Uploader {
   private endpoint: string;
 
-  constructor(endpoint: string){
+  constructor(endpoint: string) {
     this.endpoint = endpoint;
   }
 
   upload = async (file: File) => {
-
     const hash = new KeyGen(file);
     const key = await hash.getKey();
 
@@ -22,7 +21,7 @@ export class Uploader {
         filetype: file.type,
       },
       onError: function (error) {
-        throw ('Failed because: ' + error);
+        throw 'Failed because: ' + error;
       },
       onProgress: function (bytesUploaded, bytesTotal) {
         var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
@@ -37,6 +36,5 @@ export class Uploader {
     });
 
     upload.start();
-
   };
 }
