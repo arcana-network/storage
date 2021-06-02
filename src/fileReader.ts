@@ -11,7 +11,6 @@ class FileSource {
     this._file = file
     this.size = file.size
     this.key = key
-    console.log("file source", this.key)
   }
 
   async slice (start, end) {
@@ -20,7 +19,6 @@ class FileSource {
     }
 
     let value = this._file.slice(start, end)
-    console.log("start, end", start, end, value)
     const en = new Encryptor(this.key, start)
     return value.arrayBuffer().then(buffer=>{
       return en.encrypt(buffer).then(d=>{

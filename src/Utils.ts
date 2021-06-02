@@ -7,7 +7,6 @@ export class KeyGen {
   chunkSize: number;
 
   constructor(file: File) {
-    console.log('Inside keygen', file);
     this.file = file;
     this.hasher = new Sha256();
     this.chunkSize = 2 ** 20;

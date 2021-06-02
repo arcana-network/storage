@@ -2,7 +2,7 @@ import { KeyGen } from './Utils';
 import * as tus from "tus-js-client";
 import FileReader from "./fileReader";
 
-export class Upload {
+export class Uploader {
   private endpoint: string;
 
   constructor(endpoint: string){

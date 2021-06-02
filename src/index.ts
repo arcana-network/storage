@@ -1,8 +1,7 @@
-import Download from "./download"
-
+import { Uploader } from "./Uploader";
 
 export class Upload {
-  upload = (file: File) => {
+  upload = async(file: File) => {
     // let upload = new tus.Upload(file, {
     //   endpoint: 'http://localhost:1080/files/',
     //   retryDelays: [0, 3000, 5000, 10000, 20000],
@@ -27,10 +26,10 @@ export class Upload {
 
     // upload.start();
 
-  // let download = new Download();
-  //   download.decrypt();
-   let hash = new KeyGen(file);
-   hash.getKey()
-  };
+    // let download = new Download();
+    //   download.decrypt();
 
+    let up = new Uploader('http://localhost:1080/files/');
+    await up.upload(file);
+  };
 }

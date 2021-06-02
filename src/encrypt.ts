@@ -16,7 +16,7 @@ export default class Encryptor{
     private cryptoKey: CryptoKey;
     private iv: Uint8Array;
     constructor(key: number[], counterValue: number) {
-        this.key = new Uint8Array(this.key);
+        this.key = new Uint8Array(key);
         this.iv = Encryptor.create_counter(counterValue);
     }
 
