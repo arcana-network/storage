@@ -5,10 +5,13 @@ import Encryptor from "./encrypt"
 class FileSource {
   private _file: File
     size: number
+    key: number[] 
 
-  constructor (file: File) {
+  constructor (file: File, key: number[]) {
     this._file = file
     this.size = file.size
+    this.key = key
+    console.log("file source", this.key)
   }
 
   async slice (start, end) {
@@ -18,7 +21,7 @@ class FileSource {
 
     let value = this._file.slice(start, end)
     console.log("start, end", start, end, value)
-    const en = new Encryptor("b6551d0da85fc275fe613ce37657fb8d", start)
+    const en = new Encryptor(this.key, start)
     return value.arrayBuffer().then(buffer=>{
       return en.encrypt(buffer).then(d=>{
         value = new Blob([d]);
@@ -33,9 +36,15 @@ class FileSource {
 }
 
 export default class FileReader {
+  private key: number[]
+
+  constructor (key: number[]) {
+    this.key = key;
+  }
+
   openFile (input, chunkSize) {
     if (typeof input.slice === 'function' && typeof input.size !== 'undefined') {
-      return Promise.resolve(new FileSource(input))
+      return Promise.resolve(new FileSource(input, this.key))
     }
   }
 }
