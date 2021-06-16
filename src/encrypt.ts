@@ -15,13 +15,12 @@ export default class Encryptor {
   private key: Uint8Array;
   private cryptoKey: CryptoKey;
   private iv: Uint8Array;
-  constructor(key: number[], counterValue: number) {
-    this.key = new Uint8Array(key);
+  constructor(key: CryptoKey, counterValue: number) {
+    this.cryptoKey = key;
     this.iv = Encryptor.create_counter(counterValue);
   }
 
   public async encrypt(data: ArrayBuffer) {
-    this.cryptoKey = await window.crypto.subtle.importKey('raw', this.key, 'AES-CTR', false, ['encrypt']);
     return window.crypto.subtle.encrypt(
       {
         counter: this.iv,

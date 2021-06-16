@@ -5,9 +5,9 @@ import Encryptor from './encrypt';
 class FileSource {
   private _file: File;
   size: number;
-  key: number[];
+  private key: CryptoKey;
 
-  constructor(file: File, key: number[]) {
+  constructor(file: File, key: CryptoKey) {
     this._file = file;
     this.size = file.size;
     this.key = key;
@@ -34,9 +34,9 @@ class FileSource {
 }
 
 export default class FileReader {
-  private key: number[];
+  private key: CryptoKey;
 
-  constructor(key: number[]) {
+  constructor(key: CryptoKey) {
     this.key = key;
   }
 

@@ -6,7 +6,7 @@ export class KeyGen {
   file: File;
   chunkSize: number;
 
-  constructor(file: File, chunkSize = 10*2**20) {
+  constructor(file: File, chunkSize = 10 * 2 ** 20) {
     this.file = file;
     this.hasher = new Sha256();
     this.chunkSize = chunkSize;
@@ -41,12 +41,17 @@ export class KeyGen {
   }
 
   getKey = async () => {
+   await this.getHash();
+   return this.hasher.digest().slice(16);
+  };
+
+  getHash = async () => {
     let offset = 0;
     while (offset < this.file.size) {
       let data = await this.read(offset, offset + this.chunkSize);
       offset += data.length;
       this.hasher.update(data.data);
     }
-    return this.hasher.digest().slice(16);
-  };
+    return this.hasher.digest().map(x => x.toString(16).padStart(2, '0')).join(''); 
+  }
 }

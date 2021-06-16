@@ -34,7 +34,7 @@ describe('Upload File', () => {
   let file;
 
   before(() => {
-    file = MockFile('mock.txt', 10 * 2 ** 20);
+    file = MockFile('mock2.txt', 5 * 2 ** 20);
   });
 
   it('Should upload a file', async () => {
