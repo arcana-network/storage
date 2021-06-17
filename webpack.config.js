@@ -1,8 +1,8 @@
 const path = require('path');
-// const InlineEnvironmentVariablesPlugin = require('inline-environment-variables-webpack-plugin');
-// const BundleAnalyzerPlugin = require('webpack-bundle-analyzer').BundleAnalyzerPlugin;
+const NodePolyfillPlugin = require("node-polyfill-webpack-plugin")
 
-const serverConfig = ({ convergence, k, n, happy, privateKey, actor, userName, appid }) => {
+
+const serverConfig = () => {
     return {
         entry: {
             "arcana": path.resolve(__dirname, "src", "index.ts")
@@ -21,7 +21,11 @@ const serverConfig = ({ convergence, k, n, happy, privateKey, actor, userName, a
             }]
         },
         resolve: {
-            extensions: ['.tsx', '.ts', '.js']
+            extensions: ['.tsx', '.ts', '.js'],
+            fallback: {
+                crypto: require.resolve("crypto-browserify"),
+                stream: require.resolve("stream-browserify")
+            }
         },
         output: {
             filename: x => x.chunk.name + '.js',

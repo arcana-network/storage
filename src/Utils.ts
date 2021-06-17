@@ -41,8 +41,8 @@ export class KeyGen {
   }
 
   getKey = async () => {
-   await this.getHash();
-   return this.hasher.digest().slice(16);
+    await this.getHash();
+    return this.hasher.digest().slice(16);
   };
 
   getHash = async () => {
@@ -52,6 +52,15 @@ export class KeyGen {
       offset += data.length;
       this.hasher.update(data.data);
     }
-    return this.hasher.digest().map(x => x.toString(16).padStart(2, '0')).join(''); 
-  }
+    return this.hasher
+      .digest()
+      .map((x) => x.toString(16).padStart(2, '0'))
+      .join('');
+  };
 }
+
+export const fromHexString = (hexString: string): Uint8Array =>
+  new Uint8Array(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));
+
+export const toHexString = (bytes: ArrayBuffer): string =>
+  new Uint8Array(bytes).reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
