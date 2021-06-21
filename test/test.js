@@ -1,20 +1,22 @@
+const characters ='ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+
+const generateString = (length) => {
+    let result = ' ';
+    const charactersLength = characters.length;
+    for ( let i = 0; i < length; i++ ) {
+        result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+
+    return result;
+}
+
 const MockFile = (name, size, mimeType) => {
   name = name || 'mock.txt';
   size = size || 1024;
   mimeType = mimeType || 'plain/txt';
-
-  function range(count) {
-    var output = '';
-    for (var i = 0; i < count; i++) {
-      output += 'a';
-    }
-    return output;
-  }
-
-  var blob = new Blob([range(size)], { type: mimeType });
+  var blob = new Blob([generateString(size)], { type: mimeType });
   blob.lastModifiedDate = new Date();
   blob.name = name;
-
   return blob;
 };
 

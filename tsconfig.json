@@ -9,6 +9,8 @@
         "noImplicitAny": false,
         "moduleResolution": "node",
         "downlevelIteration": true,
+        "resolveJsonModule": true,
+        "esModuleInterop": true,
         "lib": [
             "dom",
             "es2018",

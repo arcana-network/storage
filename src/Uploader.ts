@@ -1,9 +1,8 @@
-import { KeyGen, fromHexString, toHexString } from './Utils';
+import { KeyGen, fromHexString, toHexString, sigToString, stringToObj, makeTx } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
-import { encryptWithPublicKey } from "eth-crypto";
-
-
+import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
+import { utils, BigNumber, ethers } from 'ethers';
 
 export class Uploader {
   private endpoint: string;
@@ -19,16 +18,12 @@ export class Uploader {
     let key;
     const hash = await hasher.getHash();
     let prevKey = localStorage.getItem(`key::${hash}`);
-    let encryptionPublicKey: string =
-      '2cee2abadd4bbebe5dfb2b5f44f421afc91252894637cb223a1c1cccba3672245ae78113dee99ce986dbfd7061ec6a0d37af6233e9a5807526f3f66a27b1a58b';
-    
-    const encrypted = await encryptWithPublicKey(
-      encryptionPublicKey,
-      'foobar', // message
-    );
-    console.log(encrypted);
+    const privateKey:string = "0x1068e1d200d2bd3140445afec1ac7829f0012b87ff6c646f6b01023c95db13c8";
+    let encryptionPublicKey: string = '19095de907dde35066bfb780f520cc5a026463f6dc0e8acde90bebf6691d5bf0ed503338414631fc5b6ccc8cad7487ad2c76ee1813a370ae14803912f43d8fd7';
+
     if (prevKey) {
-      key = await window.crypto.subtle.importKey('raw', fromHexString(prevKey), 'AES-CTR', false, ['encrypt']);
+      const decryptedKey = await decryptWithPrivateKey(privateKey,stringToObj(prevKey))
+      key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt']);
     } else {
       key = await window.crypto.subtle.generateKey(
         {
@@ -38,9 +33,24 @@ export class Uploader {
         true,
         ['encrypt', 'decrypt'],
       );
-      let aes_raw = await crypto.subtle.exportKey('raw', key);
-      // TO DO encrypt and store
-      localStorage.setItem(`key::${hash}`, toHexString(aes_raw));
+      const aes_raw = await crypto.subtle.exportKey('raw', key);
+      const hexString = toHexString(aes_raw);
+
+      const encrypted = await encryptWithPublicKey(encryptionPublicKey, hexString);
+      const encryptedKey = sigToString(encrypted);
+
+
+      const tx = await makeTx(privateKey, 'uploadInit', [
+        ethers.utils.id(prevKey + 'asdf'),
+        BigNumber.from(6),
+        BigNumber.from(4),
+        BigNumber.from(123),
+        utils.toUtf8Bytes('data'),
+        encryptedKey,
+        '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e'
+      ]);
+
+      localStorage.setItem(`key::${hash}`, encryptedKey);
     }
 
     let upload = new tus.Upload(file, {

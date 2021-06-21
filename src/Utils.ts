@@ -1,5 +1,8 @@
 import './SHA256';
 import Sha256 from './SHA256';
+import { Contract, providers, Wallet } from 'ethers';
+import * as config from './config.json';
+import * as arcana from './contracts/Arcana.json';
 
 export class KeyGen {
   hasher: any;
@@ -64,3 +67,38 @@ export const fromHexString = (hexString: string): Uint8Array =>
 
 export const toHexString = (bytes: ArrayBuffer): string =>
   new Uint8Array(bytes).reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
+
+interface encryptedI {
+  ciphertext: string;
+  ephemPublicKey: string;
+  iv: string;
+  mac: string;
+}
+
+export const sigToString = (encrypted: encryptedI): string =>
+  "0x"+encrypted.mac +
+  encrypted.iv +
+  encrypted.ephemPublicKey.substr(encrypted.ephemPublicKey.length - 128, 128) +
+  encrypted.ciphertext;
+
+export const stringToObj = (str: string): encryptedI => {
+  return {
+    ciphertext: str.substr(226),
+    ephemPublicKey: '04' + str.substr(98, 128),
+    iv: str.substr(66, 32),
+    mac: str.substr(2, 64),
+  };
+};
+
+export const Arcana = (privateKey: string): Contract => {
+  const provider = new providers.JsonRpcProvider(config.rpc);
+  const wallet = new Wallet(privateKey, provider);
+  return new Contract(config.address, arcana.abi, wallet);
+};
+
+export const makeTx = async (privateKey: string, method: string, params) => {
+  const arcana = Arcana(privateKey);
+  const tx = await arcana[method](...params);
+  await tx.wait();
+  return tx.hash;
+};
