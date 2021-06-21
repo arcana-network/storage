@@ -39,9 +39,8 @@ export class Uploader {
       const encrypted = await encryptWithPublicKey(encryptionPublicKey, hexString);
       const encryptedKey = sigToString(encrypted);
 
-
-      const tx = await makeTx(privateKey, 'uploadInit', [
-        ethers.utils.id(prevKey + 'asdf'),
+      await makeTx(privateKey, 'uploadInit', [
+        ethers.utils.id(hash),
         BigNumber.from(6),
         BigNumber.from(4),
         BigNumber.from(123),
