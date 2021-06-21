@@ -15,9 +15,8 @@
     <script src="./lib/mocha.js"></script>
 
     <script class="mocha-init">
-      mocha.setup('bdd', {globals: ['hasCert'], ignoreLeaks: true});
+      mocha.setup('bdd');
       mocha.timeout(10000);
-      mocha.checkLeaks();
     </script>
     <script src="../dist/arcana.js"></script>
     <script src="test.js" type="module"></script>

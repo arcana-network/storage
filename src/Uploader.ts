@@ -18,8 +18,10 @@ export class Uploader {
     let key;
     const hash = await hasher.getHash();
     let prevKey = localStorage.getItem(`key::${hash}`);
-    const privateKey:string = "0x1068e1d200d2bd3140445afec1ac7829f0012b87ff6c646f6b01023c95db13c8";
-    let encryptionPublicKey: string = '19095de907dde35066bfb780f520cc5a026463f6dc0e8acde90bebf6691d5bf0ed503338414631fc5b6ccc8cad7487ad2c76ee1813a370ae14803912f43d8fd7';
+    // @ts-ignore
+    const privateKey = window.privateKey;
+    // @ts-ignore
+    const publicKey = window.publicKey;
 
     if (prevKey) {
       const decryptedKey = await decryptWithPrivateKey(privateKey,stringToObj(prevKey))
@@ -36,7 +38,7 @@ export class Uploader {
       const aes_raw = await crypto.subtle.exportKey('raw', key);
       const hexString = toHexString(aes_raw);
 
-      const encrypted = await encryptWithPublicKey(encryptionPublicKey, hexString);
+      const encrypted = await encryptWithPublicKey(publicKey, hexString);
       const encryptedKey = sigToString(encrypted);
 
       await makeTx(privateKey, 'uploadInit', [
