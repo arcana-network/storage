@@ -3,5 +3,6 @@
 window.Buffer = window.Buffer || require('buffer').Buffer;
 
 import { Uploader } from './Uploader';
+import { Downloader } from './Downloader';
 
-export { Uploader };
+export { Uploader, Downloader };

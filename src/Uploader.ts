@@ -1,19 +1,14 @@
-import { KeyGen, fromHexString, toHexString, sigToString, stringToObj, makeTx } from './Utils';
+import { KeyGen, fromHexString, toHexString, sigToString, stringToObj, makeTx, AESEncrypt } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
 import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
 import { utils, BigNumber, ethers } from 'ethers';
+import * as config from './config.json';
 
 export class Uploader {
-  private endpoint: string;
   private chunkSize: number;
 
-  constructor(endpoint: string, chunkSize: number = 4 * 2 ** 20) {
-    this.endpoint = endpoint;
-    this.chunkSize = chunkSize;
-  }
-
-  upload = async (file: File) => {
+  upload = async (file: File, chunkSize: number = 4 * 2 ** 20) => {
     const hasher = new KeyGen(file, this.chunkSize);
     let key;
     const hash = await hasher.getHash();
@@ -24,7 +19,7 @@ export class Uploader {
     const publicKey = window.publicKey;
 
     if (prevKey) {
-      const decryptedKey = await decryptWithPrivateKey(privateKey,stringToObj(prevKey))
+      const decryptedKey = await decryptWithPrivateKey(privateKey, stringToObj(prevKey));
       key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt']);
     } else {
       key = await window.crypto.subtle.generateKey(
@@ -41,21 +36,32 @@ export class Uploader {
       const encrypted = await encryptWithPublicKey(publicKey, hexString);
       const encryptedKey = sigToString(encrypted);
 
+      const encryptedMetaData = await AESEncrypt(
+          key,
+          JSON.stringify({
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified,
+          }),
+      )
+
       await makeTx(privateKey, 'uploadInit', [
-        ethers.utils.id(hash),
+        ethers.utils.id(hash + privateKey),
         BigNumber.from(6),
         BigNumber.from(4),
         BigNumber.from(123),
-        utils.toUtf8Bytes('data'),
+        utils.toUtf8Bytes(encryptedMetaData),
         encryptedKey,
-        '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e'
+        '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e',
       ]);
 
       localStorage.setItem(`key::${hash}`, encryptedKey);
     }
+    const endpoint = config.storageNode + 'files/';
 
     let upload = new tus.Upload(file, {
-      endpoint: this.endpoint,
+      endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       metadata: {
         filename: file.name,
@@ -77,7 +83,7 @@ export class Uploader {
       fingerprint: function (file, options) {
         return Promise.resolve(options.metadata.hash);
       },
-      chunkSize: this.chunkSize,
+      chunkSize,
     });
 
     // Check if there are any previous uploads to continue.

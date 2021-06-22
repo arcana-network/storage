@@ -76,7 +76,8 @@ interface encryptedI {
 }
 
 export const sigToString = (encrypted: encryptedI): string =>
-  "0x"+encrypted.mac +
+  '0x' +
+  encrypted.mac +
   encrypted.iv +
   encrypted.ephemPublicKey.substr(encrypted.ephemPublicKey.length - 128, 128) +
   encrypted.ciphertext;
@@ -101,4 +102,19 @@ export const makeTx = async (privateKey: string, method: string, params) => {
   const tx = await arcana[method](...params);
   await tx.wait();
   return tx.hash;
+};
+
+export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
+  const iv = new Uint8Array(16);
+  const enc = new TextEncoder()
+  const encrypted_content = await window.crypto.subtle.encrypt(
+    {
+      name: 'AES-CTR',
+      counter: iv,
+      length: 128,
+    },
+    key,
+    enc.encode(rawData),
+  );
+  return toHexString(encrypted_content);
 };

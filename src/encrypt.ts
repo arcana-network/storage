@@ -12,7 +12,6 @@ export default class Encryptor {
 
     return counter;
   }
-  private key: Uint8Array;
   private cryptoKey: CryptoKey;
   private iv: Uint8Array;
   constructor(key: CryptoKey, counterValue: number) {
