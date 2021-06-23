@@ -45,9 +45,11 @@ export class Uploader {
             lastModified: file.lastModified,
           }),
       )
-
+      console.log("encryptedMetaData upload",encryptedMetaData)
       const did = ethers.utils.id(hash + privateKey);
       console.log("did", did);
+      // @ts-ignore
+      window.did = did;
       console.log("hash", hash);
       await makeTx(privateKey, 'uploadInit', [
         did,
@@ -77,6 +79,8 @@ export class Uploader {
       onProgress: function (bytesUploaded, bytesTotal) {
         var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
         console.log(bytesUploaded, bytesTotal, percentage + '%');
+        // @ts-ignore
+        window.fileId = upload.url.split("files/")[1]
       },
       onSuccess: function () {
         console.log('Download %s from %s', upload.url);

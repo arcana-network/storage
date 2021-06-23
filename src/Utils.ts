@@ -118,3 +118,19 @@ export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
   );
   return toHexString(encrypted_content);
 };
+
+export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
+  const iv = new Uint8Array(16);
+  const encrypted_content = await window.crypto.subtle.decrypt(
+    {
+      name: 'AES-CTR',
+      counter: iv,
+      length: 128,
+    },
+    key,
+    fromHexString(rawData),
+  );
+  const dec = new TextDecoder()
+  const str = dec.decode(new Uint8Array(encrypted_content))
+  return str;
+}

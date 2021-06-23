@@ -4,8 +4,7 @@ const generateString = (length) => {
   let result = ' ';
   const charactersLength = characters.length;
   while (result.length < length) {
-    // result += characters.charAt(Math.floor(Math.random() * charactersLength));
-    result += '1,'; 
+    result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
 
   return result;
@@ -46,11 +45,13 @@ describe('Upload File', () => {
 
   it('Should upload a file', async () => {
     let upload = new arcana.Uploader();
-    upload.upload(file);
+    await upload.upload(file);
+      await new Promise(resolve => setTimeout(resolve, 2000));
   });
 
   it('Should download a file', async() => {
     let download = new arcana.Downloader();
-    download.download("0x5bbbb93400d07ea5ede2a46a8079307dda8e8d3410c76800f1a2925c2cf0a4db", "296d87619f06a41f509db5c2f4ded372+9602b753-b5aa-4de2-8804-3a3614855949")
+    console.log(window.did, window.fileId)
+    download.download(window.did, window.fileId)
   })
 });
