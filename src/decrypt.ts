@@ -12,15 +12,13 @@ export default class Decryptor {
     return new Uint8Array(counter);
   }
 
-  private key: Uint8Array;
   private cryptoKey: CryptoKey;
-  constructor(key: string) {
-    this.key = new Uint8Array(key.split('').map((a: string) => a.charCodeAt(0)));
+  constructor(key: CryptoKey) {
+    this.cryptoKey = key
   }
 
   public async decrypt(data: ArrayBuffer, counterValue: number) {
     const iv = Decryptor.create_counter(counterValue);
-    this.cryptoKey = await window.crypto.subtle.importKey('raw', this.key, 'AES-CTR', false, ['decrypt']);
     return window.crypto.subtle.decrypt(
       {
         counter: iv,

@@ -1,7 +1,7 @@
 import Decryptor from './decrypt';
 import * as config from './config.json';
-
-import { Arcana } from "./Utils"
+import { decryptWithPrivateKey } from 'eth-crypto';
+import { Arcana, fromHexString, stringToObj } from "./Utils"
 
 const downloadBlob = (blob, filename, extension) => {
   const fileName = `${filename}.${extension}`;
@@ -29,15 +29,19 @@ export function createAndDownloadBlobFile(body, filename, extension) {
 }
 
 export class Downloader {
-  decrypt = async (file) => {
-
-    // const download = await fetch(config.storageNode + `files/download/${file}`);
-    // const blob = await download.blob();
-    // downloadBlob(blob, 'download', 'txt');
-    //   let res = await instance.get('/files/0a6d7a320db02ec132a8ee2959afb780', {
-    //     responseType: 'arraybuffer',
-    //   });
-    //   let Dec = new Decryptor('b6551d0da85fc275fe613ce37657fb8d');
-    //   createAndDownloadBlobFile(await Dec.decrypt(res.data, 0), 'download', 'txt');
+  download = async (did, uploadId) => {
+    // @ts-ignore
+    const arcana = Arcana(window.privateKey);
+    let file = await arcana.files(did);
+    
+    console.log("file encryptedKey",file.encryptedKey);
+    
+    // @ts-ignore
+    const decryptedKey = await decryptWithPrivateKey(window.privateKey, stringToObj(file.encryptedKey));
+    const key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt', 'decrypt']);
+    const download = await fetch(config.storageNode + `files/download/${uploadId}`);
+    const blob = await download.blob();
+    let Dec = new Decryptor(key);
+    createAndDownloadBlobFile(await Dec.decrypt(await blob.arrayBuffer(), 0), 'download', 'txt');
   };
 }

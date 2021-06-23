@@ -46,8 +46,11 @@ export class Uploader {
           }),
       )
 
+      const did = ethers.utils.id(hash + privateKey);
+      console.log("did", did);
+      console.log("hash", hash);
       await makeTx(privateKey, 'uploadInit', [
-        ethers.utils.id(hash + privateKey),
+        did,
         BigNumber.from(6),
         BigNumber.from(4),
         BigNumber.from(123),
@@ -92,7 +95,6 @@ export class Uploader {
       if (previousUploads.length) {
         upload.resumeFromPreviousUpload(previousUploads[0]);
       }
-
       // Start the upload
       upload.start();
     });
