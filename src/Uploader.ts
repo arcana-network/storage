@@ -1,4 +1,4 @@
-import { KeyGen, fromHexString, toHexString, sigToString, stringToObj, makeTx, AESEncrypt } from './Utils';
+import { KeyGen, fromHexString, toHexString, sigToString, stringToObj, makeTx, AESEncrypt, createChildKey } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
 import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
@@ -19,9 +19,7 @@ export class Uploader {
     const publicKey = window.publicKey;
     const did = ethers.utils.id(hash + privateKey);
 
-    // @ts-ignore
-    window.did = did;
-
+    console.log("child key", await createChildKey(privateKey, 1));
     if (prevKey) {
       const decryptedKey = await decryptWithPrivateKey(privateKey, stringToObj(prevKey));
       key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt']);

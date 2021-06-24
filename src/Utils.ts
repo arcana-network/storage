@@ -134,3 +134,24 @@ export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
   const str = dec.decode(new Uint8Array(encrypted_content))
   return str;
 }
+
+export const createChildKey = async (privateKey: string, index: number) => {
+  
+  const enc = new TextEncoder();
+  const key = await window.crypto.subtle.importKey(
+    "raw", // raw format of the key - should be Uint8Array
+    fromHexString(privateKey),
+    { // algorithm details
+        name: "HMAC",
+        hash: {name: "SHA-256"}
+    },
+    false, // export = false
+    ["sign", "verify"] // what this key can do
+  )
+  const signature = await window.crypto.subtle.sign(
+        "HMAC",
+        key,
+        enc.encode(String(index))
+  )
+  return toHexString(signature);
+}
