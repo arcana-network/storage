@@ -1,8 +1,8 @@
 import Decryptor from './decrypt';
 import * as config from './config.json';
 import { decryptWithPrivateKey } from 'eth-crypto';
-import { Arcana, fromHexString, stringToObj, AESDecrypt } from "./Utils"
-import { utils } from "ethers";
+import { Arcana, fromHexString, stringToObj, AESDecrypt, makeTx } from "./Utils"
+import { utils, Wallet } from "ethers";
 import FileWriter from "./FileWriter"
 
 const downloadBlob = (blob, fileName) => {
@@ -30,14 +30,14 @@ export function createAndDownloadBlobFile(body, filename) {
 }
 
 export class Downloader {
-  download = async (did, uploadId) => {
+  download = async (did) => {
     // @ts-ignore
-    const arcana = Arcana(window.privateKey);
+    let wallet = new Wallet(window.privateKey)
+    const arcana = Arcana(wallet.privateKey);
     let file = await arcana.files(did);
+    await makeTx(wallet.privateKey, 'checkPermission', [wallet.address,did,'0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066'])
     
-    
-    // @ts-ignore
-    const decryptedKey = await decryptWithPrivateKey(window.privateKey, stringToObj(file.encryptedKey));
+    const decryptedKey = await decryptWithPrivateKey(wallet.privateKey, stringToObj(file.encryptedKey));
     const key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt', 'decrypt']);
 
     const fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)))
@@ -47,15 +47,13 @@ export class Downloader {
     const fileWriter = new FileWriter(fileMeta.name);
     const chunkSize = Math.floor((2**20)/5);
     for(let i=0;i<fileMeta.size;i+=chunkSize){
-      const download = await fetch(config.storageNode + `files/download/${uploadId}`, {
+      const download = await fetch(config.storageNode + `files/download/${did}`, {
         headers: {
           'Range': `bytes=${i}-${i+chunkSize-1}`
         }
       });
       const buff = await download.arrayBuffer();
-      console.log("fetch: ",i,buff, chunkSize)
       const dec = await Dec.decrypt(buff, i);
-      console.log("dec", dec)
       await fileWriter.write(dec, i);
     }
     fileWriter.createDownload()

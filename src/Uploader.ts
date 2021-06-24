@@ -17,6 +17,10 @@ export class Uploader {
     const privateKey = window.privateKey;
     // @ts-ignore
     const publicKey = window.publicKey;
+    const did = ethers.utils.id(hash + privateKey);
+
+    // @ts-ignore
+    window.did = did;
 
     if (prevKey) {
       const decryptedKey = await decryptWithPrivateKey(privateKey, stringToObj(prevKey));
@@ -45,12 +49,6 @@ export class Uploader {
             lastModified: file.lastModified,
           }),
       )
-      console.log("encryptedMetaData upload",encryptedMetaData)
-      const did = ethers.utils.id(hash + privateKey);
-      console.log("did", did);
-      // @ts-ignore
-      window.did = did;
-      console.log("hash", hash);
       await makeTx(privateKey, 'uploadInit', [
         did,
         BigNumber.from(6),
@@ -72,6 +70,7 @@ export class Uploader {
         filename: file.name,
         filetype: file.type,
         hash,
+        key: did
       },
       onError: function (error) {
         throw 'Failed because: ' + error;
@@ -102,5 +101,6 @@ export class Uploader {
       // Start the upload
       upload.start();
     });
+    return did;
   };
 }

@@ -33,7 +33,7 @@ const bytesToHexString = (bytes) => {
 };
 
 describe('Upload File', () => {
-  let file;
+  let file, did;
 
   before(() => {
     file = MockFile('mock2.txt', 2 ** 20);
@@ -45,13 +45,12 @@ describe('Upload File', () => {
 
   it('Should upload a file', async () => {
     let upload = new arcana.Uploader();
-    await upload.upload(file);
-      await new Promise(resolve => setTimeout(resolve, 2000));
+    did = await upload.upload(file);
+    await new Promise(resolve => setTimeout(resolve, 2000));
   });
 
   it('Should download a file', async() => {
     let download = new arcana.Downloader();
-    console.log(window.did, window.fileId)
-    download.download(window.did, window.fileId)
+    download.download(did)
   })
 });
