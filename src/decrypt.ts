@@ -14,7 +14,7 @@ export default class Decryptor {
 
   private cryptoKey: CryptoKey;
   constructor(key: CryptoKey) {
-    this.cryptoKey = key
+    this.cryptoKey = key;
   }
 
   public async decrypt(data: ArrayBuffer, counterValue: number) {

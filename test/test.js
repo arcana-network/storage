@@ -46,11 +46,21 @@ describe('Upload File', () => {
   it('Should upload a file', async () => {
     let upload = new arcana.Uploader();
     did = await upload.upload(file);
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
-  it('Should download a file', async() => {
+  it('Should download a file', async () => {
     let download = new arcana.Downloader();
-    download.download(did)
-  })
+    // download.download(did);
+  });
+
+  it('Share file', async () => {
+    let access = new arcana.Access(window.privateKey);
+    let tx = await access.share(
+      [did],
+      ['0x045813d4f8d84c5764b1afddb1eb284351e536754343d7add428c9e8460f76df03deff124704ea538708d68aee3f5e41b5b68a381eb994f3d4b859a0bfcd598aad'],
+      [150],
+    );
+    console.log('Share tx', tx);
+  });
 });

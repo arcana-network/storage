@@ -1,8 +1,9 @@
 import './SHA256';
 import Sha256 from './SHA256';
-import { Contract, providers, Wallet } from 'ethers';
+import { Contract, providers, Wallet, utils } from 'ethers';
 import * as config from './config.json';
 import * as arcana from './contracts/Arcana.json';
+import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
 
 export class KeyGen {
   hasher: any;
@@ -106,7 +107,7 @@ export const makeTx = async (privateKey: string, method: string, params) => {
 
 export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
   const iv = new Uint8Array(16);
-  const enc = new TextEncoder()
+  const enc = new TextEncoder();
   const encrypted_content = await window.crypto.subtle.encrypt(
     {
       name: 'AES-CTR',
@@ -130,28 +131,33 @@ export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
     key,
     fromHexString(rawData),
   );
-  const dec = new TextDecoder()
-  const str = dec.decode(new Uint8Array(encrypted_content))
+  const dec = new TextDecoder();
+  const str = dec.decode(new Uint8Array(encrypted_content));
   return str;
-}
+};
 
 export const createChildKey = async (privateKey: string, index: number) => {
-  
   const enc = new TextEncoder();
   const key = await window.crypto.subtle.importKey(
-    "raw", // raw format of the key - should be Uint8Array
+    'raw', // raw format of the key - should be Uint8Array
     fromHexString(privateKey),
-    { // algorithm details
-        name: "HMAC",
-        hash: {name: "SHA-256"}
+    {
+      // algorithm details
+      name: 'HMAC',
+      hash: { name: 'SHA-256' },
     },
     false, // export = false
-    ["sign", "verify"] // what this key can do
-  )
-  const signature = await window.crypto.subtle.sign(
-        "HMAC",
-        key,
-        enc.encode(String(index))
-  )
+    ['sign', 'verify'], // what this key can do
+  );
+  const signature = await window.crypto.subtle.sign('HMAC', key, enc.encode(String(index)));
   return toHexString(signature);
-}
+};
+
+export const encryptKey = async (publicKey: string, key: string): Promise<string> => {
+  const encrypted = await encryptWithPublicKey(publicKey, key);
+  return sigToString(encrypted);
+};
+
+export const decryptKey = async (privateKey: string, encryptedKey: string): Promise<string> => {
+  return await decryptWithPrivateKey(privateKey, stringToObj(encryptedKey));
+};

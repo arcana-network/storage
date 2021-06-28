@@ -1,7 +1,15 @@
-import { KeyGen, fromHexString, toHexString, sigToString, stringToObj, makeTx, AESEncrypt, createChildKey } from './Utils';
+import {
+  KeyGen,
+  fromHexString,
+  toHexString,
+  makeTx,
+  AESEncrypt,
+  createChildKey,
+  encryptKey,
+  decryptKey,
+} from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
-import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
 import { utils, BigNumber, ethers } from 'ethers';
 import * as config from './config.json';
 
@@ -19,9 +27,9 @@ export class Uploader {
     const publicKey = window.publicKey;
     const did = ethers.utils.id(hash + privateKey);
 
-    console.log("child key", await createChildKey(privateKey, 1));
+    console.log('child key', await createChildKey(privateKey, 1));
     if (prevKey) {
-      const decryptedKey = await decryptWithPrivateKey(privateKey, stringToObj(prevKey));
+      const decryptedKey = await decryptKey(privateKey, prevKey);
       key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt']);
     } else {
       key = await window.crypto.subtle.generateKey(
@@ -35,18 +43,17 @@ export class Uploader {
       const aes_raw = await crypto.subtle.exportKey('raw', key);
       const hexString = toHexString(aes_raw);
 
-      const encrypted = await encryptWithPublicKey(publicKey, hexString);
-      const encryptedKey = sigToString(encrypted);
+      const encryptedKey = await encryptKey(publicKey, hexString);
 
       const encryptedMetaData = await AESEncrypt(
-          key,
-          JSON.stringify({
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            lastModified: file.lastModified,
-          }),
-      )
+        key,
+        JSON.stringify({
+          name: file.name,
+          type: file.type,
+          size: file.size,
+          lastModified: file.lastModified,
+        }),
+      );
       await makeTx(privateKey, 'uploadInit', [
         did,
         BigNumber.from(6),
@@ -68,7 +75,7 @@ export class Uploader {
         filename: file.name,
         filetype: file.type,
         hash,
-        key: did
+        key: did,
       },
       onError: function (error) {
         throw 'Failed because: ' + error;
@@ -77,7 +84,7 @@ export class Uploader {
         var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
         console.log(bytesUploaded, bytesTotal, percentage + '%');
         // @ts-ignore
-        window.fileId = upload.url.split("files/")[1]
+        window.fileId = upload.url.split('files/')[1];
       },
       onSuccess: function () {
         console.log('Download %s from %s', upload.url);

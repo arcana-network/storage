@@ -1,9 +1,10 @@
 import Decryptor from './decrypt';
 import * as config from './config.json';
 import { decryptWithPrivateKey } from 'eth-crypto';
-import { Arcana, fromHexString, stringToObj, AESDecrypt, makeTx } from "./Utils"
-import { utils, Wallet } from "ethers";
-import FileWriter from "./FileWriter"
+import { Arcana, fromHexString, stringToObj, AESDecrypt, makeTx } from './Utils';
+import { utils, Wallet } from 'ethers';
+import FileWriter from './FileWriter';
+import { readHash } from './constant';
 
 const downloadBlob = (blob, fileName) => {
   if (navigator.msSaveBlob) {
@@ -32,30 +33,33 @@ export function createAndDownloadBlobFile(body, filename) {
 export class Downloader {
   download = async (did) => {
     // @ts-ignore
-    let wallet = new Wallet(window.privateKey)
+    let wallet = new Wallet(window.privateKey);
     const arcana = Arcana(wallet.privateKey);
     let file = await arcana.files(did);
-    await makeTx(wallet.privateKey, 'checkPermission', [wallet.address,did,'0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066'])
-    
-    const decryptedKey = await decryptWithPrivateKey(wallet.privateKey, stringToObj(file.encryptedKey));
-    const key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt', 'decrypt']);
+    await makeTx(wallet.privateKey, 'checkPermission', [wallet.address, did, readHash]);
 
-    const fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)))
+    const decryptedKey = await decryptWithPrivateKey(wallet.privateKey, stringToObj(file.encryptedKey));
+    const key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, [
+      'encrypt',
+      'decrypt',
+    ]);
+
+    const fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)));
 
     let Dec = new Decryptor(key);
 
     const fileWriter = new FileWriter(fileMeta.name);
-    const chunkSize = Math.floor((2**20)/5);
-    for(let i=0;i<fileMeta.size;i+=chunkSize){
+    const chunkSize = Math.floor(2 ** 20 / 5);
+    for (let i = 0; i < fileMeta.size; i += chunkSize) {
       const download = await fetch(config.storageNode + `files/download/${did}`, {
         headers: {
-          'Range': `bytes=${i}-${i+chunkSize-1}`
-        }
+          Range: `bytes=${i}-${i + chunkSize - 1}`,
+        },
       });
       const buff = await download.arrayBuffer();
       const dec = await Dec.decrypt(buff, i);
       await fileWriter.write(dec, i);
     }
-    fileWriter.createDownload()
+    fileWriter.createDownload();
   };
 }
