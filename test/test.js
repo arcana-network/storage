@@ -36,31 +36,43 @@ describe('Upload File', () => {
   let file, did;
 
   before(() => {
-    file = MockFile('mock2.txt', 2 ** 20);
+    file = MockFile('mock.txt', 2 ** 20);
     window.file = file;
     window.privateKey = '0x1068e1d200d2bd3140445afec1ac7829f0012b87ff6c646f6b01023c95db13c8';
     window.publicKey =
       '19095de907dde35066bfb780f520cc5a026463f6dc0e8acde90bebf6691d5bf0ed503338414631fc5b6ccc8cad7487ad2c76ee1813a370ae14803912f43d8fd7';
   });
 
+  beforeEach(async()=>{
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  })
+
   it('Should upload a file', async () => {
     let upload = new arcana.Uploader();
     did = await upload.upload(file);
-    await new Promise((resolve) => setTimeout(resolve, 2000));
   });
 
   it('Should download a file', async () => {
     let download = new arcana.Downloader();
-    // download.download(did);
+    download.download(did);
   });
 
   it('Share file', async () => {
     let access = new arcana.Access(window.privateKey);
     let tx = await access.share(
       [did],
-      ['0x045813d4f8d84c5764b1afddb1eb284351e536754343d7add428c9e8460f76df03deff124704ea538708d68aee3f5e41b5b68a381eb994f3d4b859a0bfcd598aad'],
+      [
+        '0x0455bf05512df427512037e5341b4b779a745792e306e33216bc4cb2ca5b57ec154559bcfb88d1049a0d6f247183838d152a1378062f8582361b1a79fef4532896',
+      ],
       [150],
     );
-    console.log('Share tx', tx);
+    console.log("Share tx", tx)
   });
+
+  it('Download shared file', async() =>{
+    window.privateKey = "0xa11c0370501f00f2ebe942b81a546e05b919a09bc9c45ea78a7181bbabcfa4f8"
+    window.publicKey = "55bf05512df427512037e5341b4b779a745792e306e33216bc4cb2ca5b57ec154559bcfb88d1049a0d6f247183838d152a1378062f8582361b1a79fef4532896"
+    let download = new arcana.Downloader();
+    download.download(did);
+  })
 });

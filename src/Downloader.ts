@@ -35,9 +35,8 @@ export class Downloader {
     // @ts-ignore
     let wallet = new Wallet(window.privateKey);
     const arcana = Arcana(wallet.privateKey);
-    let file = await arcana.files(did);
+    let file = await arcana.getFile(did, readHash);
     await makeTx(wallet.privateKey, 'checkPermission', [wallet.address, did, readHash]);
-
     const decryptedKey = await decryptWithPrivateKey(wallet.privateKey, stringToObj(file.encryptedKey));
     const key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, [
       'encrypt',

@@ -1,6 +1,6 @@
 import { utils } from 'ethers';
 import { readHash } from './constant';
-import { makeTx, encryptKey } from './Utils';
+import { makeTx, getEncryptedKey, decryptKey, encryptKey } from './Utils';
 
 export class Access {
   private privateKey: string;
@@ -12,11 +12,16 @@ export class Access {
     let address = [];
     let encryptedKey = [];
     let accessType = [];
-    publicKey.forEach((p) => {
-      address.push(utils.computeAddress(p));
-      encryptedKey.push(utils.toUtf8Bytes('asdf'));
-      accessType.push(readHash);
-    });
+    await Promise.all(fileId.map(async(f) => {
+      const EK = await getEncryptedKey(f);
+      const key = await decryptKey(this.privateKey, EK);
+      await Promise.all(publicKey.map(async(p) => {
+	const pubKey = p.slice(p.length -128)
+        address.push(utils.computeAddress(p));
+        encryptedKey.push(await encryptKey(pubKey,key));
+        accessType.push(readHash);
+      }));
+    }));
     return await makeTx(this.privateKey, 'share', [fileId, address, accessType, encryptedKey, validity]);
   };
 }

@@ -92,10 +92,13 @@ export const stringToObj = (str: string): encryptedI => {
   };
 };
 
-export const Arcana = (privateKey: string): Contract => {
+export const Arcana = (privateKey?: string): Contract => {
   const provider = new providers.JsonRpcProvider(config.rpc);
-  const wallet = new Wallet(privateKey, provider);
-  return new Contract(config.address, arcana.abi, wallet);
+  let wallet;
+  if (privateKey) {
+    wallet = new Wallet(privateKey, provider);
+  }
+  return new Contract(config.address, arcana.abi, wallet ? wallet : provider);
 };
 
 export const makeTx = async (privateKey: string, method: string, params) => {
@@ -160,4 +163,10 @@ export const encryptKey = async (publicKey: string, key: string): Promise<string
 
 export const decryptKey = async (privateKey: string, encryptedKey: string): Promise<string> => {
   return await decryptWithPrivateKey(privateKey, stringToObj(encryptedKey));
+};
+
+export const getEncryptedKey = async (fileId: string): Promise<string> => {
+  const arcana = Arcana();
+  const file = await arcana.files(fileId);
+  return file.encryptedKey;
 };
