@@ -32,6 +32,23 @@ const bytesToHexString = (bytes) => {
   return hexBytes.join('');
 };
 
+const makeEmail = () => {
+  var strValues = 'abcdefg12345';
+  var strEmail = '';
+  var strTmp;
+  for (var i = 0; i < 10; i++) {
+    strTmp = strValues.charAt(Math.round(strValues.length * Math.random()));
+    strEmail = strEmail + strTmp;
+  }
+  strTmp = '';
+  strEmail = strEmail + '@';
+  for (var j = 0; j < 8; j++) {
+    strTmp = strValues.charAt(Math.round(strValues.length * Math.random()));
+    strEmail = strEmail + strTmp;
+  }
+  strEmail = strEmail + '.com';
+  return strEmail;
+};
 describe('Upload File', () => {
   let file, did;
 
@@ -43,18 +60,17 @@ describe('Upload File', () => {
       '19095de907dde35066bfb780f520cc5a026463f6dc0e8acde90bebf6691d5bf0ed503338414631fc5b6ccc8cad7487ad2c76ee1813a370ae14803912f43d8fd7';
   });
 
-  beforeEach(async()=>{
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  })
 
   it('Should upload a file', async () => {
     let upload = new arcana.Uploader();
     did = await upload.upload(file);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it('Should download a file', async () => {
     let download = new arcana.Downloader();
     download.download(did);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it('Share file', async () => {
@@ -66,7 +82,8 @@ describe('Upload File', () => {
       ],
       [150],
     );
-    console.log("Share tx", tx)
+    chai.expect(tx).not.null;
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it('Download shared file', async() =>{
@@ -75,4 +92,16 @@ describe('Upload File', () => {
     let download = new arcana.Downloader();
     download.download(did);
   })
+
+  it('Geenrate Wallet', async () => {
+    const wallet = await arcana.utils.getWallet('0x22fd4c393275398cbde74f85af7be2b79858bea05182250024d3e7f296b838b3');
+    chai.expect(wallet.address).to.equal('0xa23039d0Fca2af54E8b9ac2ECaE78e3084Cc687b');
+  });
+
+  it('Register', async () => {
+    const wallet = await arcana.utils.getRandomWallet();
+    const api = new arcana.utils.Api(wallet, makeEmail(), 1);
+    const status = await api.register()
+    chai.expect(status).to.equal(201);
+  });
 });

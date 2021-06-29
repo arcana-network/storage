@@ -170,3 +170,46 @@ export const getEncryptedKey = async (fileId: string): Promise<string> => {
   const file = await arcana.files(fileId);
   return file.encryptedKey;
 };
+
+export const getWallet = async (privateKey: string) => {
+  return new Wallet(privateKey);
+};
+
+export const getRandomWallet = () => {
+  return Wallet.createRandom();
+}
+
+export class Api {
+  baseUrl: string = config.developerServer;
+  authtoken: string;
+  email: string;
+  wallet: any;
+  appId: number;
+
+  constructor(wallet: Wallet, email: string, appId: number) {
+    this.wallet = wallet;
+    this.email = email;
+    this.appId = appId;
+  }
+
+  post = async (url: string, body: any) => {
+    return await fetch(this.baseUrl + url, {
+      method: 'POST',
+      headers: {
+        Accept: '*/*',
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(body),
+    });
+  };
+
+  register = async () => {
+    const signature = await this.wallet.signMessage(`${this.email}, ${this.wallet.address}, register, ${this.appId}`);
+    let res = await this.post('auth/signup', {
+      email: this.email,
+      address: this.wallet.address,
+      signature,
+    });
+    return res.status;
+  };
+}

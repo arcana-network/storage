@@ -1,5 +1,6 @@
 {
 	"rpc": "http://localhost:8545",
 	"address": "0x73A15a259d1bB5ACC23319CCE876a976a278bE82",
-	"storageNode": "http://localhost:5000/"
+	"storageNode": "http://localhost:5000/",
+	"developerServer": "http://localhost:3000/"
 }
