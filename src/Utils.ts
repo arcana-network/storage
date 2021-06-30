@@ -181,7 +181,7 @@ export const getRandomWallet = () => {
 
 export class Api {
   baseUrl: string = config.developerServer;
-  authtoken: string;
+  accessToken: string;
   email: string;
   wallet: any;
   appId: number;
@@ -203,6 +203,15 @@ export class Api {
     });
   };
 
+  get = async (url:string) => {
+    return await fetch(this.baseUrl + url, {
+      method: 'GET',
+      headers: {
+        Accept: '*/*',
+      },
+    });
+  }
+
   register = async () => {
     const signature = await this.wallet.signMessage(`${this.email}, ${this.wallet.address}, register, ${this.appId}`);
     let res = await this.post('auth/signup', {
@@ -212,4 +221,17 @@ export class Api {
     });
     return res.status;
   };
+
+  login = async() => {
+    const nonce = (await (await this.get(`auth/nonce/${this.email}`)).json()).nonce
+    console.log("nonce",nonce)
+    const signature = await this.wallet.signMessage(`${this.email}, ${this.wallet.address}, login, ${nonce}`);
+    let res = await this.post('auth/signin', {
+      email: this.email,
+      address: this.wallet.address,
+      signature,
+    });
+    this.accessToken = (await res.json()).accessToken
+    return this.accessToken 
+  }
 }
