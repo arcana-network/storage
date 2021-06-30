@@ -1,35 +1,26 @@
-import {
-  KeyGen,
-  fromHexString,
-  toHexString,
-  makeTx,
-  AESEncrypt,
-  createChildKey,
-  encryptKey,
-  decryptKey,
-} from './Utils';
+import { KeyGen, fromHexString, toHexString, makeTx, AESEncrypt, encryptKey, decryptKey } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
 import { utils, BigNumber, ethers } from 'ethers';
 import * as config from './config.json';
 
 export class Uploader {
-  private chunkSize: number;
+  private wallet: any;
+  private convergence: string;
+  constructor(wallet: any, convergence: string){
+    this.wallet = wallet;
+    this.convergence = convergence;
+  }
 
   upload = async (file: File, chunkSize: number = 4 * 2 ** 20) => {
-    const hasher = new KeyGen(file, this.chunkSize);
+    const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
     let prevKey = localStorage.getItem(`key::${hash}`);
-    // @ts-ignore
-    const privateKey = window.privateKey;
-    // @ts-ignore
-    const publicKey = window.publicKey;
-    const did = ethers.utils.id(hash + privateKey);
+    const did = ethers.utils.id(hash + this.convergence);
 
-    console.log('child key', await createChildKey(privateKey, 1));
     if (prevKey) {
-      const decryptedKey = await decryptKey(privateKey, prevKey);
+      const decryptedKey = await decryptKey(this.wallet.privateKey, prevKey);
       key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt']);
     } else {
       key = await window.crypto.subtle.generateKey(
@@ -43,7 +34,7 @@ export class Uploader {
       const aes_raw = await crypto.subtle.exportKey('raw', key);
       const hexString = toHexString(aes_raw);
 
-      const encryptedKey = await encryptKey(publicKey, hexString);
+      const encryptedKey = await encryptKey(this.wallet._signingKey().publicKey, hexString);
 
       const encryptedMetaData = await AESEncrypt(
         key,
@@ -54,7 +45,7 @@ export class Uploader {
           lastModified: file.lastModified,
         }),
       );
-      await makeTx(privateKey, 'uploadInit', [
+      await makeTx(this.wallet, 'uploadInit', [
         did,
         BigNumber.from(6),
         BigNumber.from(4),

@@ -3,9 +3,11 @@ import { readHash } from './constant';
 import { makeTx, getEncryptedKey, decryptKey, encryptKey } from './Utils';
 
 export class Access {
-  private privateKey: string;
-  constructor(privateKey: string) {
-    this.privateKey = privateKey;
+  private wallet: any;
+  private convergence: string;
+  constructor(wallet: any, convergence: string){
+    this.wallet = wallet;
+    this.convergence = convergence;
   }
 
   share = async (fileId: string[], publicKey: string[], validity: number[]): Promise<string> => {
@@ -15,7 +17,7 @@ export class Access {
     await Promise.all(
       fileId.map(async (f) => {
         const EK = await getEncryptedKey(f);
-        const key = await decryptKey(this.privateKey, EK);
+        const key = await decryptKey(this.wallet.privateKey, EK);
         await Promise.all(
           publicKey.map(async (p) => {
             const pubKey = p.slice(p.length - 128);
@@ -26,6 +28,6 @@ export class Access {
         );
       }),
     );
-    return await makeTx(this.privateKey, 'share', [fileId, address, accessType, encryptedKey, validity]);
+    return await makeTx(this.wallet, 'share', [fileId, address, accessType, encryptedKey, validity]);
   };
 }

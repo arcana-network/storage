@@ -31,13 +31,18 @@ export function createAndDownloadBlobFile(body, filename) {
 }
 
 export class Downloader {
+  private wallet: any;
+  private convergence: string;
+  constructor(wallet: any, convergence: string){
+    this.wallet = wallet;
+    this.convergence = convergence;
+  }
+
   download = async (did) => {
-    // @ts-ignore
-    let wallet = new Wallet(window.privateKey);
-    const arcana = Arcana(wallet.privateKey);
+    const arcana = Arcana(this.wallet);
     let file = await arcana.getFile(did, readHash);
-    await makeTx(wallet.privateKey, 'checkPermission', [wallet.address, did, readHash]);
-    const decryptedKey = await decryptWithPrivateKey(wallet.privateKey, stringToObj(file.encryptedKey));
+    await makeTx(this.wallet, 'checkPermission', [this.wallet.address, did, readHash]);
+    const decryptedKey = await decryptWithPrivateKey(this.wallet.privateKey, stringToObj(file.encryptedKey));
     const key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, [
       'encrypt',
       'decrypt',

@@ -92,17 +92,13 @@ export const stringToObj = (str: string): encryptedI => {
   };
 };
 
-export const Arcana = (privateKey?: string): Contract => {
+export const Arcana = (wallet?: Wallet): Contract => {
   const provider = new providers.JsonRpcProvider(config.rpc);
-  let wallet;
-  if (privateKey) {
-    wallet = new Wallet(privateKey, provider);
-  }
   return new Contract(config.address, arcana.abi, wallet ? wallet : provider);
 };
 
-export const makeTx = async (privateKey: string, method: string, params) => {
-  const arcana = Arcana(privateKey);
+export const makeTx = async (wallet: Wallet, method: string, params) => {
+  const arcana = Arcana(wallet);
   const tx = await arcana[method](...params);
   await tx.wait();
   return tx.hash;
@@ -153,11 +149,11 @@ export const createChildKey = async (privateKey: string, index: number) => {
     ['sign', 'verify'], // what this key can do
   );
   const signature = await window.crypto.subtle.sign('HMAC', key, enc.encode(String(index)));
-  return toHexString(signature);
+  return getWallet(toHexString(signature));
 };
 
 export const encryptKey = async (publicKey: string, key: string): Promise<string> => {
-  const encrypted = await encryptWithPublicKey(publicKey, key);
+  const encrypted = await encryptWithPublicKey(publicKey.substring(publicKey.length - 128), key);
   return sigToString(encrypted);
 };
 
@@ -172,12 +168,14 @@ export const getEncryptedKey = async (fileId: string): Promise<string> => {
 };
 
 export const getWallet = async (privateKey: string) => {
-  return new Wallet(privateKey);
+  const provider = new providers.JsonRpcProvider(config.rpc);
+  return new Wallet(privateKey, provider);
 };
 
 export const getRandomWallet = () => {
-  return Wallet.createRandom();
-}
+  const provider = new providers.JsonRpcProvider(config.rpc);
+  return Wallet.createRandom().connect(provider);
+};
 
 export class Api {
   baseUrl: string = config.developerServer;
@@ -193,24 +191,28 @@ export class Api {
   }
 
   post = async (url: string, body: any) => {
+    const headers = {
+      Accept: '*/*',
+      'Content-Type': 'application/json',
+    };
+    if (this.accessToken) headers['Authorization'] = `Bearer ${this.accessToken}`;
     return await fetch(this.baseUrl + url, {
       method: 'POST',
-      headers: {
-        Accept: '*/*',
-        'Content-Type': 'application/json',
-      },
+      headers,
       body: JSON.stringify(body),
     });
   };
 
-  get = async (url:string) => {
+  get = async (url: string) => {
+    const headers = {
+      Accept: '*/*',
+    };
+    if (this.accessToken) headers['Authorization'] = `Bearer ${this.accessToken}`;
     return await fetch(this.baseUrl + url, {
       method: 'GET',
-      headers: {
-        Accept: '*/*',
-      },
+      headers,
     });
-  }
+  };
 
   register = async () => {
     const signature = await this.wallet.signMessage(`${this.email}, ${this.wallet.address}, register, ${this.appId}`);
@@ -222,16 +224,30 @@ export class Api {
     return res.status;
   };
 
-  login = async() => {
-    const nonce = (await (await this.get(`auth/nonce/${this.email}`)).json()).nonce
-    console.log("nonce",nonce)
+  login = async () => {
+    const nonce = (await (await this.get(`auth/nonce/${this.email}`)).json()).nonce;
     const signature = await this.wallet.signMessage(`${this.email}, ${this.wallet.address}, login, ${nonce}`);
     let res = await this.post('auth/signin', {
       email: this.email,
       address: this.wallet.address,
       signature,
     });
-    this.accessToken = (await res.json()).accessToken
-    return this.accessToken 
-  }
+    this.accessToken = (await res.json()).accessToken;
+
+    // Fetch no of unused keys child keys
+    const count = (await (await this.get('keys/buffer')).json()).count;
+    const keys = [];
+    let index = new Date().getTime();
+    // Generate new child keys
+    for (let i = 0; i < config.childTreshold - count; i++) {
+      const cw = await createChildKey(this.wallet.privateKey, index);
+      keys.push({
+        publicKey: cw._signingKey().publicKey,
+        nonce: index,
+      });
+      index++;
+    }
+    console.log('register child', await this.post('keys/multiple', keys));
+    return this.accessToken;
+  };
 }
