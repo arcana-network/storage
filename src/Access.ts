@@ -30,4 +30,8 @@ export class Access {
     );
     return await makeTx(this.wallet, 'share', [fileId, address, accessType, encryptedKey, validity]);
   };
+
+  revoke = async (fileId: string, address: string):Promise<string> => {
+    return await makeTx(this.wallet, 'revoke', [fileId, address, readHash])
+  }
 }

@@ -50,7 +50,7 @@ const makeEmail = () => {
   return strEmail;
 };
 describe('Upload File', () => {
-  let file, did, wallet, api, arcanaInstance;
+  let file, did, wallet, api, arcanaInstance, access, receiverWallet;
 
   before(async () => {
     file = MockFile('mock.txt', 2 ** 20);
@@ -71,11 +71,12 @@ describe('Upload File', () => {
   });
 
   it('Share file', async () => {
-    let access = new arcanaInstance.getAccess();
+    access = new arcanaInstance.getAccess();
+    receiverWallet = await arcana.utils.getWallet("0xa11c0370501f00f2ebe942b81a546e05b919a09bc9c45ea78a7181bbabcfa4f8");
     let tx = await access.share(
       [did],
       [
-        '0x0455bf05512df427512037e5341b4b779a745792e306e33216bc4cb2ca5b57ec154559bcfb88d1049a0d6f247183838d152a1378062f8582361b1a79fef4532896',
+        receiverWallet._signingKey().publicKey
       ],
       [150],
     );
@@ -84,9 +85,15 @@ describe('Upload File', () => {
   });
 
   it('Download shared file', async() =>{
-    let sharedIntance = new arcana.Arcana(await arcana.utils.getWallet("0xa11c0370501f00f2ebe942b81a546e05b919a09bc9c45ea78a7181bbabcfa4f8"))
+    let sharedIntance = new arcana.Arcana(receiverWallet);
     let download = new sharedIntance.getDownloader();
     download.download(did);
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+  })
+
+  it('Revoke', async ()=> {
+    let tx = await access.revoke(did, receiverWallet.address);
+    console.log("Revoke", tx)
   })
 
   it('Geenrate Wallet', async () => {
