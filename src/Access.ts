@@ -34,4 +34,9 @@ export class Access {
   revoke = async (fileId: string, address: string):Promise<string> => {
     return await makeTx(this.wallet, 'revoke', [fileId, address, readHash])
   }
+
+  changeFileOwner = async(fileId: string, newOwnerAddress: string): Promise<string> => {
+    return await makeTx(this.wallet, 'changeFileOwner', [fileId, newOwnerAddress])
+  }
+  
 }

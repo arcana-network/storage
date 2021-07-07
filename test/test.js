@@ -96,19 +96,9 @@ describe('Upload File', () => {
     console.log("Revoke", tx)
   })
 
-  it('Geenrate Wallet', async () => {
+  it('Generate Wallet', async () => {
     const wallet = await arcana.utils.getWallet('0x22fd4c393275398cbde74f85af7be2b79858bea05182250024d3e7f296b838b3');
     chai.expect(wallet.address).to.equal('0xa23039d0Fca2af54E8b9ac2ECaE78e3084Cc687b');
   });
 
-  it('Register', async () => {
-    wallet = await arcana.utils.getRandomWallet();
-    api = new arcana.utils.Api(wallet, makeEmail(), 1);
-    const status = await api.register();
-    chai.expect(status).to.equal(201);
-  });
-
-  it('Login', async () => {
-    chai.expect(await api.login()).not.undefined;
-  });
 });

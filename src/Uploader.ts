@@ -1,7 +1,7 @@
 import { KeyGen, fromHexString, toHexString, makeTx, AESEncrypt, encryptKey, decryptKey } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
-import { utils, BigNumber, ethers } from 'ethers';
+import { utils, BigNumber } from 'ethers';
 import * as config from './config.json';
 
 export class Uploader {
@@ -17,7 +17,7 @@ export class Uploader {
     let key;
     const hash = await hasher.getHash();
     let prevKey = localStorage.getItem(`key::${hash}`);
-    const did = ethers.utils.id(hash + this.convergence);
+    const did = utils.id(hash + this.convergence);
 
     if (prevKey) {
       const decryptedKey = await decryptKey(this.wallet.privateKey, prevKey);
@@ -45,6 +45,9 @@ export class Uploader {
           lastModified: file.lastModified,
         }),
       );
+      // TO DO: Make this dynamic 
+      const encryptedFileHash = utils.formatBytes32String("encryptedFileHash");
+
       await makeTx(this.wallet, 'uploadInit', [
         did,
         BigNumber.from(6),
@@ -52,6 +55,7 @@ export class Uploader {
         BigNumber.from(123),
         utils.toUtf8Bytes(encryptedMetaData),
         encryptedKey,
+        encryptedFileHash,
         '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e',
       ]);
 
