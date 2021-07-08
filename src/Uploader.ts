@@ -43,10 +43,9 @@ export class Uploader {
           type: file.type,
           size: file.size,
           lastModified: file.lastModified,
+          hash,
         }),
       );
-      // TO DO: Make this dynamic 
-      const encryptedFileHash = utils.formatBytes32String("encryptedFileHash");
 
       await makeTx(this.wallet, 'uploadInit', [
         did,
@@ -55,7 +54,6 @@ export class Uploader {
         BigNumber.from(123),
         utils.toUtf8Bytes(encryptedMetaData),
         encryptedKey,
-        encryptedFileHash,
         '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e',
       ]);
 
