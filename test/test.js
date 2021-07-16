@@ -50,7 +50,7 @@ const makeEmail = () => {
   return strEmail;
 };
 describe('Upload File', () => {
-  let file, did, wallet, api, arcanaInstance, access, receiverWallet;
+  let file, did, wallet, api, arcanaInstance, access, receiverWallet, sharedIntance;
 
   before(async () => {
     file = MockFile('mock.txt', 2 * 2 ** 20);
@@ -60,7 +60,6 @@ describe('Upload File', () => {
 
   it('Should upload a file', async () => {
     let upload = arcanaInstance.getUploader();
-    console.log(typeof(file))
     did = await upload.upload(file);
     await new Promise((resolve) => setTimeout(resolve, 4000));
   });
@@ -78,18 +77,29 @@ describe('Upload File', () => {
   });
 
   it('Download shared file', async () => {
-    let sharedIntance = new arcana.Arcana(receiverWallet);
+    sharedIntance = new arcana.Arcana(receiverWallet);
     let download = new sharedIntance.getDownloader();
     await download.download(did);
   });
 
   it('Revoke', async () => {
     let tx = await access.revoke(did, receiverWallet.address);
-    console.log('Revoke', tx);
+    chai.expect(tx).not.null;
   });
 
   it('Generate Wallet', async () => {
     const wallet = await arcana.utils.getWallet('0x22fd4c393275398cbde74f85af7be2b79858bea05182250024d3e7f296b838b3');
     chai.expect(wallet.address).to.equal('0xa23039d0Fca2af54E8b9ac2ECaE78e3084Cc687b');
+  });
+
+  it('Change File Owner', async () => {
+    let tx = await access.changeFileOwner(did, receiverWallet.address);
+    chai.expect(tx).not.null;
+  });
+
+  it('Delete File', async () => {
+    const Access = sharedIntance.getAccess();
+    let tx = await Access.deleteFile(did);
+    chai.expect(tx).not.null;
   });
 });

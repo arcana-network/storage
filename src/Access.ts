@@ -38,4 +38,8 @@ export class Access {
   changeFileOwner = async (fileId: string, newOwnerAddress: string): Promise<string> => {
     return await makeTx(this.wallet, 'changeFileOwner', [fileId, newOwnerAddress]);
   };
+
+  deleteFile = async (fileId: string): Promise<string> => {
+    return await makeTx(this.wallet, 'deleteFile', [fileId]);
+  };
 }

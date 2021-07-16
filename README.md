@@ -2,7 +2,7 @@
 
 ## Inlude arcana.js in your <head> of html
 ```html
-	<script src="../path/to/sdk/arcana.js"></script>
+<script src="../path/to/sdk/arcana.js"></script>
 ```
 ## Create a arcana intance
 ```js
@@ -42,4 +42,14 @@
   // did: DID of file from which access is removed
   // address: Address of the user who's access is getting revoked
   Access.revoke(did, address);
+```
+#### Change File owner 
+```js
+  // address: new owner's address 
+  Access.changeFileOwner(did, address);
+```
+
+#### Delete File
+```js
+  Access.deleteFile(did);
 ```
