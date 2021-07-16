@@ -7,17 +7,18 @@ import * as config from './config.json';
 export class Uploader {
   private wallet: any;
   private convergence: string;
-  constructor(wallet: any, convergence: string){
+  constructor(wallet: any, convergence: string) {
     this.wallet = wallet;
     this.convergence = convergence;
   }
 
-  upload = async (file: File, chunkSize: number = 4 * 2 ** 20) => {
+  upload = async (file: File, chunkSize: number = 2 ** 20) => {
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
     let prevKey = localStorage.getItem(`key::${hash}`);
     const did = utils.id(hash + this.convergence);
+    const wallet = this.wallet;
 
     if (prevKey) {
       const decryptedKey = await decryptKey(this.wallet.privateKey, prevKey);
@@ -75,19 +76,19 @@ export class Uploader {
       },
       onProgress: function (bytesUploaded, bytesTotal) {
         var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-        console.log(bytesUploaded, bytesTotal, percentage + '%');
-        // @ts-ignore
-        window.fileId = upload.url.split('files/')[1];
+        // console.log(bytesUploaded, bytesTotal, percentage + '%');
       },
       onSuccess: function () {
-        console.log('Download %s from %s', upload.url);
-        localStorage.setItem('download url', upload.url);
+        // console.log('Download %s from %s', upload.url);
       },
       fileReader: new FileReader(key),
       fingerprint: function (file, options) {
         return Promise.resolve(options.metadata.hash);
       },
       chunkSize,
+      onBeforeRequest: function (req) {
+        req.setHeader("signature", "sig");
+      },
     });
 
     // Check if there are any previous uploads to continue.

@@ -17,14 +17,14 @@ export class Arcana {
 
   getUploader = () => {
     return new Uploader(this.wallet, this.convergence);
-  }
+  };
 
   getAccess = () => {
     return new Access(this.wallet, this.convergence);
-  }
+  };
 
   getDownloader = () => {
     return new Downloader(this.wallet, this.convergence);
-  }
+  };
 }
 export { utils };

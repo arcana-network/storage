@@ -4,12 +4,12 @@ export default class Decryptor {
       return new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
     }
     let counterValue = value / 16;
-    const counter = new Array(16);
+    const counter = new Uint8Array(16);
     for (let index = 15; index >= 0; --index) {
       counter[index] = counterValue % 256;
       counterValue = Math.floor(counterValue / 256);
     }
-    return new Uint8Array(counter);
+    return counter;
   }
 
   private cryptoKey: CryptoKey;

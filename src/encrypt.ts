@@ -9,7 +9,6 @@ export default class Encryptor {
       counter[index] = counterValue % 256;
       counterValue = Math.floor(counterValue / 256);
     }
-
     return counter;
   }
   private cryptoKey: CryptoKey;

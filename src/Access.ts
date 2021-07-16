@@ -5,7 +5,7 @@ import { makeTx, getEncryptedKey, decryptKey, encryptKey } from './Utils';
 export class Access {
   private wallet: any;
   private convergence: string;
-  constructor(wallet: any, convergence: string){
+  constructor(wallet: any, convergence: string) {
     this.wallet = wallet;
     this.convergence = convergence;
   }
@@ -31,12 +31,11 @@ export class Access {
     return await makeTx(this.wallet, 'share', [fileId, address, accessType, encryptedKey, validity]);
   };
 
-  revoke = async (fileId: string, address: string):Promise<string> => {
-    return await makeTx(this.wallet, 'revoke', [fileId, address, readHash])
-  }
+  revoke = async (fileId: string, address: string): Promise<string> => {
+    return await makeTx(this.wallet, 'revoke', [fileId, address, readHash]);
+  };
 
-  changeFileOwner = async(fileId: string, newOwnerAddress: string): Promise<string> => {
-    return await makeTx(this.wallet, 'changeFileOwner', [fileId, newOwnerAddress])
-  }
-  
+  changeFileOwner = async (fileId: string, newOwnerAddress: string): Promise<string> => {
+    return await makeTx(this.wallet, 'changeFileOwner', [fileId, newOwnerAddress]);
+  };
 }

@@ -1,6 +1,6 @@
 import './SHA256';
 import Sha256 from './SHA256';
-import { Contract, providers, Wallet, utils } from 'ethers';
+import { Contract, providers, Wallet } from 'ethers';
 import * as config from './config.json';
 import * as arcana from './contracts/Arcana.json';
 import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
@@ -56,12 +56,13 @@ export class KeyGen {
       offset += data.length;
       this.hasher.update(data.data);
     }
-    return this.hasher
-      .digest()
-      .map((x) => x.toString(16).padStart(2, '0'))
-      .join('');
+    return hasher2Hex(this.hasher.digest());
   };
 }
+
+export const hasher2Hex = (digest) => {
+  return digest.map((x) => x.toString(16).padStart(2, '0')).join('');
+};
 
 export const fromHexString = (hexString: string): Uint8Array =>
   new Uint8Array(hexString.match(/.{1,2}/g).map((byte) => parseInt(byte, 16)));

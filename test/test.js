@@ -1,7 +1,7 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 const generateString = (length) => {
-  let result = ' ';
+  let result = '';
   const charactersLength = characters.length;
   while (result.length < length) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
@@ -53,52 +53,43 @@ describe('Upload File', () => {
   let file, did, wallet, api, arcanaInstance, access, receiverWallet;
 
   before(async () => {
-    file = MockFile('mock.txt', 2 ** 20);
+    file = MockFile('mock.txt', 2 * 2 ** 20);
     const wallet = await arcana.utils.getWallet('0x1068e1d200d2bd3140445afec1ac7829f0012b87ff6c646f6b01023c95db13c8');
     arcanaInstance = new arcana.Arcana(wallet, wallet.privateKey);
   });
 
   it('Should upload a file', async () => {
     let upload = arcanaInstance.getUploader();
+    console.log(typeof(file))
     did = await upload.upload(file);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 4000));
   });
 
   it('Should download a file', async () => {
     let download = new arcanaInstance.getDownloader();
-    download.download(did);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    await download.download(did);
   });
 
   it('Share file', async () => {
     access = new arcanaInstance.getAccess();
-    receiverWallet = await arcana.utils.getWallet("0xa11c0370501f00f2ebe942b81a546e05b919a09bc9c45ea78a7181bbabcfa4f8");
-    let tx = await access.share(
-      [did],
-      [
-        receiverWallet._signingKey().publicKey
-      ],
-      [150],
-    );
+    receiverWallet = await arcana.utils.getWallet('0xa11c0370501f00f2ebe942b81a546e05b919a09bc9c45ea78a7181bbabcfa4f8');
+    let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
     chai.expect(tx).not.null;
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
-  it('Download shared file', async() =>{
+  it('Download shared file', async () => {
     let sharedIntance = new arcana.Arcana(receiverWallet);
     let download = new sharedIntance.getDownloader();
-    download.download(did);
-    await new Promise((resolve) => setTimeout(resolve, 1000));
-  })
+    await download.download(did);
+  });
 
-  it('Revoke', async ()=> {
+  it('Revoke', async () => {
     let tx = await access.revoke(did, receiverWallet.address);
-    console.log("Revoke", tx)
-  })
+    console.log('Revoke', tx);
+  });
 
   it('Generate Wallet', async () => {
     const wallet = await arcana.utils.getWallet('0x22fd4c393275398cbde74f85af7be2b79858bea05182250024d3e7f296b838b3');
     chai.expect(wallet.address).to.equal('0xa23039d0Fca2af54E8b9ac2ECaE78e3084Cc687b');
   });
-
 });
