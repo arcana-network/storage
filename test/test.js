@@ -60,6 +60,9 @@ describe('Upload File', () => {
 
   it('Should upload a file', async () => {
     let upload = arcanaInstance.getUploader();
+    upload.onSuccess = () => {
+      console.log('Completed file upload');
+    };
     did = await upload.upload(file);
     await new Promise((resolve) => setTimeout(resolve, 4000));
   });

@@ -12,6 +12,18 @@ export class Uploader {
     this.convergence = convergence;
   }
 
+  onSuccess = () => {
+  }
+
+  onProgress = (bytesUploaded: number, bytesTotal: number) => {
+      var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+      console.log(bytesUploaded, bytesTotal, percentage + '%');
+  }
+
+  onError = (err) => {
+    console.log("Error", err);
+  }
+
   upload = async (file: File, chunkSize: number = 2 ** 20) => {
     const hasher = new KeyGen(file, chunkSize);
     let key;
@@ -71,16 +83,9 @@ export class Uploader {
         hash,
         key: did,
       },
-      onError: function (error) {
-        throw 'Failed because: ' + error;
-      },
-      onProgress: function (bytesUploaded, bytesTotal) {
-        var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-        // console.log(bytesUploaded, bytesTotal, percentage + '%');
-      },
-      onSuccess: function () {
-        // console.log('Download %s from %s', upload.url);
-      },
+      onError: this.onError,
+      onProgress: this.onProgress,
+      onSuccess: this.onSuccess,
       fileReader: new FileReader(key),
       fingerprint: function (file, options) {
         return Promise.resolve(options.metadata.hash);
