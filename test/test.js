@@ -55,11 +55,11 @@ describe('Upload File', () => {
   before(async () => {
     file = MockFile('mock.txt', 2 * 2 ** 20);
     const wallet = await arcana.utils.getWallet('0x1068e1d200d2bd3140445afec1ac7829f0012b87ff6c646f6b01023c95db13c8');
-    arcanaInstance = new arcana.Arcana(wallet, wallet.privateKey);
+    arcanaInstance = new arcana.Arcana(wallet);
   });
 
   it('Should upload a file', async () => {
-    let upload = arcanaInstance.getUploader();
+    let upload = await arcanaInstance.getUploader();
     upload.onSuccess = () => {
       console.log('Completed file upload');
     };
@@ -68,12 +68,12 @@ describe('Upload File', () => {
   });
 
   it('Should download a file', async () => {
-    let download = new arcanaInstance.getDownloader();
+    let download = await arcanaInstance.getDownloader();
     await download.download(did);
   });
 
   it('Share file', async () => {
-    access = new arcanaInstance.getAccess();
+    access = await arcanaInstance.getAccess();
     receiverWallet = await arcana.utils.getWallet('0xa11c0370501f00f2ebe942b81a546e05b919a09bc9c45ea78a7181bbabcfa4f8');
     let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
     chai.expect(tx).not.null;
@@ -81,7 +81,7 @@ describe('Upload File', () => {
 
   it('Download shared file', async () => {
     sharedIntance = new arcana.Arcana(receiverWallet);
-    let download = new sharedIntance.getDownloader();
+    let download = await sharedIntance.getDownloader();
     await download.download(did);
   });
 
@@ -101,7 +101,7 @@ describe('Upload File', () => {
   });
 
   it('Delete File', async () => {
-    const Access = sharedIntance.getAccess();
+    const Access = await sharedIntance.getAccess();
     let tx = await Access.deleteFile(did);
     chai.expect(tx).not.null;
   });

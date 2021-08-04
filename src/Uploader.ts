@@ -12,17 +12,16 @@ export class Uploader {
     this.convergence = convergence;
   }
 
-  onSuccess = () => {
-  }
+  onSuccess = () => {};
 
   onProgress = (bytesUploaded: number, bytesTotal: number) => {
-      var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-      console.log(bytesUploaded, bytesTotal, percentage + '%');
-  }
+    var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
+    console.log(bytesUploaded, bytesTotal, percentage + '%');
+  };
 
   onError = (err) => {
-    console.log("Error", err);
-  }
+    console.log('Error', err);
+  };
 
   upload = async (file: File, chunkSize: number = 2 ** 20) => {
     const hasher = new KeyGen(file, chunkSize);
@@ -92,7 +91,7 @@ export class Uploader {
       },
       chunkSize,
       onBeforeRequest: function (req) {
-        req.setHeader("signature", "sig");
+        req.setHeader('signature', 'sig');
       },
     });
 

@@ -6,24 +6,43 @@ import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { Access } from './Access';
 import * as utils from './Utils';
+import { Wallet } from 'ethers';
 
 export class Arcana {
-  private wallet: any;
+  private wallet: Wallet;
   private convergence: string;
-  constructor(wallet: any, convergence: string) {
+  constructor(wallet: any) {
     this.wallet = wallet;
-    this.convergence = convergence;
+    if (!this.wallet) {
+      throw 'Null wallet';
+    }
   }
 
-  getUploader = () => {
+  setConvergence = async () => {
+    console.log('convergence', this.convergence);
+    if (!this.convergence) {
+      const arcana = utils.Arcana();
+      this.convergence = await arcana.convergence(await this.wallet.getAddress());
+      if (!this.convergence) {
+        const conv = String(Math.random());
+        await utils.makeTx(this.wallet, 'setConvergence', [conv]);
+        this.convergence = conv;
+      }
+    }
+  };
+
+  getUploader = async () => {
+    await this.setConvergence();
     return new Uploader(this.wallet, this.convergence);
   };
 
-  getAccess = () => {
+  getAccess = async () => {
+    await this.setConvergence();
     return new Access(this.wallet, this.convergence);
   };
 
-  getDownloader = () => {
+  getDownloader = async () => {
+    await this.setConvergence();
     return new Downloader(this.wallet, this.convergence);
   };
 }

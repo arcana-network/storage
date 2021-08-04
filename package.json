@@ -46,6 +46,7 @@
     "webpack-cli": "^4.7.0"
   },
   "dependencies": {
+    "buffer": "^6.0.3",
     "dkg_client": "git+https://github.com/arcana-network/dkg_client.git",
     "eth-crypto": "^1.9.0",
     "ethers": "^5.3.1",
