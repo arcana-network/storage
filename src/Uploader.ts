@@ -27,7 +27,7 @@ export class Uploader {
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
-    let prevKey = localStorage.getItem(`key::${hash}`);
+    let prevKey = JSON.parse(localStorage.getItem(`key::${hash}`));
     const did = utils.id(hash + this.convergence);
     const wallet = this.wallet;
 
@@ -69,7 +69,7 @@ export class Uploader {
         '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e',
       ]);
 
-      localStorage.setItem(`key::${hash}`, encryptedKey);
+      localStorage.setItem(`key::${hash}`, JSON.stringify(encryptedKey));
     }
     const endpoint = config.storageNode + 'files/';
 

@@ -19,7 +19,6 @@ export class Arcana {
   }
 
   setConvergence = async () => {
-    console.log('convergence', this.convergence);
     if (!this.convergence) {
       const arcana = utils.Arcana();
       this.convergence = await arcana.convergence(await this.wallet.getAddress());

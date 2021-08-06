@@ -1,6 +1,6 @@
 import './SHA256';
 import Sha256 from './SHA256';
-import { Contract, providers, Wallet } from 'ethers';
+import { Contract, providers, Wallet, utils, Bytes } from 'ethers';
 import * as config from './config.json';
 import * as arcana from './contracts/Arcana.json';
 import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
@@ -77,22 +77,6 @@ interface encryptedI {
   mac: string;
 }
 
-export const sigToString = (encrypted: encryptedI): string =>
-  '0x' +
-  encrypted.mac +
-  encrypted.iv +
-  encrypted.ephemPublicKey.substr(encrypted.ephemPublicKey.length - 128, 128) +
-  encrypted.ciphertext;
-
-export const stringToObj = (str: string): encryptedI => {
-  return {
-    ciphertext: str.substr(226),
-    ephemPublicKey: '04' + str.substr(98, 128),
-    iv: str.substr(66, 32),
-    mac: str.substr(2, 64),
-  };
-};
-
 export const Arcana = (wallet?: Wallet): Contract => {
   const provider = new providers.JsonRpcProvider(config.rpc);
   return new Contract(config.address, arcana.abi, wallet ? wallet : provider);
@@ -153,19 +137,19 @@ export const createChildKey = async (privateKey: string, index: number) => {
   return getWallet(toHexString(signature));
 };
 
-export const encryptKey = async (publicKey: string, key: string): Promise<string> => {
+export const encryptKey = async (publicKey: string, key: string): Promise<Bytes> => {
   const encrypted = await encryptWithPublicKey(publicKey.substring(publicKey.length - 128), key);
-  return sigToString(encrypted);
+  return utils.toUtf8Bytes(JSON.stringify(encrypted));
 };
 
 export const decryptKey = async (privateKey: string, encryptedKey: string): Promise<string> => {
-  return await decryptWithPrivateKey(privateKey, stringToObj(encryptedKey));
+  return await decryptWithPrivateKey(privateKey, JSON.parse(encryptedKey));
 };
 
 export const getEncryptedKey = async (fileId: string): Promise<string> => {
   const arcana = Arcana();
   const file = await arcana.files(fileId);
-  return file.encryptedKey;
+  return utils.toUtf8String(file.encryptedKey);
 };
 
 export const getWallet = async (privateKey: string) => {
