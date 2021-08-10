@@ -23,7 +23,6 @@ class FileSource {
     return value.arrayBuffer().then((buffer) => {
       return en.encrypt(buffer).then((d) => {
         value = new Blob([d]);
-        // console.log('after enc', d);
         return { value };
       });
     });

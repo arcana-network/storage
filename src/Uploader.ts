@@ -15,8 +15,6 @@ export class Uploader {
   onSuccess = () => {};
 
   onProgress = (bytesUploaded: number, bytesTotal: number) => {
-    var percentage = ((bytesUploaded / bytesTotal) * 100).toFixed(2);
-    console.log(bytesUploaded, bytesTotal, percentage + '%');
   };
 
   onError = (err) => {

@@ -232,7 +232,6 @@ export class Api {
       });
       index++;
     }
-    console.log('register child', await this.post('keys/multiple', keys));
     return this.accessToken;
   };
 }

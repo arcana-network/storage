@@ -6819,7 +6819,6 @@
              * Asserts that a function does not change the value of a property.
              *
              *     var obj = { val: 10 };
-             *     var fn = function() { console.log('foo'); };
              *     assert.doesNotChange(fn, obj, 'val');
              *
              * @name doesNotChange
