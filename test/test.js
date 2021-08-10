@@ -69,6 +69,12 @@ describe('Upload File', () => {
 
   it('Should download a file', async () => {
     let download = await arcanaInstance.getDownloader();
+    download.onSuccess = () => {
+      console.log("Download completed")
+    }
+    download.onProgress = (a,b) => {
+      console.log(a,b)
+    }
     await download.download(did);
   });
 

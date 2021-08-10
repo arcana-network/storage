@@ -53,3 +53,39 @@
 ```js
   Access.deleteFile(did);
 ```
+
+## FallBack Functions
+#### 1. Upload
+##### 1.1 On Success
+```
+uploader.onSuccess = () => {
+  console.log('Completed file upload');
+};
+```
+##### 1.2 On Error 
+```
+uploader.onError = (err) => {
+  console.log('Error', err);
+};
+```
+##### 1.3 On Progress 
+```
+uploader.onProgress = (bytesUploaded: number, bytesTotal: number) => {
+  console.log("Completed", bytesUploaded, "out of", bytesTotal)
+};
+```
+
+#### 2. Download 
+##### 2.1 On Success
+```
+downloader.onSuccess = () => {
+  console.log('Completed file download');
+};
+```
+##### 2.2 On Progress 
+```
+downloader.onProgress = (bytesDownloaded: number, bytesTotal: number) => {
+  console.log("Completed", bytesDownloaded, "out of", bytesTotal)
+};
+```
+

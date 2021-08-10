@@ -42,6 +42,9 @@ export class Downloader {
     this.hasher = new Sha256();
   }
 
+  onSuccess = async () => {}
+  onProgress = async (bytesDownloaded: number, bytesTotal: number) => {}
+
   download = async (did) => {
     const arcana = Arcana(this.wallet);
     let file = await arcana.getFile(did, readHash);
@@ -61,6 +64,7 @@ export class Downloader {
 
     const fileWriter = new FileWriter(fileMeta.name);
     const chunkSize = 2 ** 20;
+    let downloaded = 0;
     for (let i = 0; i < fileMeta.size; i += chunkSize) {
       const range = `bytes=${i}-${i + chunkSize - 1}`;
       const download = await fetch(config.storageNode + `files/download/${did}`, {
@@ -72,11 +76,14 @@ export class Downloader {
       const dec = await Dec.decrypt(buff, i);
       await fileWriter.write(dec, i);
       this.hasher.update(dec);
+      downloaded+=dec.byteLength
+      await this.onProgress(downloaded, fileMeta.size);
     }
     const decryptedHash = hasher2Hex(this.hasher.digest());
     const success = fileMeta.hash == decryptedHash;
     if (success) {
       fileWriter.createDownload();
+      await this.onSuccess();
     } else {
       throw new Error('Hash does not matches with uploaded file');
     }
