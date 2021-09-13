@@ -3,7 +3,10 @@ import Sha256 from './SHA256';
 import { Contract, providers, Wallet, utils, Bytes } from 'ethers';
 import * as config from './config.json';
 import * as arcana from './contracts/Arcana.json';
+import * as forwarder from './contracts/Arcana.json';
 import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
+import { sign } from './signer';
+import { Arcana as ArcanaT, Forwarder as ForwarderT } from './typechain';
 
 export class KeyGen {
   hasher: any;
@@ -83,7 +86,10 @@ export const Arcana = (wallet?: Wallet): Contract => {
 };
 
 export const makeTx = async (wallet: Wallet, method: string, params) => {
-  const arcana = Arcana(wallet);
+  const arcana: ArcanaT = Arcana(wallet) as ArcanaT;
+  const provider = new providers.JsonRpcProvider(config.rpc);
+  const forwarderContract: ForwarderT = new Contract(config.forwarder, forwarder.abi, provider) as ForwarderT;
+  // sign(wallet,arcana,forwarderContract,method, params)
   const tx = await arcana[method](...params);
   await tx.wait();
   return tx.hash;

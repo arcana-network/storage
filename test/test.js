@@ -55,7 +55,8 @@ describe('Upload File', () => {
   before(async () => {
     file = MockFile('mock.txt', 2 * 2 ** 20);
     const wallet = await arcana.utils.getWallet('0x1068e1d200d2bd3140445afec1ac7829f0012b87ff6c646f6b01023c95db13c8');
-    arcanaInstance = new arcana.Arcana(wallet);
+    arcanaInstance = new arcana.Arcana(wallet, makeEmail());
+    await arcanaInstance.login();
   });
 
   it('Should upload a file', async () => {
@@ -70,11 +71,11 @@ describe('Upload File', () => {
   it('Should download a file', async () => {
     let download = await arcanaInstance.getDownloader();
     download.onSuccess = () => {
-      console.log("Download completed")
-    }
-    download.onProgress = (a,b) => {
-      console.log(a,b)
-    }
+      console.log('Download completed');
+    };
+    download.onProgress = (a, b) => {
+      console.log(a, b);
+    };
     await download.download(did);
   });
 
@@ -86,7 +87,7 @@ describe('Upload File', () => {
   });
 
   it('Download shared file', async () => {
-    sharedIntance = new arcana.Arcana(receiverWallet);
+    sharedIntance = new arcana.Arcana(receiverWallet, makeEmail());
     let download = await sharedIntance.getDownloader();
     await download.download(did);
   });

@@ -42,8 +42,8 @@ export class Downloader {
     this.hasher = new Sha256();
   }
 
-  onSuccess = async () => {}
-  onProgress = async (bytesDownloaded: number, bytesTotal: number) => {}
+  onSuccess = async () => {};
+  onProgress = async (bytesDownloaded: number, bytesTotal: number) => {};
 
   download = async (did) => {
     const arcana = Arcana(this.wallet);
@@ -76,7 +76,7 @@ export class Downloader {
       const dec = await Dec.decrypt(buff, i);
       await fileWriter.write(dec, i);
       this.hasher.update(dec);
-      downloaded+=dec.byteLength
+      downloaded += dec.byteLength;
       await this.onProgress(downloaded, fileMeta.size);
     }
     const decryptedHash = hasher2Hex(this.hasher.digest());

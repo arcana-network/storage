@@ -7,15 +7,22 @@ import { Downloader } from './Downloader';
 import { Access } from './Access';
 import * as utils from './Utils';
 import { Wallet } from 'ethers';
+import axios, { AxiosInstance } from 'axios';
+import * as config from './config.json';
 
 export class Arcana {
   private wallet: Wallet;
   private convergence: string;
-  constructor(wallet: any) {
+  private email: string;
+  private api: AxiosInstance;
+
+  constructor(wallet: any, email: string) {
     this.wallet = wallet;
+    this.email = email;
     if (!this.wallet) {
       throw 'Null wallet';
     }
+    this.login()
   }
 
   setConvergence = async () => {
@@ -43,6 +50,26 @@ export class Arcana {
   getDownloader = async () => {
     await this.setConvergence();
     return new Downloader(this.wallet, this.convergence);
+  };
+
+  login = async () => {
+    let nonce = (await axios.get(config.gateway + `get-nonce/?email=${this.email}`)).data;
+    let sig = await this.wallet.signMessage(String(nonce));
+    if (nonce === 0) {
+      await axios.post(config.gateway + `register/`, {
+        signature: sig,
+        user: { name: '', email: this.email, public_key: this.wallet.publicKey },
+      });
+      this.login();
+    } else {
+      let res = await axios.post(config.gateway + `login/`, { signature: sig, email: this.email });
+      this.api = axios.create({
+        baseURL: config.gateway,
+        headers: {
+          Authorization: `Bearer ${res.data.token}`,
+        },
+      });
+    }
   };
 }
 export { utils };
