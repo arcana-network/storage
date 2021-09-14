@@ -1,4 +1,5 @@
 const ethSigUtil = require('eth-sig-util');
+import { SigningKey } from '@ethersproject/signing-key';
 import { Forwarder, Arcana } from './typechain';
 
 const EIP712Domain = [
@@ -70,6 +71,10 @@ export async function sign(signer: any, arcana: Arcana, forwarder: Forwarder, me
     to: arcana.address,
     data: arcana.interface.encodeFunctionData(method, params),
   });
-
-  // console.log(method, params, request, signature);
+  request['signature'] = signature.replace('0x', '');
+  request['from'] = request['from'].replace('0x', '');
+  request['to'] = request['to'].replace('0x', '');
+  request['data'] = request['data'].replace('0x', '');
+  request['nonce'] = parseInt(request['nonce']);
+  return request;
 }

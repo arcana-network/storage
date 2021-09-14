@@ -50,6 +50,7 @@
     "buffer": "^6.0.3",
     "dkg_client": "git+https://github.com/arcana-network/dkg_client.git",
     "eth-crypto": "^1.9.0",
+    "eth-sig-util": "^3.0.1",
     "ethers": "^5.3.1",
     "tus-js-client": "^2.3.0",
     "tweetnacl": "^1.0.3"

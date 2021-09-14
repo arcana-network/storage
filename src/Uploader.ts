@@ -3,13 +3,16 @@ import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
 import { utils, BigNumber } from 'ethers';
 import * as config from './config.json';
+import { AxiosInstance } from 'axios';
 
 export class Uploader {
   private wallet: any;
   private convergence: string;
-  constructor(wallet: any, convergence: string) {
+  private api: AxiosInstance;
+  constructor(wallet: any, convergence: string, api: AxiosInstance) {
     this.wallet = wallet;
     this.convergence = convergence;
+    this.api = api;
   }
 
   onSuccess = () => {};
@@ -56,7 +59,7 @@ export class Uploader {
         }),
       );
 
-      await makeTx(this.wallet, 'uploadInit', [
+      await makeTx(this.api, this.wallet, 'uploadInit', [
         did,
         BigNumber.from(6),
         BigNumber.from(4),

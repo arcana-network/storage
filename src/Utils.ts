@@ -3,10 +3,11 @@ import Sha256 from './SHA256';
 import { Contract, providers, Wallet, utils, Bytes } from 'ethers';
 import * as config from './config.json';
 import * as arcana from './contracts/Arcana.json';
-import * as forwarder from './contracts/Arcana.json';
+import * as forwarder from './contracts/Forwarder.json';
 import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
 import { sign } from './signer';
 import { Arcana as ArcanaT, Forwarder as ForwarderT } from './typechain';
+import { AxiosInstance } from 'axios';
 
 export class KeyGen {
   hasher: any;
@@ -85,12 +86,14 @@ export const Arcana = (wallet?: Wallet): Contract => {
   return new Contract(config.address, arcana.abi, wallet ? wallet : provider);
 };
 
-export const makeTx = async (wallet: Wallet, method: string, params) => {
+export const makeTx = async (api: AxiosInstance, wallet: Wallet, method: string, params) => {
   const arcana: ArcanaT = Arcana(wallet) as ArcanaT;
   const provider = new providers.JsonRpcProvider(config.rpc);
   const forwarderContract: ForwarderT = new Contract(config.forwarder, forwarder.abi, provider) as ForwarderT;
-  // sign(wallet,arcana,forwarderContract,method, params)
-  const tx = await arcana[method](...params);
+  let req = await sign(wallet, arcana, forwarderContract, method, params);
+  let res = await api.post('api/meta-tx/', req);
+  let tx = await wallet.provider.getTransaction(res.data.txHash);
+  // let tx = await arcana[method](...params);
   await tx.wait();
   return tx.hash;
 };

@@ -54,7 +54,7 @@ describe('Upload File', () => {
 
   before(async () => {
     file = MockFile('mock.txt', 2 * 2 ** 20);
-    const wallet = await arcana.utils.getWallet('0x1068e1d200d2bd3140445afec1ac7829f0012b87ff6c646f6b01023c95db13c8');
+    const wallet = await arcana.utils.getWallet('0x88baea1c45c1434e494604f48a39eedb780ba71086d109b78cc3b7d41aa49773');
     arcanaInstance = new arcana.Arcana(wallet, makeEmail());
     await arcanaInstance.login();
   });

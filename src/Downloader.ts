@@ -2,10 +2,11 @@ import Decryptor from './decrypt';
 import * as config from './config.json';
 import { decryptWithPrivateKey } from 'eth-crypto';
 import { Arcana, hasher2Hex, fromHexString, AESDecrypt, makeTx } from './Utils';
-import { utils, Wallet } from 'ethers';
+import { utils } from 'ethers';
 import FileWriter from './FileWriter';
 import { readHash } from './constant';
 import Sha256 from './SHA256';
+import { AxiosInstance } from 'axios';
 
 const downloadBlob = (blob, fileName) => {
   if (navigator.msSaveBlob) {
@@ -35,11 +36,13 @@ export class Downloader {
   private wallet: any;
   private convergence: string;
   private hasher;
+  private api: AxiosInstance;
 
-  constructor(wallet: any, convergence: string) {
+  constructor(wallet: any, convergence: string, api: AxiosInstance) {
     this.wallet = wallet;
     this.convergence = convergence;
     this.hasher = new Sha256();
+    this.api = api;
   }
 
   onSuccess = async () => {};
@@ -48,7 +51,7 @@ export class Downloader {
   download = async (did) => {
     const arcana = Arcana(this.wallet);
     let file = await arcana.getFile(did, readHash);
-    await makeTx(this.wallet, 'checkPermission', [did, readHash]);
+    await makeTx(this.api, this.wallet, 'checkPermission', [did, readHash]);
     const decryptedKey = await decryptWithPrivateKey(
       this.wallet.privateKey,
       JSON.parse(utils.toUtf8String(file.encryptedKey)),

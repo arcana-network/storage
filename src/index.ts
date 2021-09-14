@@ -22,16 +22,16 @@ export class Arcana {
     if (!this.wallet) {
       throw 'Null wallet';
     }
-    this.login()
   }
 
   setConvergence = async () => {
+    await this.login();
     if (!this.convergence) {
       const arcana = utils.Arcana();
       this.convergence = await arcana.convergence(await this.wallet.getAddress());
       if (!this.convergence) {
         const conv = String(Math.random());
-        await utils.makeTx(this.wallet, 'setConvergence', [conv]);
+        await utils.makeTx(this.api, this.wallet, 'setConvergence', [conv]);
         this.convergence = conv;
       }
     }
@@ -39,17 +39,17 @@ export class Arcana {
 
   getUploader = async () => {
     await this.setConvergence();
-    return new Uploader(this.wallet, this.convergence);
+    return new Uploader(this.wallet, this.convergence, this.api);
   };
 
   getAccess = async () => {
     await this.setConvergence();
-    return new Access(this.wallet, this.convergence);
+    return new Access(this.wallet, this.convergence, this.api);
   };
 
   getDownloader = async () => {
     await this.setConvergence();
-    return new Downloader(this.wallet, this.convergence);
+    return new Downloader(this.wallet, this.convergence, this.api);
   };
 
   login = async () => {
@@ -60,7 +60,7 @@ export class Arcana {
         signature: sig,
         user: { name: '', email: this.email, public_key: this.wallet.publicKey },
       });
-      this.login();
+      await this.login();
     } else {
       let res = await axios.post(config.gateway + `login/`, { signature: sig, email: this.email });
       this.api = axios.create({
