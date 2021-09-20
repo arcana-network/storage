@@ -36,15 +36,8 @@ function getMetaTxTypeData(chainId: number, verifyingContract: string) {
 
 async function signTypedData(signer: any, from: string, data: any) {
   // If signer is a private key, use it to sign
-  if (typeof signer === 'string') {
-    const privateKey = Buffer.from(signer.replace(/^0x/, ''), 'hex');
-    return ethSigUtil.signTypedMessage(privateKey, { data });
-  }
-
-  // Otherwise, send the signTypedData RPC call
-  // Note that hardhatvm and metamask require different EIP712 input
-  const [method, argData] = ['eth_signTypedData_v4', JSON.stringify(data)];
-  return await signer.send(method, [from, argData]);
+  const privateKey = Buffer.from(signer.privateKey.replace(/^0x/, ''), 'hex');
+  return ethSigUtil.signTypedMessage(privateKey, { data });
 }
 
 async function buildRequest(forwarder: any, input: any) {
@@ -66,7 +59,7 @@ export async function signMetaTxRequest(signer: any, forwarder: Forwarder, input
 }
 
 export async function sign(signer: any, arcana: Arcana, forwarder: Forwarder, method: any, params: any) {
-  const { request, signature } = await signMetaTxRequest(signer.provider, forwarder, {
+  const { request, signature } = await signMetaTxRequest(signer, forwarder, {
     from: signer.address,
     to: arcana.address,
     data: arcana.interface.encodeFunctionData(method, params),

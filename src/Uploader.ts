@@ -59,7 +59,6 @@ export class Uploader {
         }),
       );
 
-      console.log(file.size, typeof(file.size))
       await makeTx(this.api, this.wallet, 'uploadInit', [
         did,
         BigNumber.from(6),

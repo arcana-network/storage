@@ -49,12 +49,13 @@ const makeEmail = () => {
   strEmail = strEmail + '.com';
   return strEmail;
 };
+
 describe('Upload File', () => {
   let file, did, wallet, api, arcanaInstance, access, receiverWallet, sharedIntance;
 
   before(async () => {
     file = MockFile('mock.txt', 2 * 2 ** 20);
-    const wallet = await arcana.utils.getWallet('0x88baea1c45c1434e494604f48a39eedb780ba71086d109b78cc3b7d41aa49773');
+    const wallet = await arcana.utils.getRandomWallet();
     arcanaInstance = new arcana.Arcana(wallet, makeEmail());
     await arcanaInstance.login();
   });
@@ -81,7 +82,7 @@ describe('Upload File', () => {
 
   it('Share file', async () => {
     access = await arcanaInstance.getAccess();
-    receiverWallet = await arcana.utils.getWallet('0xa11c0370501f00f2ebe942b81a546e05b919a09bc9c45ea78a7181bbabcfa4f8');
+    receiverWallet = await arcana.utils.getRandomWallet();
     let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
     chai.expect(tx).not.null;
   });
