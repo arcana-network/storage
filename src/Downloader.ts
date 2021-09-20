@@ -51,7 +51,6 @@ export class Downloader {
   download = async (did) => {
     const arcana = Arcana(this.wallet);
     let file = await arcana.getFile(did, readHash);
-    await makeTx(this.api, this.wallet, 'checkPermission', [did, readHash]);
     const decryptedKey = await decryptWithPrivateKey(
       this.wallet.privateKey,
       JSON.parse(utils.toUtf8String(file.encryptedKey)),

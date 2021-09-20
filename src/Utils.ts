@@ -93,7 +93,6 @@ export const makeTx = async (api: AxiosInstance, wallet: Wallet, method: string,
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('api/meta-tx/', req);
   let tx = await wallet.provider.getTransaction(res.data.txHash);
-  // let tx = await arcana[method](...params);
   await tx.wait();
   return tx.hash;
 };

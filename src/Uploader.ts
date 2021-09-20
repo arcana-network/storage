@@ -59,11 +59,12 @@ export class Uploader {
         }),
       );
 
+      console.log(file.size, typeof(file.size))
       await makeTx(this.api, this.wallet, 'uploadInit', [
         did,
         BigNumber.from(6),
         BigNumber.from(4),
-        BigNumber.from(123),
+        BigNumber.from(file.size),
         utils.toUtf8Bytes(encryptedMetaData),
         encryptedKey,
         '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e',
