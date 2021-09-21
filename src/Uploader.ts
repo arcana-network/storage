@@ -9,10 +9,13 @@ export class Uploader {
   private wallet: any;
   private convergence: string;
   private api: AxiosInstance;
-  constructor(wallet: any, convergence: string, api: AxiosInstance) {
+  private appAddress: string;
+
+  constructor(appAddress: string, wallet: any, convergence: string, api: AxiosInstance) {
     this.wallet = wallet;
     this.convergence = convergence;
     this.api = api;
+    this.appAddress = appAddress;
   }
 
   onSuccess = () => {};
@@ -59,7 +62,7 @@ export class Uploader {
         }),
       );
 
-      await makeTx(this.api, this.wallet, 'uploadInit', [
+      await makeTx(this.appAddress, this.api, this.wallet, 'uploadInit', [
         did,
         BigNumber.from(6),
         BigNumber.from(4),

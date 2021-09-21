@@ -81,13 +81,13 @@ interface encryptedI {
   mac: string;
 }
 
-export const Arcana = (wallet?: Wallet): Contract => {
+export const Arcana = (address: string, wallet?: Wallet): Contract => {
   const provider = new providers.JsonRpcProvider(config.rpc);
-  return new Contract(config.address, arcana.abi, wallet ? wallet : provider);
+  return new Contract(address, arcana.abi, wallet ? wallet : provider);
 };
 
-export const makeTx = async (api: AxiosInstance, wallet: Wallet, method: string, params) => {
-  const arcana: ArcanaT = Arcana(wallet) as ArcanaT;
+export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
+  const arcana: ArcanaT = Arcana(address, wallet) as ArcanaT;
   const provider = new providers.JsonRpcProvider(config.rpc);
   const forwarderContract: ForwarderT = new Contract(config.forwarder, forwarder.abi, provider) as ForwarderT;
   let req = await sign(wallet, arcana, forwarderContract, method, params);
@@ -154,8 +154,8 @@ export const decryptKey = async (privateKey: string, encryptedKey: string): Prom
   return await decryptWithPrivateKey(privateKey, JSON.parse(encryptedKey));
 };
 
-export const getEncryptedKey = async (fileId: string): Promise<string> => {
-  const arcana = Arcana();
+export const getEncryptedKey = async (address: string,fileId: string): Promise<string> => {
+  const arcana = Arcana(address);
   const file = await arcana.files(fileId);
   return utils.toUtf8String(file.encryptedKey);
 };

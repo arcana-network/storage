@@ -37,20 +37,23 @@ export class Downloader {
   private convergence: string;
   private hasher;
   private api: AxiosInstance;
+  private appAddress: string;
 
-  constructor(wallet: any, convergence: string, api: AxiosInstance) {
+  constructor(appAddress: string, wallet: any, convergence: string, api: AxiosInstance) {
     this.wallet = wallet;
     this.convergence = convergence;
     this.hasher = new Sha256();
     this.api = api;
+    this.appAddress = appAddress;
   }
 
   onSuccess = async () => {};
   onProgress = async (bytesDownloaded: number, bytesTotal: number) => {};
 
   download = async (did) => {
-    const arcana = Arcana(this.wallet);
+    const arcana = Arcana(this.appAddress,this.wallet);
     let file = await arcana.getFile(did, readHash);
+    await makeTx(this.appAddress, this.api, this.wallet, 'checkPermission', [did, readHash]);
     const decryptedKey = await decryptWithPrivateKey(
       this.wallet.privateKey,
       JSON.parse(utils.toUtf8String(file.encryptedKey)),

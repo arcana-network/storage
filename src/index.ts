@@ -15,10 +15,12 @@ export class Arcana {
   private convergence: string;
   private email: string;
   private api: AxiosInstance;
+  private appAddress: string;
 
-  constructor(wallet: any, email: string) {
+  constructor(appAddress: string,wallet: any, email: string) {
     this.wallet = wallet;
     this.email = email;
+    this.appAddress = appAddress;
     if (!this.wallet) {
       throw 'Null wallet';
     }
@@ -27,11 +29,11 @@ export class Arcana {
   setConvergence = async () => {
     await this.login();
     if (!this.convergence) {
-      const arcana = utils.Arcana();
+      const arcana = utils.Arcana(this.appAddress);
       this.convergence = await arcana.convergence(await this.wallet.getAddress());
       if (!this.convergence) {
         const conv = String(Math.random());
-        await utils.makeTx(this.api, this.wallet, 'setConvergence', [conv]);
+        await utils.makeTx(this.appAddress, this.api, this.wallet, 'setConvergence', [conv]);
         this.convergence = conv;
       }
     }
@@ -39,17 +41,17 @@ export class Arcana {
 
   getUploader = async () => {
     await this.setConvergence();
-    return new Uploader(this.wallet, this.convergence, this.api);
+    return new Uploader(this.appAddress,this.wallet, this.convergence, this.api);
   };
 
   getAccess = async () => {
     await this.setConvergence();
-    return new Access(this.wallet, this.convergence, this.api);
+    return new Access(this.appAddress,this.wallet, this.convergence, this.api);
   };
 
   getDownloader = async () => {
     await this.setConvergence();
-    return new Downloader(this.wallet, this.convergence, this.api);
+    return new Downloader(this.appAddress, this.wallet, this.convergence, this.api);
   };
 
   login = async () => {
