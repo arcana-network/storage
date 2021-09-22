@@ -75,6 +75,7 @@ export class Downloader {
       const download = await fetch(res.host + `files/download/${did}`, {
         headers: {
           Range: range,
+          Authorization: `Bearer ${res.token}`,
         },
       });
       const buff = await download.arrayBuffer();

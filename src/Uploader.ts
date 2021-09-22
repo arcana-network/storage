@@ -32,6 +32,7 @@ export class Uploader {
     const hash = await hasher.getHash();
     let prevKey = localStorage.getItem(`key::${hash}`);
     let host = localStorage.getItem(`host::${hash}`);
+    let token = localStorage.getItem(`token::${hash}`);
     const did = utils.id(hash + this.convergence);
     const wallet = this.wallet;
 
@@ -73,10 +74,14 @@ export class Uploader {
         '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e',
       ]);
       host = res.host;
+      token = res.token;
       localStorage.setItem(`host:${hash}`, host);
       localStorage.setItem(`key::${hash}`, encryptedKey);
+      localStorage.setItem(`token::${hash}`, token);
     }
     const endpoint = host + 'files/';
+    // console.log('Token: ', token);
+    // console.log('Endpoint: ', endpoint);
     let upload = new tus.Upload(file, {
       endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
@@ -92,6 +97,9 @@ export class Uploader {
       fileReader: new FileReader(key),
       fingerprint: function (file, options) {
         return Promise.resolve(options.metadata.hash);
+      },
+      headers: {
+        Authorization: `Bearer ${token}`,
       },
       chunkSize,
       onBeforeRequest: function (req) {
