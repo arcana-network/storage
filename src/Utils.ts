@@ -94,7 +94,7 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   let res = await api.post('api/meta-tx/', req);
   let tx = await wallet.provider.getTransaction(res.data.txHash);
   await tx.wait();
-  return tx.hash;
+  return res.data;
 };
 
 export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
@@ -145,16 +145,16 @@ export const createChildKey = async (privateKey: string, index: number) => {
   return getWallet(toHexString(signature));
 };
 
-export const encryptKey = async (publicKey: string, key: string): Promise<Bytes> => {
+export const encryptKey = async (publicKey: string, key: string): Promise<any> => {
   const encrypted = await encryptWithPublicKey(publicKey.substring(publicKey.length - 128), key);
-  return utils.toUtf8Bytes(JSON.stringify(encrypted));
+  return JSON.stringify(encrypted);
 };
 
 export const decryptKey = async (privateKey: string, encryptedKey: string): Promise<string> => {
   return await decryptWithPrivateKey(privateKey, JSON.parse(encryptedKey));
 };
 
-export const getEncryptedKey = async (address: string,fileId: string): Promise<string> => {
+export const getEncryptedKey = async (address: string, fileId: string): Promise<string> => {
   const arcana = Arcana(address);
   const file = await arcana.files(fileId);
   return utils.toUtf8String(file.encryptedKey);

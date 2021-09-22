@@ -51,9 +51,9 @@ export class Downloader {
   onProgress = async (bytesDownloaded: number, bytesTotal: number) => {};
 
   download = async (did) => {
-    const arcana = Arcana(this.appAddress,this.wallet);
+    const arcana = Arcana(this.appAddress, this.wallet);
     let file = await arcana.getFile(did, readHash);
-    await makeTx(this.appAddress, this.api, this.wallet, 'checkPermission', [did, readHash]);
+    let res = await makeTx(this.appAddress, this.api, this.wallet, 'checkPermission', [did, readHash]);
     const decryptedKey = await decryptWithPrivateKey(
       this.wallet.privateKey,
       JSON.parse(utils.toUtf8String(file.encryptedKey)),
@@ -72,7 +72,7 @@ export class Downloader {
     let downloaded = 0;
     for (let i = 0; i < fileMeta.size; i += chunkSize) {
       const range = `bytes=${i}-${i + chunkSize - 1}`;
-      const download = await fetch(config.storageNode + `files/download/${did}`, {
+      const download = await fetch(res.host + `files/download/${did}`, {
         headers: {
           Range: range,
         },

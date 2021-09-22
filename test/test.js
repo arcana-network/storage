@@ -1,5 +1,5 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-const address = "0x73A15a259d1bB5ACC23319CCE876a976a278bE82"
+const address = '0x73A15a259d1bB5ACC23319CCE876a976a278bE82';
 
 const generateString = (length) => {
   let result = '';
@@ -70,8 +70,15 @@ describe('Upload File', () => {
     await new Promise((resolve) => setTimeout(resolve, 4000));
   });
 
+  it('Should skip uploading same file', async () => {
+    let upload = await arcanaInstance.getUploader();
+    upload.onSuccess = () => {
+      console.log('Skip file upload');
+    };
+    did = await upload.upload(file);
+  });
+
   it('Should download a file', async () => {
-    await new Promise((r) => setTimeout(r, 2000));
     let download = await arcanaInstance.getDownloader();
     download.onSuccess = () => {
       console.log('Download completed');
@@ -90,7 +97,6 @@ describe('Upload File', () => {
   });
 
   it('Download shared file', async () => {
-    await new Promise((r) => setTimeout(r, 2000));
     sharedIntance = new arcana.Arcana(address, receiverWallet, makeEmail());
     let download = await sharedIntance.getDownloader();
     await download.download(did);

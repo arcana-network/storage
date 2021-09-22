@@ -30,7 +30,8 @@ export class Uploader {
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
-    let prevKey = JSON.parse(localStorage.getItem(`key::${hash}`));
+    let prevKey = localStorage.getItem(`key::${hash}`);
+    let host = localStorage.getItem(`host::${hash}`);
     const did = utils.id(hash + this.convergence);
     const wallet = this.wallet;
 
@@ -62,20 +63,20 @@ export class Uploader {
         }),
       );
 
-      await makeTx(this.appAddress, this.api, this.wallet, 'uploadInit', [
+      let res = await makeTx(this.appAddress, this.api, this.wallet, 'uploadInit', [
         did,
         BigNumber.from(6),
         BigNumber.from(4),
         BigNumber.from(file.size),
         utils.toUtf8Bytes(encryptedMetaData),
-        encryptedKey,
+        utils.toUtf8Bytes(encryptedKey),
         '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e',
       ]);
-
-      localStorage.setItem(`key::${hash}`, JSON.stringify(encryptedKey));
+      host = res.host;
+      localStorage.setItem(`host:${hash}`, host);
+      localStorage.setItem(`key::${hash}`, encryptedKey);
     }
-    const endpoint = config.storageNode + 'files/';
-
+    const endpoint = host + 'files/';
     let upload = new tus.Upload(file, {
       endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
