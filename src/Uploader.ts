@@ -26,7 +26,14 @@ export class Uploader {
     console.log('Error', err);
   };
 
-  upload = async (file: File, chunkSize: number = 2 ** 20) => {
+  upload = async (fileRaw: any, chunkSize: number = 2 ** 20) => {
+    let file = fileRaw;
+    if (file instanceof File) {
+      file = new Blob([new Uint8Array(await file.arrayBuffer())], { type: file.type });
+      file.name = fileRaw.name;
+      // file['lastModified'] = fileRaw.lastModified;
+      file['name'] = fileRaw.name;
+    }
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();

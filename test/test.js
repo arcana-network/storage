@@ -55,19 +55,25 @@ describe('Upload File', () => {
   let file, did, wallet, api, arcanaInstance, access, receiverWallet, sharedIntance;
 
   before(async () => {
-    file = MockFile('mock.txt', 2 * 2 ** 20);
+    file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 20, 'image/txt');
+    file = new File([file], file.name, { type: file.type });
     const wallet = await arcana.utils.getRandomWallet();
-    arcanaInstance = new arcana.Arcana(address, wallet, makeEmail());
+    arcanaInstance = new arcana.Arcana(address, wallet.privateKey, makeEmail());
     await arcanaInstance.login();
   });
 
   it('Should upload a file', async () => {
     let upload = await arcanaInstance.getUploader();
+    let complete = false;
     upload.onSuccess = () => {
       console.log('Completed file upload');
+      complete = true;
     };
     did = await upload.upload(file);
-    await new Promise((resolve) => setTimeout(resolve, 4000));
+    while (complete) {
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it('Should skip uploading same file', async () => {
@@ -76,6 +82,13 @@ describe('Upload File', () => {
       console.log('Skip file upload');
     };
     did = await upload.upload(file);
+  });
+
+  it('My files', async () => {
+    let files = await arcanaInstance.myFiles();
+    chai.expect(files.length).equal(1);
+    chai.expect(files[0]['did']).equal(did.substring(2));
+    chai.expect(files[0]['size']).equal(file.size);
   });
 
   it('Should download a file', async () => {
@@ -92,6 +105,7 @@ describe('Upload File', () => {
   it('Share file', async () => {
     access = await arcanaInstance.getAccess();
     receiverWallet = await arcana.utils.getRandomWallet();
+    console.log('DID', did, receiverWallet.address);
     let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
     chai.expect(tx).not.null;
   });
@@ -100,6 +114,13 @@ describe('Upload File', () => {
     sharedIntance = new arcana.Arcana(address, receiverWallet, makeEmail());
     let download = await sharedIntance.getDownloader();
     await download.download(did);
+  });
+
+  it('Files shared with me', async () => {
+    let files = await sharedIntance.sharedFiles();
+    chai.expect(files.length).equal(1);
+    chai.expect(files[0]['did']).equal(did.substring(2));
+    chai.expect(files[0]['size']).equal(file.size);
   });
 
   it('Revoke', async () => {

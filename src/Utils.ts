@@ -11,10 +11,10 @@ import { AxiosInstance } from 'axios';
 
 export class KeyGen {
   hasher: any;
-  file: File;
+  file: Blob;
   chunkSize: number;
 
-  constructor(file: File, chunkSize = 10 * 2 ** 20) {
+  constructor(file: Blob, chunkSize = 10 * 2 ** 20) {
     this.file = file;
     this.hasher = new Sha256();
     this.chunkSize = chunkSize;
@@ -160,7 +160,7 @@ export const getEncryptedKey = async (address: string, fileId: string): Promise<
   return utils.toUtf8String(file.encryptedKey);
 };
 
-export const getWallet = async (privateKey: string) => {
+export const getWallet = (privateKey: string) => {
   const provider = new providers.JsonRpcProvider(config.rpc);
   return new Wallet(privateKey, provider);
 };

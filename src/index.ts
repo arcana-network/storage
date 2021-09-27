@@ -17,8 +17,8 @@ export class Arcana {
   private api: AxiosInstance;
   private appAddress: string;
 
-  constructor(appAddress: string,wallet: any, email: string) {
-    this.wallet = wallet;
+  constructor(appAddress: string, privateKey: string, email: string) {
+    this.wallet = utils.getWallet(privateKey);
     this.email = email;
     this.appAddress = appAddress;
     if (!this.wallet) {
@@ -41,12 +41,12 @@ export class Arcana {
 
   getUploader = async () => {
     await this.setConvergence();
-    return new Uploader(this.appAddress,this.wallet, this.convergence, this.api);
+    return new Uploader(this.appAddress, this.wallet, this.convergence, this.api);
   };
 
   getAccess = async () => {
     await this.setConvergence();
-    return new Access(this.appAddress,this.wallet, this.convergence, this.api);
+    return new Access(this.appAddress, this.wallet, this.convergence, this.api);
   };
 
   getDownloader = async () => {
@@ -55,23 +55,31 @@ export class Arcana {
   };
 
   login = async () => {
-    let nonce = (await axios.get(config.gateway + `get-nonce/?email=${this.email}`)).data;
+    let nonce = (await axios.get(config.gateway + `get-nonce/?address=${this.wallet.address}`)).data;
     let sig = await this.wallet.signMessage(String(nonce));
-    if (nonce === 0) {
-      await axios.post(config.gateway + `register/`, {
-        signature: sig,
-        user: { name: '', email: this.email, public_key: this.wallet.publicKey },
-      });
-      await this.login();
-    } else {
-      let res = await axios.post(config.gateway + `login/`, { signature: sig, email: this.email });
-      this.api = axios.create({
-        baseURL: config.gateway,
-        headers: {
-          Authorization: `Bearer ${res.data.token}`,
-        },
-      });
-    }
+    let res = await axios.post(config.gateway + `login/`, {
+      signature: sig,
+      email: this.email,
+      address: this.wallet.address,
+    });
+    this.api = axios.create({
+      baseURL: config.gateway,
+      headers: {
+        Authorization: `Bearer ${res.data.token}`,
+      },
+    });
+  };
+
+  myFiles = async () => {
+    await this.setConvergence();
+    let res = await this.api('api/list-files/');
+    return res.data;
+  };
+
+  sharedFiles = async () => {
+    await this.setConvergence();
+    let res = await this.api('api/shared-files/');
+    return res.data;
   };
 }
 export { utils };
