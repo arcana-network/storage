@@ -45,7 +45,7 @@ const makeEmail = () => {
   strEmail = strEmail + '@';
   for (var j = 0; j < 8; j++) {
     strTmp = strValues.charAt(Math.round(strValues.length * Math.random()));
-    strEmail = strEmail + strTmp;
+    strEmail = strEmail + striTmp;
   }
   strEmail = strEmail + '.com';
   return strEmail;
@@ -70,6 +70,10 @@ describe('Upload File', () => {
       complete = true;
     };
     did = await upload.upload(file);
+    upload.onError = (err) => {
+      console.log(err);
+      throw Error(err);
+    };
     while (complete) {
       await new Promise((resolve) => setTimeout(resolve, 100));
     }

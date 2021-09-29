@@ -72,7 +72,7 @@ export class Downloader {
     let downloaded = 0;
     for (let i = 0; i < fileMeta.size; i += chunkSize) {
       const range = `bytes=${i}-${i + chunkSize - 1}`;
-      const download = await fetch(res.host + `files/download/${did}`, {
+      const download = await fetch(res.host + `files/${did}`, {
         headers: {
           Range: range,
           Authorization: `Bearer ${res.token}`,
