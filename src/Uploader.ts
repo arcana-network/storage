@@ -71,6 +71,9 @@ export class Uploader {
         }),
       );
 
+      let node = (await this.api.get('/api/get-address/')).data;
+      host = node.host;
+
       let res = await makeTx(this.appAddress, this.api, this.wallet, 'uploadInit', [
         did,
         BigNumber.from(6),
@@ -78,9 +81,8 @@ export class Uploader {
         BigNumber.from(file.size),
         utils.toUtf8Bytes(encryptedMetaData),
         utils.toUtf8Bytes(encryptedKey),
-        '0x9cc14a288bb5cb9ec0e85b606cb6585bb7ca6a8e',
+        node.address,
       ]);
-      host = res.host;
       token = res.token;
       localStorage.setItem(`host:${hash}`, host);
       localStorage.setItem(`key::${hash}`, encryptedKey);

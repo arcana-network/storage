@@ -45,7 +45,7 @@ const makeEmail = () => {
   strEmail = strEmail + '@';
   for (var j = 0; j < 8; j++) {
     strTmp = strValues.charAt(Math.round(strValues.length * Math.random()));
-    strEmail = strEmail + striTmp;
+    strEmail = strEmail + strTmp;
   }
   strEmail = strEmail + '.com';
   return strEmail;
