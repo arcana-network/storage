@@ -75,7 +75,7 @@ describe('Upload File', () => {
       throw Error(err);
     };
     while (complete) {
-      await new Promise((resolve) => setTimeout(resolve, 100));
+      await new Promise((resolve) => setTimeout(resolve, 8000));
     }
     await new Promise((resolve) => setTimeout(resolve, 1000));
   });
