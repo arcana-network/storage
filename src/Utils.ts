@@ -81,13 +81,13 @@ interface encryptedI {
   mac: string;
 }
 
-export const Arcana = (address: string, wallet?: Wallet): Contract => {
+export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
   const provider = new providers.JsonRpcProvider(config.rpc);
-  return new Contract(address, arcana.abi, wallet ? wallet : provider);
+  return new Contract(address, arcana.abi, wallet ? wallet : provider) as ArcanaT;
 };
 
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
-  const arcana: ArcanaT = Arcana(address, wallet) as ArcanaT;
+  const arcana: ArcanaT = Arcana(address, wallet);
   const provider = new providers.JsonRpcProvider(config.rpc);
   const forwarderContract: ForwarderT = new Contract(config.forwarder, forwarder.abi, provider) as ForwarderT;
   let req = await sign(wallet, arcana, forwarderContract, method, params);
@@ -168,4 +168,8 @@ export const getWallet = (privateKey: string) => {
 export const getRandomWallet = () => {
   const provider = new providers.JsonRpcProvider(config.rpc);
   return Wallet.createRandom().connect(provider);
+};
+
+export const parseHex = (hex) => {
+  return hex.substring(0, 2) != '0x' ? '0x' + hex : hex;
 };

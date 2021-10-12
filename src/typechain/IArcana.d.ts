@@ -11,27 +11,38 @@ import {
   PopulatedTransaction,
   BaseContract,
   ContractTransaction,
+  Overrides,
+  CallOverrides,
 } from "ethers";
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
 
-interface ERC1967ProxyInterface extends ethers.utils.Interface {
-  functions: {};
-
-  events: {
-    "AdminChanged(address,address)": EventFragment;
-    "BeaconUpgraded(address)": EventFragment;
-    "Upgraded(address)": EventFragment;
+interface IArcanaInterface extends ethers.utils.Interface {
+  functions: {
+    "uploadInit(bytes32,uint256,uint256,uint256,bytes,bytes,address)": FunctionFragment;
   };
 
-  getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
+  encodeFunctionData(
+    functionFragment: "uploadInit",
+    values: [
+      BytesLike,
+      BigNumberish,
+      BigNumberish,
+      BigNumberish,
+      BytesLike,
+      BytesLike,
+      string
+    ]
+  ): string;
+
+  decodeFunctionResult(functionFragment: "uploadInit", data: BytesLike): Result;
+
+  events: {};
 }
 
-export class ERC1967Proxy extends BaseContract {
+export class IArcana extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -72,31 +83,70 @@ export class ERC1967Proxy extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: ERC1967ProxyInterface;
+  interface: IArcanaInterface;
 
-  functions: {};
-
-  callStatic: {};
-
-  filters: {
-    AdminChanged(
-      previousAdmin?: null,
-      newAdmin?: null
-    ): TypedEventFilter<
-      [string, string],
-      { previousAdmin: string; newAdmin: string }
-    >;
-
-    BeaconUpgraded(
-      beacon?: string | null
-    ): TypedEventFilter<[string], { beacon: string }>;
-
-    Upgraded(
-      implementation?: string | null
-    ): TypedEventFilter<[string], { implementation: string }>;
+  functions: {
+    uploadInit(
+      _file: BytesLike,
+      _n: BigNumberish,
+      _k: BigNumberish,
+      _fileSize: BigNumberish,
+      _encryptedMetaData: BytesLike,
+      _encryptedKey: BytesLike,
+      _storageNode: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
   };
 
-  estimateGas: {};
+  uploadInit(
+    _file: BytesLike,
+    _n: BigNumberish,
+    _k: BigNumberish,
+    _fileSize: BigNumberish,
+    _encryptedMetaData: BytesLike,
+    _encryptedKey: BytesLike,
+    _storageNode: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
-  populateTransaction: {};
+  callStatic: {
+    uploadInit(
+      _file: BytesLike,
+      _n: BigNumberish,
+      _k: BigNumberish,
+      _fileSize: BigNumberish,
+      _encryptedMetaData: BytesLike,
+      _encryptedKey: BytesLike,
+      _storageNode: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+  };
+
+  filters: {};
+
+  estimateGas: {
+    uploadInit(
+      _file: BytesLike,
+      _n: BigNumberish,
+      _k: BigNumberish,
+      _fileSize: BigNumberish,
+      _encryptedMetaData: BytesLike,
+      _encryptedKey: BytesLike,
+      _storageNode: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+  };
+
+  populateTransaction: {
+    uploadInit(
+      _file: BytesLike,
+      _n: BigNumberish,
+      _k: BigNumberish,
+      _fileSize: BigNumberish,
+      _encryptedMetaData: BytesLike,
+      _encryptedKey: BytesLike,
+      _storageNode: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+  };
 }

@@ -2,29 +2,32 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from 'ethers';
-import { Provider } from '@ethersproject/providers';
-import type { ERC2771ContextUpgradeable, ERC2771ContextUpgradeableInterface } from '../ERC2771ContextUpgradeable';
+import { Contract, Signer, utils } from "ethers";
+import { Provider } from "@ethersproject/providers";
+import type {
+  ERC2771ContextUpgradeable,
+  ERC2771ContextUpgradeableInterface,
+} from "../ERC2771ContextUpgradeable";
 
 const _abi = [
   {
     inputs: [
       {
-        internalType: 'address',
-        name: 'forwarder',
-        type: 'address',
+        internalType: "address",
+        name: "forwarder",
+        type: "address",
       },
     ],
-    name: 'isTrustedForwarder',
+    name: "isTrustedForwarder",
     outputs: [
       {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
+        internalType: "bool",
+        name: "",
+        type: "bool",
       },
     ],
-    stateMutability: 'view',
-    type: 'function',
+    stateMutability: "view",
+    type: "function",
   },
 ];
 
@@ -33,7 +36,14 @@ export class ERC2771ContextUpgradeable__factory {
   static createInterface(): ERC2771ContextUpgradeableInterface {
     return new utils.Interface(_abi) as ERC2771ContextUpgradeableInterface;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): ERC2771ContextUpgradeable {
-    return new Contract(address, _abi, signerOrProvider) as ERC2771ContextUpgradeable;
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): ERC2771ContextUpgradeable {
+    return new Contract(
+      address,
+      _abi,
+      signerOrProvider
+    ) as ERC2771ContextUpgradeable;
   }
 }

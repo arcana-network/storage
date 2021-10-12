@@ -26,8 +26,9 @@ export class Uploader {
     console.log('Error', err);
   };
 
-  upload = async (fileRaw: any, chunkSize: number = 2 ** 20) => {
+  upload = async (fileRaw: any, chunkSize: number = 10 * 2 ** 20) => {
     let file = fileRaw;
+    const walletAddress = await this.wallet.getAddress();
     if (file instanceof File) {
       file = new Blob([new Uint8Array(await file.arrayBuffer())], { type: file.type });
       file.name = fileRaw.name;
@@ -37,9 +38,9 @@ export class Uploader {
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
-    let prevKey = localStorage.getItem(`key::${hash}`);
-    let host = localStorage.getItem(`host::${hash}`);
-    let token = localStorage.getItem(`token::${hash}`);
+    let prevKey = localStorage.getItem(`${walletAddress}::key::${hash}`);
+    let host = localStorage.getItem(`${walletAddress}::host::${hash}`);
+    let token = localStorage.getItem(`${walletAddress}::token::${hash}`);
     const did = utils.id(hash + this.convergence);
     const wallet = this.wallet;
 
@@ -84,11 +85,11 @@ export class Uploader {
         node.address,
       ]);
       token = res.token;
-      localStorage.setItem(`host:${hash}`, host);
-      localStorage.setItem(`key::${hash}`, encryptedKey);
-      localStorage.setItem(`token::${hash}`, token);
+      localStorage.setItem(`${walletAddress}::host:${hash}`, host);
+      localStorage.setItem(`${walletAddress}::key::${hash}`, encryptedKey);
+      localStorage.setItem(`${walletAddress}::token::${hash}`, token);
     }
-    const endpoint = host + 'files/';
+    let endpoint = host + 'files/';
     // console.log('Token: ', token);
     // console.log('Endpoint: ', endpoint);
     let upload = new tus.Upload(file, {

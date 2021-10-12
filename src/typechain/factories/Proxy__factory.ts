@@ -2,18 +2,18 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from 'ethers';
-import { Provider } from '@ethersproject/providers';
-import type { Proxy, ProxyInterface } from '../Proxy';
+import { Contract, Signer, utils } from "ethers";
+import { Provider } from "@ethersproject/providers";
+import type { Proxy, ProxyInterface } from "../Proxy";
 
 const _abi = [
   {
-    stateMutability: 'payable',
-    type: 'fallback',
+    stateMutability: "payable",
+    type: "fallback",
   },
   {
-    stateMutability: 'payable',
-    type: 'receive',
+    stateMutability: "payable",
+    type: "receive",
   },
 ];
 

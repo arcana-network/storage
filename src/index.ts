@@ -9,6 +9,7 @@ import * as utils from './Utils';
 import { Wallet } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
 import * as config from './config.json';
+import { Arcana as ArcanaT } from './typechain';
 
 export class Arcana {
   private wallet: Wallet;
@@ -16,6 +17,7 @@ export class Arcana {
   private email: string;
   private api: AxiosInstance;
   private appAddress: string;
+  private arcana: ArcanaT;
 
   constructor(appAddress: string, privateKey: string, email: string) {
     this.wallet = utils.getWallet(privateKey);
@@ -29,8 +31,8 @@ export class Arcana {
   setConvergence = async () => {
     await this.login();
     if (!this.convergence) {
-      const arcana = utils.Arcana(this.appAddress);
-      this.convergence = await arcana.convergence(await this.wallet.getAddress());
+      this.arcana = utils.Arcana(this.appAddress);
+      this.convergence = await this.arcana.convergence(await this.wallet.getAddress());
       if (!this.convergence) {
         const conv = String(Math.random());
         await utils.makeTx(this.appAddress, this.api, this.wallet, 'setConvergence', [conv]);
@@ -73,13 +75,21 @@ export class Arcana {
   myFiles = async () => {
     await this.setConvergence();
     let res = await this.api('api/list-files/');
-    return res.data;
+    let data = [];
+    if (res.data) data = res.data;
+    return data;
   };
 
   sharedFiles = async () => {
     await this.setConvergence();
     let res = await this.api('api/shared-files/');
-    return res.data;
+    let data = [];
+    if (res.data) data = res.data;
+    return data;
+  };
+
+  getContract = async () => {
+    return this.arcana;
   };
 }
 export { utils };

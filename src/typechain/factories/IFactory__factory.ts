@@ -2,181 +2,181 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from 'ethers';
-import { Provider } from '@ethersproject/providers';
-import type { IFactory, IFactoryInterface } from '../IFactory';
+import { Contract, Signer, utils } from "ethers";
+import { Provider } from "@ethersproject/providers";
+import type { IFactory, IFactoryInterface } from "../IFactory";
 
 const _abi = [
   {
     inputs: [
       {
-        internalType: 'string',
-        name: '_appName',
-        type: 'string',
+        internalType: "string",
+        name: "_appName",
+        type: "string",
       },
       {
-        internalType: 'address',
-        name: '_relayer',
-        type: 'address',
+        internalType: "address",
+        name: "_relayer",
+        type: "address",
       },
       {
-        internalType: 'bool',
-        name: '_onlyDKGAddress',
-        type: 'bool',
+        internalType: "bool",
+        name: "_onlyDKGAddress",
+        type: "bool",
       },
       {
-        internalType: 'bool',
-        name: '_aggregateLogin',
-        type: 'bool',
+        internalType: "bool",
+        name: "_aggregateLogin",
+        type: "bool",
       },
       {
-        internalType: 'uint128',
-        name: '_appId',
-        type: 'uint128',
+        internalType: "uint128",
+        name: "_appId",
+        type: "uint128",
       },
     ],
-    name: 'createNewApp',
+    name: "createNewApp",
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
       {
-        internalType: 'uint128',
-        name: '_id',
-        type: 'uint128',
+        internalType: "uint128",
+        name: "_id",
+        type: "uint128",
       },
     ],
-    name: 'idToAddress',
+    name: "idToAddress",
     outputs: [
       {
-        internalType: 'address',
-        name: '',
-        type: 'address',
+        internalType: "address",
+        name: "",
+        type: "address",
       },
     ],
-    stateMutability: 'view',
-    type: 'function',
+    stateMutability: "view",
+    type: "function",
   },
   {
     inputs: [
       {
-        internalType: 'address',
-        name: '_app',
-        type: 'address',
+        internalType: "address",
+        name: "_app",
+        type: "address",
       },
       {
-        internalType: 'address',
-        name: '_user',
-        type: 'address',
+        internalType: "address",
+        name: "_user",
+        type: "address",
       },
     ],
-    name: 'isRegisteredUser',
+    name: "isRegisteredUser",
     outputs: [
       {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
+        internalType: "bool",
+        name: "",
+        type: "bool",
       },
     ],
-    stateMutability: 'view',
-    type: 'function',
+    stateMutability: "view",
+    type: "function",
   },
   {
     inputs: [
       {
-        internalType: 'address',
-        name: '_node',
-        type: 'address',
+        internalType: "address",
+        name: "_node",
+        type: "address",
       },
       {
-        internalType: 'bool',
-        name: '_value',
-        type: 'bool',
+        internalType: "bool",
+        name: "_value",
+        type: "bool",
       },
     ],
-    name: 'modifyNode',
+    name: "modifyNode",
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
       {
-        internalType: 'address',
-        name: '_app',
-        type: 'address',
+        internalType: "address",
+        name: "_app",
+        type: "address",
       },
       {
-        internalType: 'uint256',
-        name: 'store',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "store",
+        type: "uint256",
       },
       {
-        internalType: 'uint256',
-        name: 'bandwidth',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "bandwidth",
+        type: "uint256",
       },
     ],
-    name: 'setAppLevelLimit',
+    name: "setAppLevelLimit",
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: '_storage',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_storage",
+        type: "uint256",
       },
       {
-        internalType: 'uint256',
-        name: '_bandwidth',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_bandwidth",
+        type: "uint256",
       },
     ],
-    name: 'setDefaultLimit',
+    name: "setDefaultLimit",
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: '_newTreshold',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "_newTreshold",
+        type: "uint256",
       },
     ],
-    name: 'setTreshold',
+    name: "setTreshold",
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+    stateMutability: "nonpayable",
+    type: "function",
   },
   {
     inputs: [
       {
-        internalType: 'address',
-        name: '_app',
-        type: 'address',
+        internalType: "address",
+        name: "_app",
+        type: "address",
       },
       {
-        internalType: 'address',
-        name: '_user',
-        type: 'address',
+        internalType: "address",
+        name: "_user",
+        type: "address",
       },
       {
-        internalType: 'bool',
-        name: '_value',
-        type: 'bool',
+        internalType: "bool",
+        name: "_value",
+        type: "bool",
       },
     ],
-    name: 'voteUser',
+    name: "voteUser",
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+    stateMutability: "nonpayable",
+    type: "function",
   },
 ];
 
@@ -185,7 +185,10 @@ export class IFactory__factory {
   static createInterface(): IFactoryInterface {
     return new utils.Interface(_abi) as IFactoryInterface;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): IFactory {
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): IFactory {
     return new Contract(address, _abi, signerOrProvider) as IFactory;
   }
 }

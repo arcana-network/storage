@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { utils } from 'ethers';
 import { readHash } from './constant';
-import { makeTx, getEncryptedKey, decryptKey, encryptKey } from './Utils';
+import { makeTx, getEncryptedKey, decryptKey, encryptKey, parseHex, Arcana } from './Utils';
 
 export class Access {
   private wallet: any;
@@ -22,6 +22,7 @@ export class Access {
     let accessType = [];
     await Promise.all(
       fileId.map(async (f) => {
+        f = f.substring(0, 2) !== '0x' ? '0x' + f : f;
         const EK = await getEncryptedKey(this.appAddress, f);
         const key = await decryptKey(this.wallet.privateKey, EK);
         await Promise.all(
@@ -44,14 +45,29 @@ export class Access {
   };
 
   revoke = async (fileId: string, address: string): Promise<string> => {
+    fileId = parseHex(fileId);
     return await makeTx(this.appAddress, this.api, this.wallet, 'revoke', [fileId, address, readHash]);
   };
 
   changeFileOwner = async (fileId: string, newOwnerAddress: string): Promise<string> => {
+    fileId = parseHex(fileId);
     return await makeTx(this.appAddress, this.api, this.wallet, 'changeFileOwner', [fileId, newOwnerAddress]);
   };
 
   deleteFile = async (fileId: string): Promise<string> => {
+    fileId = parseHex(fileId);
     return await makeTx(this.appAddress, this.api, this.wallet, 'deleteFile', [fileId]);
+  };
+
+  getUploadLimit = async (): Promise<[number, number]> => {
+    const arcana = Arcana(this.appAddress, this.wallet);
+    let con = await arcana.getUploadLimit();
+    return [con[0].toNumber(), con[1].toNumber()];
+  };
+
+  getDownloadLimit = async (): Promise<[number, number]> => {
+    const arcana = Arcana(this.appAddress, this.wallet);
+    let con = await arcana.getDownloadLimit();
+    return [con[0].toNumber(), con[1].toNumber()];
   };
 }

@@ -2,34 +2,37 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from 'ethers';
-import { Provider } from '@ethersproject/providers';
-import type { FactoryInterface, FactoryInterfaceInterface } from '../FactoryInterface';
+import { Contract, Signer, utils } from "ethers";
+import { Provider } from "@ethersproject/providers";
+import type {
+  FactoryInterface,
+  FactoryInterfaceInterface,
+} from "../FactoryInterface";
 
 const _abi = [
   {
     inputs: [
       {
-        internalType: 'address',
-        name: '_app',
-        type: 'address',
+        internalType: "address",
+        name: "_app",
+        type: "address",
       },
       {
-        internalType: 'address',
-        name: '_user',
-        type: 'address',
+        internalType: "address",
+        name: "_user",
+        type: "address",
       },
     ],
-    name: 'isRegisteredUser',
+    name: "isRegisteredUser",
     outputs: [
       {
-        internalType: 'bool',
-        name: '',
-        type: 'bool',
+        internalType: "bool",
+        name: "",
+        type: "bool",
       },
     ],
-    stateMutability: 'nonpayable',
-    type: 'function',
+    stateMutability: "nonpayable",
+    type: "function",
   },
 ];
 
@@ -38,7 +41,10 @@ export class FactoryInterface__factory {
   static createInterface(): FactoryInterfaceInterface {
     return new utils.Interface(_abi) as FactoryInterfaceInterface;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): FactoryInterface {
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): FactoryInterface {
     return new Contract(address, _abi, signerOrProvider) as FactoryInterface;
   }
 }

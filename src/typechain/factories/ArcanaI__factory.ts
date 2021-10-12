@@ -2,28 +2,28 @@
 /* tslint:disable */
 /* eslint-disable */
 
-import { Contract, Signer, utils } from 'ethers';
-import { Provider } from '@ethersproject/providers';
-import type { ArcanaI, ArcanaIInterface } from '../ArcanaI';
+import { Contract, Signer, utils } from "ethers";
+import { Provider } from "@ethersproject/providers";
+import type { ArcanaI, ArcanaIInterface } from "../ArcanaI";
 
 const _abi = [
   {
     inputs: [
       {
-        internalType: 'uint256',
-        name: 'store',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "store",
+        type: "uint256",
       },
       {
-        internalType: 'uint256',
-        name: 'bandwidth',
-        type: 'uint256',
+        internalType: "uint256",
+        name: "bandwidth",
+        type: "uint256",
       },
     ],
-    name: 'setAppLevelLimit',
+    name: "setAppLevelLimit",
     outputs: [],
-    stateMutability: 'nonpayable',
-    type: 'function',
+    stateMutability: "nonpayable",
+    type: "function",
   },
 ];
 
@@ -32,7 +32,10 @@ export class ArcanaI__factory {
   static createInterface(): ArcanaIInterface {
     return new utils.Interface(_abi) as ArcanaIInterface;
   }
-  static connect(address: string, signerOrProvider: Signer | Provider): ArcanaI {
+  static connect(
+    address: string,
+    signerOrProvider: Signer | Provider
+  ): ArcanaI {
     return new Contract(address, _abi, signerOrProvider) as ArcanaI;
   }
 }

@@ -52,7 +52,7 @@ const makeEmail = () => {
 };
 
 describe('Upload File', () => {
-  let file, did, wallet, api, arcanaInstance, access, receiverWallet, sharedIntance;
+  let file, did, wallet, api, arcanaInstance, access, receiverWallet, sharedInstance;
 
   before(async () => {
     file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 20, 'image/txt');
@@ -60,6 +60,16 @@ describe('Upload File', () => {
     const wallet = await arcana.utils.getRandomWallet();
     arcanaInstance = new arcana.Arcana(address, wallet.privateKey, makeEmail());
     await arcanaInstance.login();
+  });
+
+  it('My Files should return empty array', async () => {
+    let files = await arcanaInstance.myFiles();
+    chai.expect(files.length).equal(0);
+  });
+
+  it('Shared Files should return empty array', async () => {
+    let files = await arcanaInstance.sharedFiles();
+    chai.expect(files.length).equal(0);
   });
 
   it('Should upload a file', async () => {
@@ -115,13 +125,13 @@ describe('Upload File', () => {
   });
 
   it('Download shared file', async () => {
-    sharedIntance = new arcana.Arcana(address, receiverWallet, makeEmail());
-    let download = await sharedIntance.getDownloader();
+    sharedInstance = new arcana.Arcana(address, receiverWallet, makeEmail());
+    let download = await sharedInstance.getDownloader();
     await download.download(did);
   });
 
   it('Files shared with me', async () => {
-    let files = await sharedIntance.sharedFiles();
+    let files = await sharedInstance.sharedFiles();
     chai.expect(files.length).equal(1);
     chai.expect(files[0]['did']).equal(did.substring(2));
     chai.expect(files[0]['size']).equal(file.size);
@@ -143,8 +153,20 @@ describe('Upload File', () => {
   });
 
   it('Delete File', async () => {
-    const Access = await sharedIntance.getAccess();
+    const Access = await sharedInstance.getAccess();
     let tx = await Access.deleteFile(did);
     chai.expect(tx).not.null;
+  });
+
+  it('Get consumed and total upload limit', async () => {
+    const Access = await arcanaInstance.getAccess();
+    let [consumed, total] = await Access.getUploadLimit(did);
+    chai.expect(consumed).equal(file.size);
+  });
+
+  it('Get consumed and total download limit', async () => {
+    const Access = await sharedInstance.getAccess();
+    let [consumed, total] = await Access.getDownloadLimit(did);
+    chai.expect(consumed).equal(file.size);
   });
 });

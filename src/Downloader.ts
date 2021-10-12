@@ -51,6 +51,7 @@ export class Downloader {
   onProgress = async (bytesDownloaded: number, bytesTotal: number) => {};
 
   download = async (did) => {
+    did = did.substring(0,2) !== "0x" ? "0x"+ did : did
     const arcana = Arcana(this.appAddress, this.wallet);
     let file = await arcana.getFile(did, readHash);
     let res = await makeTx(this.appAddress, this.api, this.wallet, 'checkPermission', [did, readHash]);
@@ -68,7 +69,7 @@ export class Downloader {
     let Dec = new Decryptor(key);
 
     const fileWriter = new FileWriter(fileMeta.name);
-    const chunkSize = 2 ** 20;
+    const chunkSize = 10 * 2 ** 20;
     let downloaded = 0;
     for (let i = 0; i < fileMeta.size; i += chunkSize) {
       const range = `bytes=${i}-${i + chunkSize - 1}`;
