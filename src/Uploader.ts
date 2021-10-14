@@ -1,8 +1,7 @@
-import { KeyGen, fromHexString, toHexString, makeTx, AESEncrypt, encryptKey, decryptKey } from './Utils';
+import { KeyGen, fromHexString, toHexString, makeTx, AESEncrypt, encryptKey, decryptKey, getProvider } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
 import { utils, BigNumber } from 'ethers';
-import * as config from './config.json';
 import { AxiosInstance } from 'axios';
 
 export class Uploader {
@@ -24,6 +23,16 @@ export class Uploader {
 
   onError = (err) => {
     console.log('Error', err);
+  };
+
+  onUpload = async (host: string, token: string) => {
+    if (host) {
+      const res = await this.api.get(`${host}/hash`, { headers: { Authorization: `Bearer ${token}` } });
+      const provider = getProvider();
+      const tx = await provider.getTransaction('0x' + res.data.hash);
+      await tx.wait();
+      await this.onSuccess();
+    }
   };
 
   upload = async (fileRaw: any, chunkSize: number = 10 * 2 ** 20) => {
@@ -103,7 +112,9 @@ export class Uploader {
       },
       onError: this.onError,
       onProgress: this.onProgress,
-      onSuccess: this.onSuccess,
+      onSuccess: () => {
+        this.onUpload(host, token);
+      },
       fileReader: new FileReader(key),
       fingerprint: function (file, options) {
         return Promise.resolve(options.metadata.hash);

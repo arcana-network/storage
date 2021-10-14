@@ -81,8 +81,12 @@ interface encryptedI {
   mac: string;
 }
 
+export const getProvider = () => {
+  return new providers.JsonRpcProvider(config.rpc);
+};
+
 export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
-  const provider = new providers.JsonRpcProvider(config.rpc);
+  const provider = getProvider();
   return new Contract(address, arcana.abi, wallet ? wallet : provider) as ArcanaT;
 };
 

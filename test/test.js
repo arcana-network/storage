@@ -84,10 +84,9 @@ describe('Upload File', () => {
       console.log(err);
       throw Error(err);
     };
-    while (complete) {
-      await new Promise((resolve) => setTimeout(resolve, 8000));
+    while (!complete) {
+      await new Promise((resolve) => setTimeout(resolve, 800));
     }
-    await new Promise((resolve) => setTimeout(resolve, 1000));
   });
 
   it('Should skip uploading same file', async () => {
