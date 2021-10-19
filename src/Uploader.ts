@@ -29,7 +29,9 @@ export class Uploader {
     if (host) {
       const res = await this.api.get(`${host}/hash`, { headers: { Authorization: `Bearer ${token}` } });
       const provider = getProvider();
-      const tx = await provider.getTransaction('0x' + res.data.hash);
+      const tx = await provider.getTransaction(
+        res.data.hash.substring(0, 2) == '0x' ? res.data.hash : '0x' + res.data.hash,
+      );
       await tx.wait();
       await this.onSuccess();
     }
