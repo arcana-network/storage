@@ -89,6 +89,39 @@ describe('Upload File', () => {
     }
   });
 
+  it('Fail download tranaction', async () => {
+    receiverWallet = await arcana.utils.getRandomWallet();
+    sharedInstance = new arcana.Arcana(address, receiverWallet, makeEmail());
+    let download = await sharedInstance.getDownloader();
+    try {
+      await download.download(did);
+    } catch (err) {
+      chai.expect(err.code).equal('UNAUTHORIZED');
+      chai.expect(err.message).equal("You can't download this file");
+    }
+  });
+
+  it('Fail revoke transaction', async () => {
+    let access = await sharedInstance.getAccess();
+    try {
+      await access.revoke(did, receiverWallet.address);
+    } catch (err) {
+      chai.expect(err.code).equal('TRANSACTION');
+      chai.expect(err.message).equal('This function can only be called by file owner');
+    }
+  });
+
+  it('Fail to upload a big file', async () => {
+    const bigFile = MockFile('asdf', 10000001, 'image/txt');
+    let upload = await arcanaInstance.getUploader();
+    try {
+      await upload.upload(bigFile);
+    } catch (err) {
+      chai.expect(err.code).equal('TRANSACTION');
+      chai.expect(err.message).equal('No space left for user');
+    }
+  });
+
   it('Should skip uploading same file', async () => {
     let upload = await arcanaInstance.getUploader();
     upload.onSuccess = () => {
@@ -117,14 +150,12 @@ describe('Upload File', () => {
 
   it('Share file', async () => {
     access = await arcanaInstance.getAccess();
-    receiverWallet = await arcana.utils.getRandomWallet();
     console.log('DID', did, receiverWallet.address);
     let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
     chai.expect(tx).not.null;
   });
 
   it('Download shared file', async () => {
-    sharedInstance = new arcana.Arcana(address, receiverWallet, makeEmail());
     let download = await sharedInstance.getDownloader();
     await download.download(did);
   });

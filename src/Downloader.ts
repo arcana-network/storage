@@ -1,7 +1,7 @@
 import Decryptor from './decrypt';
 import * as config from './config.json';
 import { decryptWithPrivateKey } from 'eth-crypto';
-import { Arcana, hasher2Hex, fromHexString, AESDecrypt, makeTx } from './Utils';
+import { Arcana, hasher2Hex, fromHexString, AESDecrypt, makeTx, customError } from './Utils';
 import { utils } from 'ethers';
 import FileWriter from './FileWriter';
 import { readHash } from './constant';
@@ -51,9 +51,14 @@ export class Downloader {
   onProgress = async (bytesDownloaded: number, bytesTotal: number) => {};
 
   download = async (did) => {
-    did = did.substring(0,2) !== "0x" ? "0x"+ did : did
+    did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
     const arcana = Arcana(this.appAddress, this.wallet);
-    let file = await arcana.getFile(did, readHash);
+    let file;
+    try {
+      file = await arcana.getFile(did, readHash);
+    } catch (e) {
+      throw customError('UNAUTHORIZED', "You can't download this file");
+    }
     let res = await makeTx(this.appAddress, this.api, this.wallet, 'checkPermission', [did, readHash]);
     const decryptedKey = await decryptWithPrivateKey(
       this.wallet.privateKey,

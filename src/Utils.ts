@@ -90,12 +90,21 @@ export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
   return new Contract(address, arcana.abi, wallet ? wallet : provider) as ArcanaT;
 };
 
+const cleanMessage = (message: string): string => {
+  return message
+    .replace(/[^\w\s:]/gi, '')
+    .replace('Error: VM Exception while processing transaction: reverted with reason string y ', '');
+};
+
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
   const arcana: ArcanaT = Arcana(address, wallet);
   const provider = new providers.JsonRpcProvider(config.rpc);
   const forwarderContract: ForwarderT = new Contract(config.forwarder, forwarder.abi, provider) as ForwarderT;
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('api/meta-tx/', req);
+  if (res.data.err) {
+    throw customError('TRANSACTION', cleanMessage(res.data.err.message));
+  }
   let tx = await wallet.provider.getTransaction(res.data.txHash);
   await tx.wait();
   return res.data;
@@ -176,4 +185,10 @@ export const getRandomWallet = () => {
 
 export const parseHex = (hex) => {
   return hex.substring(0, 2) != '0x' ? '0x' + hex : hex;
+};
+
+export const customError = (code: string, message: string): Error => {
+  const error: any = new Error(message);
+  error.code = code;
+  return error;
 };
