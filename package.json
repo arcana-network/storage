@@ -2,7 +2,7 @@
   "name": "@arcana_tech/storage-sdk",
   "version": "0.0.1",
   "description": "Upload, Download, Share can be performed using this SDK",
-  "main": "dist/arcana.js",
+  "main": "dist/index.js",
   "files": [
     "lib/**/*"
   ],
