@@ -20,7 +20,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/arcana-network/arcana-js-sdk.git"
+    "url": "git+https://github.com/arcana-network/storage-sdk.git"
   },
   "keywords": [],
   "author": "Saurav Kanchan",

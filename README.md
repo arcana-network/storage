@@ -1,9 +1,9 @@
-# arcana-js-sdk
+# storage-sdk
 
-## Inlude arcana.js in your <head> of html
+## Install using npm
 
-```html
-<script src="../path/to/sdk/arcana.js"></script>
+```bash
+npm i @arcana_tech/storage-sdk
 ```
 
 ## Create a arcana intance
@@ -136,3 +136,11 @@ downloader.onProgress = (bytesDownloaded: number, bytesTotal: number) => {
   console.log("Completed", bytesDownloaded, "out of", bytesTotal)
 };
 ```
+
+## Error List
+
+| Code         | Message                      | Reason                                                                      |
+| ------------ | ---------------------------- | --------------------------------------------------------------------------- |
+| UNAUTHORIZED | You can't download this file | Trying to download a file which is neither owned by you nor shared with you |
+| TRANSACTION  | \*                           | Smart contract Errors                                                       |
+| TRANSACTION  | No space left for user       | You have already consumed your storage or bandwidht limit                   |
