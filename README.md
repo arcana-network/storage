@@ -67,6 +67,30 @@ Access.changeFileOwner(did, address);
 Access.deleteFile(did);
 ```
 
+#### Usage
+
+```js
+//Get consumed and total storage of the current user
+let [consumed, total] = await Access.getUploadLimit(did);
+```
+
+```js
+//Get consumed and total bandwidth of the current user
+let [consumed, total] = await Access.getDownloadLimit(did);
+```
+
+#### File shared with current user
+
+```js
+let files = await arcanaInstance.sharedFiles();
+```
+
+#### List of files uploaded by the user
+
+```js
+let files = await arcanaInstance.myFiles();
+```
+
 ## FallBack Functions
 
 #### 1. Upload

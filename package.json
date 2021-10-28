@@ -1,8 +1,8 @@
 {
-  "name": "arcana-js-sdk",
+  "name": "@arcana_tech/storage-sdk",
   "version": "0.0.1",
-  "description": "",
-  "main": "index.js",
+  "description": "Upload, Download, Share can be performed using this SDK",
+  "main": "dist/arcana.js",
   "files": [
     "lib/**/*"
   ],
@@ -10,8 +10,8 @@
     "build": "tsc",
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"  ",
     "lint": "tslint -p tsconfig.json",
-    "prepare": "npm run build",
-    "prepublishOnly": "npm test && npm run lint",
+    "prepare": "npm run build-web",
+    "prepublish": "npm run prepare",
     "preversion": "npm run lint",
     "version": "npm run format && git add -A src",
     "postversion": "git push && git push --tags",
@@ -23,7 +23,7 @@
     "url": "git+https://github.com/arcana-network/arcana-js-sdk.git"
   },
   "keywords": [],
-  "author": "",
+  "author": "Saurav Kanchan",
   "license": "ISC",
   "bugs": {
     "url": "https://github.com/arcana-network/arcana-js-sdk/issues"
@@ -55,5 +55,9 @@
     "ethers": "^5.3.1",
     "tus-js-client": "^2.3.0",
     "tweetnacl": "^1.0.3"
+  },
+  "directories": {
+    "lib": "lib",
+    "test": "test"
   }
 }

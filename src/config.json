@@ -1,5 +1,5 @@
 {
   "rpc": "https://hardhat.arcana.network",
   "forwarder": "0xE41390d07BE5032F1EF9b27C316217987525f843",
-  "gateway": "https://gateway.arcana.network/"
+  "gateway": "https://gateway02.arcana.network/"
 }
