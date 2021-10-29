@@ -45,6 +45,7 @@
   },
   "dependencies": {
     "@openzeppelin/contracts-upgradeable": "^4.3.2",
+    "assert": "^2.0.0",
     "axios": "^0.21.4",
     "buffer": "^6.0.3",
     "eth-crypto": "^1.9.0",
