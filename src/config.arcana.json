@@ -1,0 +1,5 @@
+{
+  "rpc": "http://validator02.dev.dc01.arcana.network:10002/",
+  "forwarder": "0x90BD5C80f489cD79708b827032cd7BD6Bab8DEAE",
+  "gateway": "http://localhost:9010/"
+}
