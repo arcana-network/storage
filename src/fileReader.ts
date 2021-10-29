@@ -1,4 +1,3 @@
-import isCordova from 'tus-js-client/lib/browser/isCordova';
 import readAsByteArray from 'tus-js-client/lib/browser/readAsByteArray';
 import Encryptor from './encrypt';
 
@@ -14,7 +13,7 @@ class FileSource {
   }
 
   async slice(start, end) {
-    if (isCordova()) {
+    if (false) {
       return readAsByteArray(this._file.slice(start, end));
     }
 

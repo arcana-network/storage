@@ -100,11 +100,8 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   const arcana: ArcanaT = Arcana(address, wallet);
   const provider = new providers.JsonRpcProvider(config.rpc);
   const forwarderContract: ForwarderT = new Contract(config.forwarder, forwarder.abi, provider) as ForwarderT;
-  console.log('makeTx', address, method, ...params);
   let req = await sign(wallet, arcana, forwarderContract, method, params);
-  console.log('req', req);
   let res = await api.post('api/meta-tx/', req);
-  console.log('res', res.data);
   if (res.data.err) {
     throw customError('TRANSACTION', cleanMessage(res.data.err.message));
   }
