@@ -4,7 +4,6 @@
   "description": "Upload, Download, Share can be performed using this SDK",
   "main": "dist/index.js",
   "files": [
-    "lib/**/*",
     "dist/**/*"
   ],
   "scripts": {
