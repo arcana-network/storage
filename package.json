@@ -11,6 +11,7 @@
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"  ",
     "lint": "tslint -p tsconfig.json",
     "prepare": "npm run build-web",
+    "prepublish": "npm run build",
     "postversion": "git push && git push --tags",
     "test": "mocha 'test/**/*.ts' --recursive --timeout 3000000 -R spec --ui bdd",
     "build-web": "webpack"
@@ -46,7 +47,6 @@
     "@openzeppelin/contracts-upgradeable": "^4.3.2",
     "axios": "^0.21.4",
     "buffer": "^6.0.3",
-    "dkg_client": "git+https://github.com/arcana-network/dkg_client.git",
     "eth-crypto": "^1.9.0",
     "eth-sig-util": "^3.0.1",
     "ethers": "^5.3.1",

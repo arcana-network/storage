@@ -74,6 +74,7 @@ var nodeWrap = function(method, is224) {
     var Buffer = eval("require('buffer').Buffer");
     var algorithm = is224 ? 'sha224' : 'sha256';
     var nodeMethod = function(message) {
+        console.log("proper till here")
         if (typeof message === 'string') {
             return crypto.createHash(algorithm).update(message, 'utf8').digest('hex');
         } else {
