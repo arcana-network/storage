@@ -1,5 +1,0 @@
-{
-  "rpc": "http://localhost:8545/",
-  "forwarder": "0xE41390d07BE5032F1EF9b27C316217987525f843",
-  "gateway": "http://localhost:9010/"
-}

@@ -5,8 +5,7 @@
     <title>Mocha Tests</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <link rel="stylesheet" href="./lib/mocha.css" />
-    <link rel="icon" href="data:,">
-
+    <link rel="icon" href="data:," />
   </head>
   <body>
     <div id="mocha"></div>
@@ -16,12 +15,12 @@
 
     <script class="mocha-init">
       mocha.setup('bdd');
-      mocha.timeout(10000);
+      mocha.timeout(10000000);
     </script>
     <script src="../dist/arcana.js"></script>
     <script src="test.js" type="module"></script>
     <script>
-        mocha.run();
+      mocha.run();
     </script>
   </body>
 </html>
