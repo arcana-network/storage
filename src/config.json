@@ -1,5 +1,5 @@
 {
-  "rpc": "https://rpc-mumbai.maticvigil.com/v1/839c4f1f04664475d4214b7eb9c0b487746fa5eb",
+  "rpc": "http://localhost:8545/",
   "forwarder": "0x90BD5C80f489cD79708b827032cd7BD6Bab8DEAE",
-  "gateway": "https://gateway02.arcana.network/"
+  "gateway": "http://localhost:9010/"
 }

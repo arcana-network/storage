@@ -1,13 +1,13 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const address = '0x73A15a259d1bB5ACC23319CCE876a976a278bE82';
 //hardhat
-const address = '0x5CE5D307E4D3FA292f1F7F88C3F75Fc911554396';
+// const address = '0x5CE5D307E4D3FA292f1F7F88C3F75Fc911554396';
 //polygon
 // const address = '0x86c89626024123Fe01d4389Ea277895bb80f4a1d';
 // arcana
 // const address = '0x37032e133884fcE151aF8a54A440177210313743';
 // local polygon
-// const address = '0xA512F9AeDEd064D2DDd266812A834543EC93Ebaf';
+const address = '0xA512F9AeDEd064D2DDd266812A834543EC93Ebaf';
 
 const generateString = (length) => {
   let result = '';
