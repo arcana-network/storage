@@ -7,8 +7,8 @@ const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567
 // arcana
 // const address = '0x37032e133884fcE151aF8a54A440177210313743';
 // local polygon
-const address = '0xA512F9AeDEd064D2DDd266812A834543EC93Ebaf';
-
+// const address = '0xA512F9AeDEd064D2DDd266812A834543EC93Ebaf';
+const address = 1;
 const generateString = (length) => {
   let result = '';
   const charactersLength = characters.length;
