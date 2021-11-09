@@ -174,9 +174,13 @@ describe('Upload File', () => {
 
   it('Share file', async () => {
     access = await arcanaInstance.getAccess();
-    console.log('DID', did, receiverWallet.address);
     let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
     chai.expect(tx).not.null;
+  });
+
+  it('Shared users', async () => {
+    chai.expect((await access.getSharedUsers(did))[0]).equal(receiverWallet.address);
+    chai.expect((await access.getSharedUsers(did)).length).equal(1);
   });
 
   it('Download shared file', async () => {

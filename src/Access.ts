@@ -70,4 +70,9 @@ export class Access {
     let con = await arcana.getDownloadLimit();
     return [con[0].toNumber(), con[1].toNumber()];
   };
+
+  getSharedUsers = async (fileId: string): Promise<string[]> => {
+    const arcana = Arcana(this.appAddress, this.wallet);
+    return arcana.getAllUsers(fileId, readHash)
+  }
 }
