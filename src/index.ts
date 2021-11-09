@@ -17,12 +17,13 @@ export class Arcana {
   private email: string;
   private api: AxiosInstance;
   private appAddress: string;
+  private appId: number;
   private arcana: ArcanaT;
 
-  constructor(appAddress: string, privateKey: string, email: string) {
+  constructor(appId: number, privateKey: string, email: string) {
     this.wallet = utils.getWallet(privateKey);
     this.email = email;
-    this.appAddress = appAddress;
+    this.appId = appId;
     if (!this.wallet) {
       throw 'Null wallet';
     }
@@ -70,6 +71,11 @@ export class Arcana {
         Authorization: `Bearer ${res.data.token}`,
       },
     });
+    this.appAddress = (await this.api.get(`get-address/?id=${this.appId}`)).data.address;
+    this.appAddress = this.appAddress.length === 40 ? '0x' + this.appAddress : this.appAddress;
+    res = (await this.api.get("get-config/")).data;
+    localStorage.setItem("forwarder",res["Forwarder"])
+    localStorage.setItem("rpc_url", res["RPC_URL"])
   };
 
   myFiles = async () => {
