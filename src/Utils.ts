@@ -82,7 +82,7 @@ interface encryptedI {
 }
 
 export const getProvider = () => {
-  return new providers.JsonRpcProvider(config.rpc);
+  return new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
 };
 
 export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
@@ -98,8 +98,12 @@ const cleanMessage = (message: string): string => {
 
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
   const arcana: ArcanaT = Arcana(address, wallet);
-  const provider = new providers.JsonRpcProvider(config.rpc);
-  const forwarderContract: ForwarderT = new Contract(config.forwarder, forwarder.abi, provider) as ForwarderT;
+  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
+  const forwarderContract: ForwarderT = new Contract(
+    localStorage.getItem('forwarder'),
+    forwarder.abi,
+    provider,
+  ) as ForwarderT;
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('api/meta-tx/', req);
   if (res.data.err) {
@@ -174,12 +178,12 @@ export const getEncryptedKey = async (address: string, fileId: string): Promise<
 };
 
 export const getWallet = (privateKey: string) => {
-  const provider = new providers.JsonRpcProvider(config.rpc);
+  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
   return new Wallet(privateKey, provider);
 };
 
 export const getRandomWallet = () => {
-  const provider = new providers.JsonRpcProvider(config.rpc);
+  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
   return Wallet.createRandom().connect(provider);
 };
 

@@ -73,7 +73,9 @@ export class Arcana {
     });
     this.appAddress = (await this.api.get(`get-address/?id=${this.appId}`)).data.address;
     this.appAddress = this.appAddress.length === 40 ? '0x' + this.appAddress : this.appAddress;
-    console.log(this.appAddress);
+    res = (await this.api.get("get-config/")).data;
+    localStorage.setItem("forwarder",res["Forwarder"])
+    localStorage.setItem("rpc_url", res["RPC_URL"])
   };
 
   myFiles = async () => {
