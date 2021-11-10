@@ -6,6 +6,11 @@ const serverConfig = () => {
       arcana: path.resolve(__dirname, 'src', 'index.ts'),
     },
     mode: 'production',
+    plugins: [
+      new webpack.ProvidePlugin({
+              process: 'process/browser',
+            })
+          ],      
     module: {
       rules: [
         {
