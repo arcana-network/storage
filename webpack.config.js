@@ -20,7 +20,7 @@ const commonConfig = {
     ],
   },
   output: {
-    filename: (x) => x.chunk.name + '.js',
+    filename: 'storage.umd.js',
     library: 'arcana',
     libraryTarget: 'umd',
   },

@@ -15,7 +15,7 @@ npm i process crypto-browserify stream-browserify
 Otherwise, you can use the standalone module which includes the polyfills.
 
 ```html
-<script src="./dist/standalone/arcana.js"></script>
+<script src="./dist/standalone/storage.umd.js"></script>
 ```
 
 ## Create a arcana intance
