@@ -3,7 +3,19 @@
 ## Install using npm
 
 ```bash
-npm i @arcana_tech/storage-sdk
+npm i @arcana/storage
+```
+
+Provide polyfills for Node's Buffer, Crypto and Stream APIs.
+
+```base
+npm i process crypto-browserify stream-browserify
+```
+
+Otherwise, you can use the standalone module which includes the polyfills.
+
+```html
+<script src="./dist/standalone/storage.umd.js"></script>
 ```
 
 ## Create a arcana intance
