@@ -2,9 +2,10 @@
   "name": "@arcana/storage",
   "version": "0.0.1",
   "description": "Upload, Download, Share can be performed using this SDK",
+  "main": "dist/storage.umd.js",
   "browser": "dist/storage.umd.js",
-  "jsdelivr": "dist/storage.umd.js",
-  "unpkg": "dist/storage.umd.js",
+  "unpkg": "dist/standalone/storage.umd.js",
+  "jsdelivr": "dist/standalone/storage.umd.js",
   "files": [
     "dist/**/*"
   ],
