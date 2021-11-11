@@ -1,17 +1,19 @@
 {
   "name": "@arcana/storage",
-  "version": "0.0.12",
+  "version": "0.0.1",
   "description": "Upload, Download, Share can be performed using this SDK",
+  "main": "dist/storage.umd.js",
   "browser": "dist/storage.umd.js",
-  "jsdelivr": "dist/storage.umd.js",
-  "unpkg": "dist/storage.umd.js",
+  "unpkg": "dist/standalone/storage.umd.js",
+  "jsdelivr": "dist/standalone/storage.umd.js",
   "files": [
-    "dist/**/*"
+    "dist",
+    "types"
   ],
   "scripts": {
-    "build": "npm run build:web && npm run build:default",
-    "build:default": "tsc",
+    "build": "npm run build:types && npm run build:web",
     "build:web": "rimraf dist/ && webpack",
+    "build:types": "rimraf types/ && tsc --project tsconfig.json --emitDeclarationOnly",
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"  ",
     "lint": "tslint -p tsconfig.json",
     "prepare": "npm run build-web",

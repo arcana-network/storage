@@ -21,7 +21,7 @@ const commonConfig = {
   },
   output: {
     filename: 'storage.umd.js',
-    library: 'arcana',
+    library: ['arcana', 'storage'],
     libraryTarget: 'umd',
   },
   resolve: {
