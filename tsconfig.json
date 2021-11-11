@@ -4,7 +4,6 @@
     "module": "commonjs",
     "outDir": "./types",
     "declaration": true,
-    "emitDeclarationOnly": true,
     "allowJs": true,
     "alwaysStrict": true,
     "sourceMap": true,

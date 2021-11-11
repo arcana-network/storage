@@ -12,8 +12,8 @@
   ],
   "scripts": {
     "build": "npm run build:types && npm run build:web",
-    "build:types": "rimraf types/ && tsc",
     "build:web": "rimraf dist/ && webpack",
+    "build:types": "rimraf types/ && tsc --project tsconfig.json --emitDeclarationOnly",
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"  ",
     "lint": "tslint -p tsconfig.json",
     "prepare": "npm run build-web",
