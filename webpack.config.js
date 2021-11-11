@@ -1,4 +1,5 @@
 const path = require('path');
+const webpack = require('webpack');
 
 const serverConfig = () => {
   return {
@@ -8,9 +9,9 @@ const serverConfig = () => {
     mode: 'production',
     plugins: [
       new webpack.ProvidePlugin({
-              process: 'process/browser',
-            })
-          ],      
+        process: 'process/browser',
+      }),
+    ],
     module: {
       rules: [
         {

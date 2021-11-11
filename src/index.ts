@@ -8,7 +8,6 @@ import { Access } from './Access';
 import * as utils from './Utils';
 import { Wallet } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
-import * as config from './config.json';
 import { Arcana as ArcanaT } from './typechain';
 
 export class Arcana {
@@ -19,13 +18,19 @@ export class Arcana {
   private appAddress: string;
   private appId: number;
   private arcana: ArcanaT;
+  private gateway: string;
 
-  constructor(appId: number, privateKey: string, email: string) {
+  constructor(appId: number, privateKey: string, email: string, gateway: string) {
     this.wallet = utils.getWallet(privateKey);
     this.email = email;
     this.appId = appId;
     if (!this.wallet) {
       throw 'Null wallet';
+    }
+    if(!gateway) {
+      this.gateway= "http://gateway.arcana.network"
+    }else {
+      this.gateway = gateway;
     }
   }
 
@@ -58,15 +63,15 @@ export class Arcana {
   };
 
   login = async () => {
-    let nonce = (await axios.get(config.gateway + `get-nonce/?address=${this.wallet.address}`)).data;
+    let nonce = (await axios.get(this.gateway + `get-nonce/?address=${this.wallet.address}`)).data;
     let sig = await this.wallet.signMessage(String(nonce));
-    let res = await axios.post(config.gateway + `login/`, {
+    let res = await axios.post(this.gateway + `login/`, {
       signature: sig,
       email: this.email,
       address: this.wallet.address,
     });
     this.api = axios.create({
-      baseURL: config.gateway,
+      baseURL: this.gateway,
       headers: {
         Authorization: `Bearer ${res.data.token}`,
       },

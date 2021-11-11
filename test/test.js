@@ -8,6 +8,7 @@ const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567
 // const address = '0x37032e133884fcE151aF8a54A440177210313743';
 // local polygon
 // const address = '0xA512F9AeDEd064D2DDd266812A834543EC93Ebaf';
+const gateway = "http://localhost:9010/"
 const address = 1;
 const generateString = (length) => {
   let result = '';
@@ -74,7 +75,7 @@ describe('Upload File', () => {
     file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 20, 'image/txt');
     file = new File([file], file.name, { type: file.type });
     const wallet = await arcana.utils.getRandomWallet();
-    arcanaInstance = new arcana.Arcana(address, wallet.privateKey, makeEmail());
+    arcanaInstance = new arcana.Arcana(address, wallet.privateKey, makeEmail(), gateway);
     await arcanaInstance.login();
   });
 
@@ -108,7 +109,7 @@ describe('Upload File', () => {
 
   it('Fail download tranaction', async () => {
     receiverWallet = await arcana.utils.getRandomWallet();
-    sharedInstance = new arcana.Arcana(address, receiverWallet, makeEmail());
+    sharedInstance = new arcana.Arcana(address, receiverWallet, makeEmail(), gateway);
     let download = await sharedInstance.getDownloader();
     try {
       await download.download(did);
@@ -212,7 +213,12 @@ describe('Upload File', () => {
 
   it('Delete File', async () => {
     const Access = await sharedInstance.getAccess();
+    let files = await sharedInstance.sharedFiles();
+    chai.expect(files.length).equal(1);
+    chai.expect(files[0].did).equal(did.replace('0x', ''));
     let tx = await Access.deleteFile(did);
+    files = await sharedInstance.sharedFiles();
+    chai.expect(files.length).equal(0);
     chai.expect(tx).not.null;
   });
 
