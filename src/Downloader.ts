@@ -1,5 +1,4 @@
 import Decryptor from './decrypt';
-import * as config from './config.json';
 import { decryptWithPrivateKey } from 'eth-crypto';
 import { Arcana, hasher2Hex, fromHexString, AESDecrypt, makeTx, customError } from './Utils';
 import { utils } from 'ethers';

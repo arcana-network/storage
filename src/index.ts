@@ -20,17 +20,17 @@ export class Arcana {
   private arcana: ArcanaT;
   private gateway: string;
 
-  constructor(appId: number, privateKey: string, email: string, gateway: string) {
-    this.wallet = utils.getWallet(privateKey);
-    this.email = email;
-    this.appId = appId;
+  constructor(config: utils.Config) {
+    this.wallet = utils.getWallet(config.privateKey);
+    this.email = config.email;
+    this.appId = config.appId;
     if (!this.wallet) {
       throw 'Null wallet';
     }
-    if(!gateway) {
+    if(!config.gateway) {
       this.gateway= "http://gateway.arcana.network"
     }else {
-      this.gateway = gateway;
+      this.gateway = config.gateway;
     }
   }
 

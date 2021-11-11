@@ -1,13 +1,19 @@
 import './SHA256';
 import Sha256 from './SHA256';
 import { Contract, providers, Wallet, utils, Bytes } from 'ethers';
-import * as config from './config.json';
 import * as arcana from './contracts/Arcana.json';
 import * as forwarder from './contracts/Forwarder.json';
 import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
 import { sign } from './signer';
 import { Arcana as ArcanaT, Forwarder as ForwarderT } from './typechain';
 import { AxiosInstance } from 'axios';
+
+export type Config = {
+  appId: number;
+  privateKey: string;
+  email: string;
+  gateway: any;
+};
 
 export class KeyGen {
   hasher: any;
