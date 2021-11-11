@@ -9,14 +9,15 @@
     "dist/**/*"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:web && npm run build:default",
+    "build:default": "tsc",
+    "build:web": "rimraf dist/ && webpack",
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"  ",
     "lint": "tslint -p tsconfig.json",
     "prepare": "npm run build-web",
     "prepublish": "npm run build",
     "postversion": "git push && git push --tags",
-    "test": "mocha 'test/**/*.ts' --recursive --timeout 3000000 -R spec --ui bdd",
-    "build-web": "rimraf dist/ && webpack"
+    "test": "mocha 'test/**/*.ts' --recursive --timeout 3000000 -R spec --ui bdd"
   },
   "repository": {
     "type": "git",
