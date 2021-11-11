@@ -1,44 +1,63 @@
 const path = require('path');
 const webpack = require('webpack');
+const { merge } = require('webpack-merge');
 
-const serverConfig = () => {
-  return {
-    entry: {
-      arcana: path.resolve(__dirname, 'src', 'index.ts'),
-    },
-    mode: 'production',
-    plugins: [
-      new webpack.ProvidePlugin({
-        process: 'process/browser',
-      }),
-    ],
-    module: {
-      rules: [
-        {
-          test: /\.(ts|js)x?$/,
-          use: {
-            loader: 'ts-loader',
-            options: {
-              configFile: 'tsconfig.json',
-            },
+const commonConfig = {
+  entry: path.resolve(__dirname, 'src', 'index.ts'),
+  mode: 'production',
+  module: {
+    rules: [
+      {
+        test: /\.(ts|js)x?$/,
+        use: {
+          loader: 'ts-loader',
+          options: {
+            configFile: 'tsconfig.json',
           },
-          exclude: /node_modules/,
         },
-      ],
-    },
-    resolve: {
-      extensions: ['.tsx', '.ts', '.js', '.json'],
-      fallback: {
-        crypto: require.resolve('crypto-browserify'),
-        stream: require.resolve('stream-browserify'),
+        exclude: /node_modules/,
       },
-    },
-    output: {
-      filename: (x) => x.chunk.name + '.js',
-      library: '[name]',
-      path: path.resolve(__dirname, 'dist'),
-    },
-  };
+    ],
+  },
+  output: {
+    filename: (x) => x.chunk.name + '.js',
+    library: 'arcana',
+    libraryTarget: 'umd',
+  },
+  resolve: {
+    extensions: ['.tsx', '.ts', '.js', '.json'],
+  },
+  target: 'web',
 };
 
-module.exports = serverConfig;
+const standaloneConfig = {
+  plugins: [
+    new webpack.ProvidePlugin({
+      process: 'process/browser',
+      Buffer: ['buffer', 'Buffer'],
+    }),
+  ],
+  resolve: {
+    fallback: {
+      crypto: require.resolve('crypto-browserify'),
+      stream: require.resolve('stream-browserify'),
+    },
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist/standalone'),
+  },
+};
+
+const moduleConfig = {
+  resolve: {
+    fallback: {
+      crypto: false,
+      stream: false,
+    },
+  },
+  output: {
+    path: path.resolve(__dirname, 'dist'),
+  },
+};
+
+module.exports = [merge(commonConfig, standaloneConfig), merge(commonConfig, moduleConfig)];
