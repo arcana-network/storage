@@ -39,6 +39,7 @@ const standaloneConfig = {
   ],
   resolve: {
     fallback: {
+      buffer: require.resolve('buffer'),
       crypto: require.resolve('crypto-browserify'),
       stream: require.resolve('stream-browserify'),
     },
@@ -51,6 +52,7 @@ const standaloneConfig = {
 const moduleConfig = {
   resolve: {
     fallback: {
+      buffer: false,
       crypto: false,
       stream: false,
     },
