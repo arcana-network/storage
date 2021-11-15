@@ -1,15 +1,8 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-// const address = '0x73A15a259d1bB5ACC23319CCE876a976a278bE82';
-//hardhat
-// const address = '0x5CE5D307E4D3FA292f1F7F88C3F75Fc911554396';
-//polygon
-// const address = '0x86c89626024123Fe01d4389Ea277895bb80f4a1d';
-// arcana
-// const address = '0x37032e133884fcE151aF8a54A440177210313743';
-// local polygon
-// const address = '0xA512F9AeDEd064D2DDd266812A834543EC93Ebaf';
-const gateway = 'http://localhost:9010/';
-const address = 1;
+const gateway = 'https://gateway01.arcana.network/';
+const appId = 2;
+// const gateway = 'http://localhost:9010/';
+// const appId = 1;
 const generateString = (length) => {
   let result = '';
   const charactersLength = characters.length;
@@ -74,8 +67,8 @@ describe('Upload File', () => {
   before(async () => {
     file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 20, 'image/txt');
     file = new File([file], file.name, { type: file.type });
-    const wallet = await arcana.utils.getRandomWallet();
-    arcanaInstance = new arcana.storage.Arcana(address, wallet.privateKey, makeEmail(), gateway);
+    const wallet = await arcana.storage.utils.getRandomWallet();
+    arcanaInstance = new arcana.storage.Arcana({ appId, privateKey: wallet.privateKey, email: makeEmail(), gateway });
     await arcanaInstance.login();
   });
 
@@ -98,6 +91,7 @@ describe('Upload File', () => {
       file_count += 1;
     };
     did = await upload.upload(file);
+    console.log('did', did);
     upload.onError = (err) => {
       console.log(err);
       throw Error(err);
@@ -108,8 +102,8 @@ describe('Upload File', () => {
   });
 
   it('Fail download tranaction', async () => {
-    receiverWallet = await arcana.utils.getRandomWallet();
-    sharedInstance = new arcana.storage.Arcana(address, receiverWallet, makeEmail(), gateway);
+    receiverWallet = await arcana.storage.utils.getRandomWallet();
+    sharedInstance = new arcana.storage.Arcana({ appId, privateKey: receiverWallet, email: makeEmail(), gateway });
     let download = await sharedInstance.getDownloader();
     try {
       await download.download(did);
@@ -202,7 +196,9 @@ describe('Upload File', () => {
   });
 
   it('Generate Wallet', async () => {
-    const wallet = await arcana.utils.getWallet('0x22fd4c393275398cbde74f85af7be2b79858bea05182250024d3e7f296b838b3');
+    const wallet = await arcana.storage.utils.getWallet(
+      '0x22fd4c393275398cbde74f85af7be2b79858bea05182250024d3e7f296b838b3',
+    );
     chai.expect(wallet.address).to.equal('0xa23039d0Fca2af54E8b9ac2ECaE78e3084Cc687b');
   });
 

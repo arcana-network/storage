@@ -19,17 +19,18 @@ export class Arcana {
   private appId: number;
   private arcana: ArcanaT;
   private gateway: string;
+  private privateKey: string;
 
   constructor(config: utils.Config) {
-    this.wallet = utils.getWallet(config.privateKey);
+    this.privateKey = config.privateKey;
     this.email = config.email;
     this.appId = config.appId;
-    if (!this.wallet) {
+    if (!this.privateKey) {
       throw 'Null wallet';
     }
-    if(!config.gateway) {
-      this.gateway= "http://gateway.arcana.network"
-    }else {
+    if (!config.gateway) {
+      this.gateway = 'http://gateway.arcana.network';
+    } else {
       this.gateway = config.gateway;
     }
   }
@@ -63,9 +64,16 @@ export class Arcana {
   };
 
   login = async () => {
+    let res = (await axios.get(this.gateway + 'get-config/')).data;
+    localStorage.setItem('forwarder', res['Forwarder']);
+    localStorage.setItem('rpc_url', res['RPC_URL']);
+
+    this.wallet = utils.getWallet(this.privateKey);
+
     let nonce = (await axios.get(this.gateway + `get-nonce/?address=${this.wallet.address}`)).data;
     let sig = await this.wallet.signMessage(String(nonce));
-    let res = await axios.post(this.gateway + `login/`, {
+
+    res = await axios.post(this.gateway + `login/`, {
       signature: sig,
       email: this.email,
       address: this.wallet.address,
@@ -78,9 +86,6 @@ export class Arcana {
     });
     this.appAddress = (await this.api.get(`get-address/?id=${this.appId}`)).data.address;
     this.appAddress = this.appAddress.length === 40 ? '0x' + this.appAddress : this.appAddress;
-    res = (await this.api.get("get-config/")).data;
-    localStorage.setItem("forwarder",res["Forwarder"])
-    localStorage.setItem("rpc_url", res["RPC_URL"])
   };
 
   myFiles = async () => {

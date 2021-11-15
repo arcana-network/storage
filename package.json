@@ -16,7 +16,7 @@
     "build:types": "rimraf types/ && tsc --project tsconfig.json --emitDeclarationOnly",
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"  ",
     "lint": "tslint -p tsconfig.json",
-    "prepare": "npm run build-web",
+    "prepare": "npm run build",
     "prepublish": "npm run build",
     "postversion": "git push && git push --tags",
     "test": "mocha 'test/**/*.ts' --recursive --timeout 3000000 -R spec --ui bdd"
