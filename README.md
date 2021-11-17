@@ -1,24 +1,27 @@
-# storage-sdk
+# Arcana Storage
 
-## Install using npm
+## Installation
 
-```bash
+### Using npm/yarn
+
+```shell
 npm i @arcana/storage
+yarn add @arcana/storage
 ```
 
-Provide polyfills for Node's Buffer, Crypto and Stream APIs.
-
-```base
-npm i process crypto-browserify stream-browserify
-```
-
-Otherwise, you can use the standalone module which includes the polyfills.
+You can use the standalone module which includes the polyfills.
 
 ```html
 <script src="./dist/standalone/storage.umd.js"></script>
 ```
 
-## Create a arcana intance
+```js
+import { Arcana } from '@arcana/storage/dist/standalone/storage.umd';
+```
+
+## Usage
+
+### Create an Arcana instance
 
 ```js
 // address: Smart contract address of app
@@ -27,7 +30,7 @@ Otherwise, you can use the standalone module which includes the polyfills.
 const arcanaInstance = new arcana.storage.Arcana({appId, privateKey, email});
 ```
 
-## Uploader
+### Uploader
 
 ```js
 const Uploader = arcanaInstance.getUploader();
@@ -35,7 +38,7 @@ const Uploader = arcanaInstance.getUploader();
 Uploader.upload(file);
 ```
 
-## Downloader
+### Downloader
 
 ```js
 const Downloader = arcanaInstance.getDownloader();
@@ -43,7 +46,7 @@ const Downloader = arcanaInstance.getDownloader();
 Downloader.download(did);
 ```
 
-## Access
+### Access
 
 ```js
 const Access = new arcanaInstance.getAccess();
@@ -103,7 +106,7 @@ let files = await arcanaInstance.sharedFiles();
 let files = await arcanaInstance.myFiles();
 ```
 
-## FallBack Functions
+### FallBack Functions
 
 #### 1. Upload
 
