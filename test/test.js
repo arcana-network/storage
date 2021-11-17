@@ -190,11 +190,12 @@ describe('Upload File', () => {
   });
 
   it('Revoke', async () => {
-    let before = (await access.getSharedUsers(did)).length;
+    let before = await access.getSharedUsers(did);
     let tx = await access.revoke(did, receiverWallet.address);
-    let after = (await access.getSharedUsers(did)).length;
+    let after = await access.getSharedUsers(did);
+    chai.expect(before.includes(receiverWallet.address)).is.true;
     chai.expect(after.includes(receiverWallet.address)).is.false;
-    chai.expect(before - after).equal(1);
+    chai.expect(before.length - after.length).equal(1);
     chai.expect(tx).exist;
   });
 

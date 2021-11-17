@@ -97,6 +97,7 @@ export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
 };
 
 const cleanMessage = (message: string): string => {
+  if (!message) return '';
   return message
     .replace(/[^\w\s:]/gi, '')
     .replace('Error: VM Exception while processing transaction: reverted with reason string y ', '');
