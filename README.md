@@ -24,7 +24,7 @@ Otherwise, you can use the standalone module which includes the polyfills.
 // address: Smart contract address of app
 // private key: Secp256K private key
 // convergence: seceret for a specific user
-const arcanaInstance = new arcana.storage.Arcana(address, privateKey, convergence);
+const arcanaInstance = new arcana.storage.Arcana({appId, privateKey, email});
 ```
 
 ## Uploader

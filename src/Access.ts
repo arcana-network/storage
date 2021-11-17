@@ -1,5 +1,5 @@
 import { AxiosInstance } from 'axios';
-import { utils } from 'ethers';
+import { ethers, utils } from 'ethers';
 import { readHash } from './constant';
 import { makeTx, getEncryptedKey, decryptKey, encryptKey, parseHex, Arcana } from './Utils';
 
@@ -73,6 +73,7 @@ export class Access {
 
   getSharedUsers = async (fileId: string): Promise<string[]> => {
     const arcana = Arcana(this.appAddress, this.wallet);
-    return arcana.getAllUsers(fileId, readHash)
-  }
+    let users = await arcana.getAllUsers(fileId, readHash);
+    return users.filter((d) => d != ethers.constants.AddressZero);
+  };
 }

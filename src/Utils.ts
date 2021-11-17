@@ -115,8 +115,12 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   if (res.data.err) {
     throw customError('TRANSACTION', cleanMessage(res.data.err.message));
   }
-  let tx = await wallet.provider.getTransaction(res.data.txHash);
-  await tx.wait();
+  try {
+    let tx = await wallet.provider.getTransaction(res.data.txHash);
+    await tx.wait();
+  } catch (e) {
+    throw customError('TRANSACTION', cleanMessage(e.reason));
+  }
   return res.data;
 };
 
@@ -199,6 +203,6 @@ export const parseHex = (hex) => {
 
 export const customError = (code: string, message: string): Error => {
   const error: any = new Error(message);
-  error.code = code;
+  error.code = cleanMessage(code);
   return error;
 };

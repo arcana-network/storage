@@ -1,4 +1,14 @@
-import { KeyGen, fromHexString, toHexString, makeTx, AESEncrypt, encryptKey, decryptKey, getProvider } from './Utils';
+import {
+  KeyGen,
+  fromHexString,
+  toHexString,
+  makeTx,
+  AESEncrypt,
+  encryptKey,
+  decryptKey,
+  getProvider,
+  customError,
+} from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
 import { utils, BigNumber } from 'ethers';
@@ -25,15 +35,32 @@ export class Uploader {
     console.log('Error', err);
   };
 
-  onUpload = async (host: string, token: string) => {
+  onUpload = async (host: string, token: string, did: string) => {
     if (host) {
-      const res = await this.api.get(`${host}/hash`, { headers: { Authorization: `Bearer ${token}` } });
+      let res;
+      for (let i = 0; i < 5; i++) {
+        try {
+          res = await this.api.get(`${host}/hash`, { headers: { Authorization: `Bearer ${token}` } });
+          break;
+        } catch {
+          await new Promise((r) => setTimeout(r, 1000));
+          console.log('retrying to fetch tx hash');
+        }
+      }
       const provider = getProvider();
-      const tx = await provider.getTransaction(
-        res.data.hash.substring(0, 2) == '0x' ? res.data.hash : '0x' + res.data.hash,
-      );
-      await tx.wait();
-      await this.onSuccess();
+      try {
+        const tx = await provider.getTransaction(
+          res.data.hash.substring(0, 2) == '0x' ? res.data.hash : '0x' + res.data.hash,
+        );
+        await tx.wait();
+        await this.onSuccess();
+      } catch (e) {
+        if (e.reason.includes('Owner already exist for this file')) {
+          throw customError('TRANSACTION', `File already exist. DID: ${did}`);
+        } else {
+          throw customError('TRANSACTION', e.reason);
+        }
+      }
     }
   };
 
@@ -115,7 +142,7 @@ export class Uploader {
       onError: this.onError,
       onProgress: this.onProgress,
       onSuccess: () => {
-        this.onUpload(host, token);
+        this.onUpload(host, token, did);
       },
       fileReader: new FileReader(key),
       fingerprint: function (file, options) {

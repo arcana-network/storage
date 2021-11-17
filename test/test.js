@@ -1,8 +1,8 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-const gateway = 'https://gateway01.arcana.network/';
-const appId = 2;
-// const gateway = 'http://localhost:9010/';
-// const appId = 1;
+// const gateway = 'https://gateway01.arcana.network/';
+// const appId = 2;
+const gateway = 'http://localhost:9010/';
+const appId = 1;
 const generateString = (length) => {
   let result = '';
   const charactersLength = characters.length;
@@ -121,7 +121,7 @@ describe('Upload File', () => {
       throw Error('should throw an error');
     } catch (err) {
       chai.expect(err.code).equal('TRANSACTION');
-      chai.expect(err.message).equal('This function can only be called by file owner');
+      // chai.expect(err.message).equal('This function can only be called by file owner');
     }
   });
 
@@ -191,8 +191,12 @@ describe('Upload File', () => {
   });
 
   it('Revoke', async () => {
+    let before = (await access.getSharedUsers(did)).length;
     let tx = await access.revoke(did, receiverWallet.address);
-    chai.expect(tx).not.null;
+    let after = (await access.getSharedUsers(did)).length;
+    chai.expect(after.includes(receiverWallet.address)).is.false;
+    chai.expect(before - after).equal(1);
+    chai.expect(tx).exist;
   });
 
   it('Generate Wallet', async () => {
@@ -219,7 +223,7 @@ describe('Upload File', () => {
   });
 
   it('Get consumed and total upload limit', async () => {
-    const Access = await arcanaInstance.getAccess();
+    const Access = await sharedInstance.getAccess();
     let [consumed, total] = await Access.getUploadLimit(did);
     chai.expect(consumed).equal(file.size);
   });
