@@ -21,7 +21,7 @@ import { Arcana } from '@arcana/storage/dist/standalone/storage.umd';
 
 ## Usage
 
-### Create a arcana intance
+### Create an Arcana instance
 
 ```js
 // address: Smart contract address of app
