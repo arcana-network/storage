@@ -152,7 +152,7 @@ downloader.onProgress = (bytesDownloaded: number, bytesTotal: number) => {
 };
 ```
 
-### Error List
+## Error List
 
 | Code         | Message                      | Reason                                                                      |
 | ------------ | ---------------------------- | --------------------------------------------------------------------------- |
