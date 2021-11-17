@@ -109,7 +109,7 @@ describe('Upload File', () => {
       throw Error('should throw an error');
     } catch (err) {
       chai.expect(err.code).equal('UNAUTHORIZED');
-      chai.expect(err.message).equal("You can't download this file");
+      chai.expect(err.message).equal("You cant download this file");
     }
   });
 

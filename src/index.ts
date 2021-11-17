@@ -42,7 +42,9 @@ export class Arcana {
       this.convergence = await this.arcana.convergence(await this.wallet.getAddress());
       if (!this.convergence) {
         const conv = String(Math.random());
+        console.log('before make tx');
         await utils.makeTx(this.appAddress, this.api, this.wallet, 'setConvergence', [conv]);
+        console.log('after make tx');
         this.convergence = conv;
       }
     }

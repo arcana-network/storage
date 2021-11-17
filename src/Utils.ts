@@ -97,6 +97,7 @@ export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
 };
 
 const cleanMessage = (message: string): string => {
+  console.log('message', message);
   if (!message) return '';
   return message
     .replace(/[^\w\s:]/gi, '')
@@ -111,16 +112,25 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
     forwarder.abi,
     provider,
   ) as ForwarderT;
+  console.log('forwarder inint');
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('api/meta-tx/', req);
+  console.log('res', res.data);
   if (res.data.err) {
     throw customError('TRANSACTION', cleanMessage(res.data.err.message));
   }
   try {
+    console.log('trying to fetch tx');
+    await new Promise((r) => setTimeout(r, 1000));
     let tx = await wallet.provider.getTransaction(res.data.txHash);
     await tx.wait();
+    console.log('Fetch tx hash', tx);
   } catch (e) {
-    throw customError('TRANSACTION', cleanMessage(e.reason));
+    if (e.reason) {
+      throw customError('TRANSACTION', cleanMessage(e.reason));
+    } else {
+      throw customError('', e.error);
+    }
   }
   return res.data;
 };
@@ -203,7 +213,7 @@ export const parseHex = (hex) => {
 };
 
 export const customError = (code: string, message: string): Error => {
-  const error: any = new Error(message);
-  error.code = cleanMessage(code);
+  const error: any = new Error(cleanMessage(message));
+  error.code = code;
   return error;
 };
