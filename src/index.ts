@@ -29,7 +29,7 @@ export class Arcana {
       throw 'Null wallet';
     }
     if (!config.gateway) {
-      this.gateway = 'http://gateway.arcana.network';
+      this.gateway = 'https://gateway-testnet.arcana.network/';
     } else {
       this.gateway = config.gateway;
     }

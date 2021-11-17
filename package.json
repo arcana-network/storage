@@ -29,9 +29,9 @@
   "author": "Saurav Kanchan",
   "license": "ISC",
   "bugs": {
-    "url": "https://github.com/arcana-network/arcana-js-sdk/issues"
+    "url": "https://github.com/arcana-network/storage/issues"
   },
-  "homepage": "https://github.com/arcana-network/arcana-js-sdk#readme",
+  "homepage": "https://github.com/arcana-network/storage#readme",
   "devDependencies": {
     "chai": "^4.3.4",
     "crypto-browserify": "^3.12.0",

@@ -1,7 +1,6 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-// const gateway = 'https://gateway01.arcana.network/';
-// const appId = 2;
-const gateway = 'http://localhost:9010/';
+const gateway = 'https://gateway-testnet.arcana.network/';
+// const gateway = 'http://localhost:9010/';
 const appId = 1;
 const generateString = (length) => {
   let result = '';
