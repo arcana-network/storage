@@ -112,19 +112,15 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
     forwarder.abi,
     provider,
   ) as ForwarderT;
-  console.log('forwarder inint');
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('api/meta-tx/', req);
-  console.log('res', res.data);
   if (res.data.err) {
     throw customError('TRANSACTION', cleanMessage(res.data.err.message));
   }
   try {
-    console.log('trying to fetch tx');
     await new Promise((r) => setTimeout(r, 1000));
     let tx = await wallet.provider.getTransaction(res.data.txHash);
     await tx.wait();
-    console.log('Fetch tx hash', tx);
   } catch (e) {
     if (e.reason) {
       throw customError('TRANSACTION', cleanMessage(e.reason));
