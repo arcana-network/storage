@@ -55,11 +55,14 @@ export class Uploader {
         await tx.wait();
         await this.onSuccess();
       } catch (e) {
-        console.log("Error", e.reason)
-        if (e.reason.includes('Owner already exist for this file')) {
-          throw customError('TRANSACTION', `File already exist. DID: ${did}`);
+        if (e.reason) {
+          if (e.reason.includes('Owner already exist for this file')) {
+            throw customError('TRANSACTION', `File already exist. DID: ${did}`);
+          } else {
+            throw customError('TRANSACTION', e.reason);
+          }
         } else {
-          throw customError('TRANSACTION', e.reason);
+          throw customError('', e.error);
         }
       }
     }
