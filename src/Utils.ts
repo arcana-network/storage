@@ -194,6 +194,12 @@ export const getEncryptedKey = async (address: string, fileId: string): Promise<
   return utils.toUtf8String(file.encryptedKey);
 };
 
+export const isFileUploaded = async (address: string, fileId: string): Promise<boolean> => {
+  const arcana = Arcana(address);
+  const file = await arcana.files(fileId);
+  return file.uploaded;
+};
+
 export const getWallet = (privateKey: string) => {
   const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
   return new Wallet(privateKey, provider);

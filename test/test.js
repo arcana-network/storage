@@ -109,7 +109,7 @@ describe('Upload File', () => {
       throw Error('should throw an error');
     } catch (err) {
       chai.expect(err.code).equal('UNAUTHORIZED');
-      chai.expect(err.message).equal("You cant download this file");
+      chai.expect(err.message).equal('You cant download this file');
     }
   });
 
@@ -120,6 +120,7 @@ describe('Upload File', () => {
       throw Error('should throw an error');
     } catch (err) {
       chai.expect(err.code).equal('TRANSACTION');
+      console.log(err.message);
       // chai.expect(err.message).equal('This function can only be called by file owner');
     }
   });

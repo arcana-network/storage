@@ -8,6 +8,7 @@ import {
   decryptKey,
   getProvider,
   customError,
+  isFileUploaded,
 } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
@@ -89,6 +90,9 @@ export class Uploader {
     if (prevKey) {
       const decryptedKey = await decryptKey(this.wallet.privateKey, prevKey);
       key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt']);
+      if (await isFileUploaded(this.appAddress, did)) {
+        throw customError('TRANSACTION', `File is already uploaded. DID is ${did}`);
+      }
     } else {
       key = await window.crypto.subtle.generateKey(
         {
