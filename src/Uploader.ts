@@ -40,7 +40,7 @@ export class Uploader {
       let res;
       for (let i = 0; i < 5; i++) {
         try {
-          res = await this.api.get(`${host}/hash`, { headers: { Authorization: `Bearer ${token}` } });
+          res = await this.api.get(`${host}hash`, { headers: { Authorization: `Bearer ${token}` } });
           break;
         } catch {
           await new Promise((r) => setTimeout(r, 1000));
