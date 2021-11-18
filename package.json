@@ -1,6 +1,6 @@
 {
   "name": "@arcana/storage",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Upload, Download, Share can be performed using this SDK",
   "main": "dist/storage.umd.js",
   "browser": "dist/storage.umd.js",
