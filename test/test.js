@@ -1,6 +1,6 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-const gateway = 'https://gateway-testnet.arcana.network/';
-// const gateway = 'http://localhost:9010/';
+// const gateway = 'https://gateway-testnet.arcana.network/';
+const gateway = 'http://localhost:9010/';
 const appId = 1;
 const generateString = (length) => {
   let result = '';
@@ -43,12 +43,7 @@ const makeEmail = () => {
     strEmail = strEmail + strTmp;
   }
   strTmp = '';
-  strEmail = strEmail + '@';
-  for (var j = 0; j < 8; j++) {
-    strTmp = strValues.charAt(Math.round(strValues.length * Math.random()));
-    strEmail = strEmail + strTmp;
-  }
-  strEmail = strEmail + '.com';
+  strEmail = strEmail + '@example.com';
   return strEmail;
 };
 

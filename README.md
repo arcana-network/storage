@@ -26,8 +26,7 @@ import { Arcana } from '@arcana/storage/dist/standalone/storage.umd';
 ```js
 // address: Smart contract address of app
 // private key: Secp256K private key
-// convergence: seceret for a specific user
-const arcanaInstance = new arcana.storage.Arcana({appId, privateKey, email});
+const arcanaInstance = new arcana.storage.Arcana({ appId, privateKey, email });
 ```
 
 ### Uploader
@@ -69,12 +68,12 @@ Access.share([did], [publicKey], [validity]);
 Access.revoke(did, address);
 ```
 
-#### Change File owner
+<!-- #### Change File owner -->
 
-```js
-// address: new owner's address
+<!-- ```js -->
+<!-- // address: new owner's address
 Access.changeFileOwner(did, address);
-```
+``` -->
 
 #### Delete File
 
@@ -86,12 +85,12 @@ Access.deleteFile(did);
 
 ```js
 //Get consumed and total storage of the current user
-let [consumed, total] = await Access.getUploadLimit(did);
+let [consumed, total] = await Access.getUploadLimit();
 ```
 
 ```js
 //Get consumed and total bandwidth of the current user
-let [consumed, total] = await Access.getDownloadLimit(did);
+let [consumed, total] = await Access.getDownloadLimit();
 ```
 
 #### File shared with current user
