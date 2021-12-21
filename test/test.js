@@ -1,7 +1,9 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
 const gateway = 'http://localhost:9010/';
+// const gateway = 'https://gateway02.arcana.network/';
 const appId = 1;
+const debug = true;
 const generateString = (length) => {
   let result = '';
   const charactersLength = characters.length;
@@ -50,8 +52,6 @@ const makeEmail = () => {
 describe('Upload File', () => {
   let file,
     did,
-    wallet,
-    api,
     arcanaInstance,
     access,
     receiverWallet,
@@ -62,7 +62,13 @@ describe('Upload File', () => {
     file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 20, 'image/txt');
     file = new File([file], file.name, { type: file.type });
     const wallet = await arcana.storage.utils.getRandomWallet();
-    arcanaInstance = new arcana.storage.Arcana({ appId, privateKey: wallet.privateKey, email: makeEmail(), gateway });
+    arcanaInstance = new arcana.storage.Arcana({
+      appId,
+      privateKey: wallet.privateKey,
+      email: makeEmail(),
+      gateway,
+      debug,
+    });
     await arcanaInstance.login();
   });
 
@@ -95,9 +101,26 @@ describe('Upload File', () => {
     }
   });
 
+  it('Close upload', async () => {
+    const response = await fetch(gateway + `/api/closeUpload/?did=${did.substring(2)}`, {
+      headers: {
+        Authorization:
+          'Bearer eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiIweDU4MGEyODM4OEUyOTJhZEJCNmZDZjgzZmJkYjU2ZDViMzEzRDA0ZEEiLCJzdWIiOiJnYXRld2F5IG5vZGUiLCJpYXQiOjE2NDAwODE2OTZ9.l54j4TrEuZD66MInw3RcDjwncJXeCKigtwZzSuhsVJ6rgfcXJgNJ6FUpfm8MV5-Ajw_RHwnMaKcED9X-6aoDBQ',
+      },
+    });
+    const reader = response.body.getReader();
+    console.log(await reader.read());
+  });
+
   it('Fail download tranaction', async () => {
     receiverWallet = await arcana.storage.utils.getRandomWallet();
-    sharedInstance = new arcana.storage.Arcana({ appId, privateKey: receiverWallet, email: makeEmail(), gateway });
+    sharedInstance = new arcana.storage.Arcana({
+      appId,
+      privateKey: receiverWallet,
+      email: makeEmail(),
+      gateway,
+      debug,
+    });
     let download = await sharedInstance.getDownloader();
     try {
       await download.download(did);
@@ -120,28 +143,17 @@ describe('Upload File', () => {
     }
   });
 
-  // it('Fail to upload a big file', async () => {
-  //   const bigFile = MockFile('asdf', 10000001, 'image/txt');
-  //   let upload = await arcanaInstance.getUploader();
-  //   try {
-  //     await upload.upload(bigFile);
-  //     upload.onSuccess = () => {
-  //       file_count += 1;
-  //     };
-  //     throw Error('No error occured');
-  //   } catch (err) {
-  //     console.log(err);
-  //     chai.expect(err.code).equal('TRANSACTION');
-  //     chai.expect(err.message).equal('No space left for user');
-  //   }
-  // });
-
   it('Should skip uploading same file', async () => {
     let upload = await arcanaInstance.getUploader();
     upload.onSuccess = () => {
       console.log('Skip file upload');
     };
-    did = await upload.upload(file);
+    try {
+      did = await upload.upload(file);
+      throw new Error('');
+    } catch (e) {
+      chai.expect(e.message.includes('File is already uploaded')).is.true;
+    }
   });
 
   it('My files', async () => {
@@ -207,6 +219,12 @@ describe('Upload File', () => {
     chai.expect(tx).not.null;
   });
 
+  it('Get consumed and total upload limit', async () => {
+    const Access = await sharedInstance.getAccess();
+    let [consumed, total] = await Access.getUploadLimit(did);
+    chai.expect(consumed).equal(file.size);
+  });
+
   it('Delete File', async () => {
     const Access = await sharedInstance.getAccess();
     let files = await sharedInstance.sharedFiles();
@@ -216,12 +234,6 @@ describe('Upload File', () => {
     files = await sharedInstance.sharedFiles();
     chai.expect(files.length).equal(0);
     chai.expect(tx).not.null;
-  });
-
-  it('Get consumed and total upload limit', async () => {
-    const Access = await sharedInstance.getAccess();
-    let [consumed, total] = await Access.getUploadLimit(did);
-    chai.expect(consumed).equal(file.size);
   });
 
   it('Get consumed and total download limit', async () => {

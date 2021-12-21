@@ -9,6 +9,8 @@ import * as utils from './Utils';
 import { Wallet } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
 import { Arcana as ArcanaT } from './typechain';
+import * as Sentry from '@sentry/browser';
+import { Integrations } from '@sentry/tracing';
 
 export class Arcana {
   private wallet: Wallet;
@@ -25,6 +27,13 @@ export class Arcana {
     this.privateKey = config.privateKey;
     this.email = config.email;
     this.appId = config.appId;
+    if (config.debug) {
+      Sentry.init({
+        dsn: 'https://1a411b6bfed244de8f6a7d64bb432bd4@o1011868.ingest.sentry.io/6081085',
+        integrations: [new Integrations.BrowserTracing()],
+        tracesSampleRate: 1.0,
+      });
+    }
     if (!this.privateKey) {
       throw 'Null wallet';
     }
