@@ -8,8 +8,10 @@ import Sha256 from './SHA256';
 import { AxiosInstance } from 'axios';
 
 const downloadBlob = (blob, fileName) => {
+  // @ts-ignore
   if (navigator.msSaveBlob) {
     // IE 10+
+    // @ts-ignore
     navigator.msSaveBlob(blob, fileName);
   } else {
     const link = document.createElement('a');

@@ -1,4 +1,4 @@
-{
+export default {
   "_format": "hh-sol-artifact-1",
   "contractName": "Forwarder",
   "sourceName": "contracts/Forwarder.sol",
