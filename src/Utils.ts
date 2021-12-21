@@ -13,6 +13,7 @@ export type Config = {
   privateKey: string;
   email: string;
   gateway: any;
+  debug: any
 };
 
 export class KeyGen {
@@ -104,6 +105,15 @@ const cleanMessage = (message: string): string => {
     .replace('Error: VM Exception while processing transaction: reverted with reason string y ', '');
 };
 
+function hex_to_ascii(str1) {
+  var hex = str1.toString();
+  var str = '';
+  for (var n = 0; n < hex.length; n += 2) {
+    str += String.fromCharCode(parseInt(hex.substr(n, 2), 16));
+  }
+  return str;
+}
+
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
   const arcana: ArcanaT = Arcana(address, wallet);
   const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
@@ -117,13 +127,17 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   if (res.data.err) {
     throw customError('TRANSACTION', cleanMessage(res.data.err.message));
   }
+  // await new Promise((r) => setTimeout(r, 1000));
+  let tx = await wallet.provider.getTransaction(res.data.txHash);
+  console.log(method, tx);
   try {
-    // await new Promise((r) => setTimeout(r, 1000));
-    let tx = await wallet.provider.getTransaction(res.data.txHash);
     await tx.wait();
   } catch (e) {
-    if (e.reason) {
-      throw customError('TRANSACTION', cleanMessage(e.reason));
+    let code = await provider.call(tx, tx.blockNumber);
+    let reason = hex_to_ascii(code.substr(138));
+    console.log('revert reason', reason);
+    if (reason) {
+      throw customError('TRANSACTION', cleanMessage(reason));
     } else {
       throw customError('', e.error);
     }
