@@ -16,7 +16,7 @@ You can use the standalone module which includes the polyfills.
 ```
 
 ```js
-import { Arcana } from '@arcana/storage/dist/standalone/storage.umd';
+import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```
 
 ## Usage
