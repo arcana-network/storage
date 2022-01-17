@@ -1,7 +1,7 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-const gateway = 'http://localhost:9010/';
-// const gateway = 'https://gateway02.arcana.network/';
+// const gateway = 'http://localhost:9010/';
+const gateway = 'https://gateway-dev.arcana.network/';
 const appId = 1;
 const debug = true;
 const generateString = (length) => {
@@ -10,7 +10,6 @@ const generateString = (length) => {
   while (result.length < length) {
     result += characters.charAt(Math.floor(Math.random() * charactersLength));
   }
-
   return result;
 };
 
@@ -101,19 +100,9 @@ describe('Upload File', () => {
     }
   });
 
-  it('Close upload', async () => {
-    const response = await fetch(gateway + `/api/closeUpload/?did=${did.substring(2)}`, {
-      headers: {
-        Authorization:
-          'Bearer eyJhbGciOiJFUzI1NiJ9.eyJpc3MiOiIweDU4MGEyODM4OEUyOTJhZEJCNmZDZjgzZmJkYjU2ZDViMzEzRDA0ZEEiLCJzdWIiOiJnYXRld2F5IG5vZGUiLCJpYXQiOjE2NDAwODE2OTZ9.l54j4TrEuZD66MInw3RcDjwncJXeCKigtwZzSuhsVJ6rgfcXJgNJ6FUpfm8MV5-Ajw_RHwnMaKcED9X-6aoDBQ',
-      },
-    });
-    const reader = response.body.getReader();
-    console.log(await reader.read());
-  });
-
   it('Fail download tranaction', async () => {
     receiverWallet = await arcana.storage.utils.getRandomWallet();
+    console.log('Receiver wallet address', receiverWallet.address);
     sharedInstance = new arcana.storage.Arcana({
       appId,
       privateKey: receiverWallet,
@@ -204,6 +193,8 @@ describe('Upload File', () => {
     chai.expect(before.includes(receiverWallet.address)).is.true;
     chai.expect(after.includes(receiverWallet.address)).is.false;
     chai.expect(before.length - after.length).equal(1);
+    let files = await sharedInstance.sharedFiles();
+    chai.expect(files.length).equal(0);
     chai.expect(tx).exist;
   });
 
@@ -214,24 +205,23 @@ describe('Upload File', () => {
     chai.expect(wallet.address).to.equal('0xa23039d0Fca2af54E8b9ac2ECaE78e3084Cc687b');
   });
 
-  it('Change File Owner', async () => {
-    let tx = await access.changeFileOwner(did, receiverWallet.address);
-    chai.expect(tx).not.null;
-  });
+  // it('Change File Owner', async () => {
+  //   let tx = await access.changeFileOwner(did, receiverWallet.address);
+  //   chai.expect(tx).not.null;
+  // });
 
   it('Get consumed and total upload limit', async () => {
-    const Access = await sharedInstance.getAccess();
+    const Access = await arcanaInstance.getAccess();
     let [consumed, total] = await Access.getUploadLimit(did);
     chai.expect(consumed).equal(file.size);
   });
 
   it('Delete File', async () => {
-    const Access = await sharedInstance.getAccess();
-    let files = await sharedInstance.sharedFiles();
+    let files = await arcanaInstance.myFiles();
     chai.expect(files.length).equal(1);
     chai.expect(files[0].did).equal(did.replace('0x', ''));
-    let tx = await Access.deleteFile(did);
-    files = await sharedInstance.sharedFiles();
+    let tx = await access.deleteFile(did);
+    files = await arcanaInstance.myFiles();
     chai.expect(files.length).equal(0);
     chai.expect(tx).not.null;
   });
