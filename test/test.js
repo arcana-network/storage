@@ -61,7 +61,7 @@ describe('Upload File', () => {
     file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 20, 'image/txt');
     file = new File([file], file.name, { type: file.type });
     const wallet = await arcana.storage.utils.getRandomWallet();
-    arcanaInstance = new arcana.storage.StorageProvider({
+    arcanaInstance = new arcana.storage.Arcana({
       appId,
       privateKey: wallet.privateKey,
       email: makeEmail(),
@@ -103,7 +103,7 @@ describe('Upload File', () => {
   it('Fail download tranaction', async () => {
     receiverWallet = await arcana.storage.utils.getRandomWallet();
     console.log('Receiver wallet address', receiverWallet.address);
-    sharedInstance = new arcana.storage.StorageProvider({
+    sharedInstance = new arcana.storage.Arcana({
       appId,
       privateKey: receiverWallet,
       email: makeEmail(),

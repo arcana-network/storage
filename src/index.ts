@@ -12,7 +12,7 @@ import { Arcana as ArcanaT } from './typechain';
 import * as Sentry from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
 
-export class StorageProvider {
+export class Arcana {
   private wallet: Wallet;
   private convergence: string;
   private email: string;
