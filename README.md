@@ -26,7 +26,7 @@ import { Arcana } from '@arcana/storage/dist/standalone/storage.umd';
 ```js
 // address: Smart contract address of app
 // private key: Secp256K private key
-const arcanaInstance = new arcana.storage.Arcana({ appId, privateKey, email });
+const arcanaInstance = new arcana.storage.StorageProvider({ appId, privateKey, email });
 ```
 
 ### Uploader
