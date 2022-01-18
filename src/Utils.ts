@@ -13,7 +13,7 @@ export type Config = {
   privateKey: string;
   email: string;
   gateway: any;
-  debug: any
+  debug: any;
 };
 
 export class KeyGen {
@@ -98,7 +98,6 @@ export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
 };
 
 const cleanMessage = (message: string): string => {
-  console.log('message', message);
   if (!message) return '';
   return message
     .replace(/[^\w\s:]/gi, '')
@@ -129,7 +128,6 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   }
   // await new Promise((r) => setTimeout(r, 1000));
   let tx = await wallet.provider.getTransaction(res.data.txHash);
-  console.log(method, tx);
   try {
     await tx.wait();
   } catch (e) {
