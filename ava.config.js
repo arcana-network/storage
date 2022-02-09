@@ -1,12 +1,12 @@
 module.exports = () => {
 	return {
         "files": [
-			"./tests/*",
+			"./test/*",
 		],
-		timeout: "10s",
-	
+		timeout: "50s",
+		extensions : [ "ts"],
 		require: [
-			 
+			 "ts-node/register/transpile-only",
              "./tests/_setup-browser-env.js"
         ]
 	};

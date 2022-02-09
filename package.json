@@ -19,7 +19,7 @@
     "prepare": "npm run build",
     "prepublish": "npm run build",
     "postversion": "git push && git push --tags",
-    "test": "mocha 'test/**/*.ts' --recursive --timeout 3000000 -R spec --ui bdd"
+    "test": "npx ava"
   },
   "repository": {
     "type": "git",
@@ -33,7 +33,9 @@
   },
   "homepage": "https://github.com/arcana-network/storage#readme",
   "devDependencies": {
+    "@peculiar/webcrypto": "^1.2.3",
     "ava": "^4.0.1",
+    "blob-polyfill": "^6.0.20211015",
     "browser-env": "^3.3.0",
     "chai": "^4.3.4",
     "crypto-browserify": "^3.12.0",
