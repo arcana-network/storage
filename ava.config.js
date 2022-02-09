@@ -7,7 +7,7 @@ module.exports = () => {
 		extensions : [ "ts"],
 		require: [
 			 "ts-node/register/transpile-only",
-             "./tests/_setup-browser-env.js"
+             "./test/_setup-browser-env.js"
         ]
 	};
 };
