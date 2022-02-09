@@ -83,7 +83,6 @@ export class KeyGen {
       // console.debug("offset",offset,"chunk size", this.chunkSize);
       
     }
-    console.log("after getting hash");
     return hasher2Hex(this.hasher.digest());
   };
 }
