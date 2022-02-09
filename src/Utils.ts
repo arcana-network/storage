@@ -29,9 +29,13 @@ export class KeyGen {
 
   async read<T>(position: number, length: number, binary?: boolean): Promise<{ data: T; length: number }> {
     return new Promise((resolve, reject) => {
+     
+      
       this._chunk_reader(position, length, binary, (evt: any) => {
+       
+
         if (evt.target.error == null) {
-          resolve({ data: evt.target.result, length: evt.total });
+          resolve({ data: evt.target.result, length: evt.target.result.byteLength });
         } else {
           reject(evt.target.error);
         }
@@ -42,11 +46,17 @@ export class KeyGen {
   private _chunk_reader(offset: number, length: number, binary: boolean, readEventHandler: (evt: any) => void) {
     const r: FileReader = new FileReader();
     let blob;
+    
     if (!(offset === 0 && this.file.size <= length)) {
       blob = this.file.slice(offset, offset + length);
     } else {
       blob = this.file;
+     
+      
     }
+
+
+
     r.onload = readEventHandler;
     if (binary) {
       r.readAsBinaryString(blob);
@@ -61,12 +71,19 @@ export class KeyGen {
   };
 
   getHash = async () => {
-    let offset = 0;
+    let offset = 0;    
+  
+    
     while (offset < this.file.size) {
       let data = await this.read(offset, offset + this.chunkSize);
       offset += data.length;
+      // console.log(data.length);
+      
       this.hasher.update(data.data);
+      // console.debug("offset",offset,"chunk size", this.chunkSize);
+      
     }
+    console.log("after getting hash");
     return hasher2Hex(this.hasher.digest());
   };
 }
