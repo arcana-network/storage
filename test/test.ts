@@ -103,7 +103,7 @@ test.before(async (t) => {
     receiverWallet = await utils.getRandomWallet();
     sharedInstance = new StorageProvider({
       appId,
-      privateKey: receiverWallet,
+      privateKey: receiverWallet.privateKey,
       email: makeEmail(),
       gateway,
       debug,
@@ -168,7 +168,7 @@ test.serial('Fail revoke transaction', async (t) => {
   let err = await t.throwsAsync(access.revoke(did, receiverWallet.address));
 
   t.is(err.code, 'TRANSACTION');
-  t.is(err.message, 'This function can only be called by file owner');
+  t.is(err.message.substring(3), 'This function can only be called by file owner');
 });
 
 //Skiped as it returned DID, instead of error
@@ -202,7 +202,7 @@ test.serial('Should download a file', async (t) => {
     console.log(a, b);
   };
 
-  t.notThrowsAsync(await download.download(did));
+await  t.notThrowsAsync(download.download(did));
 });
 
 test.serial('Share file', async (t) => {
