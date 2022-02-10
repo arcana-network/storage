@@ -1,3 +1,4 @@
+*.sqlite
 /dist
 /types
 /lib

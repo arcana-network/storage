@@ -56,9 +56,9 @@ export default class FileWriter {
       this.writing = true;
       const self = this;
       const transaction = this.DB.transaction([self.dbName], 'readonly');
-      const request = transaction.objectStore(self.dbName).getAll();
+      const irequest = transaction.objectStore(self.dbName).getAll();
       request.onsuccess = (event: any) => {
-        const objectUrl = URL.createObjectURL(new Blob(event.target.result));
+        const objectUrl = window.URL.createObjectURL(new Blob(event.target.result));
         if (this.type === 'view') {
           return resolve(objectUrl);
         } else {
@@ -70,7 +70,7 @@ export default class FileWriter {
           this.writing = false;
           setTimeout(() => {
             document.body.removeChild(a);
-            URL.revokeObjectURL(objectUrl);
+            window.URL.revokeObjectURL(objectUrl);
             return resolve(null);
           }, 100);
         }
@@ -84,6 +84,7 @@ export default class FileWriter {
   private initDB() {
     return new Promise((resolve, reject) => {
       const self = this;
+      console.log('window indexedDB');
       const request = window.indexedDB.open(this.dbName, 1);
       request.onsuccess = () => {
         self.DB = request.result;
