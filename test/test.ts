@@ -185,7 +185,6 @@ test.serial('Fail revoke transaction', async (t) => {
   
 });
 
-  
 //Skiped as it returned DID, instead of error
 test.serial.skip('Should skip uploading same file', async (t) => {
   let upload = await arcanaInstance.getUploader();
@@ -213,7 +212,6 @@ test.serial('My files', async (t) => {
   // chai.expect(files[0]['did']).equal(did.substring(2));
   // chai.expect(files[0]['size']).equal(file.size);
 });
-
 
 //Error: File must be uploaded before downloading it
 test.serial.skip('Should download a file', async (t) => {
