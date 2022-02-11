@@ -146,7 +146,6 @@ test.serial('Should upload a file', async (t) => {
     throw Error(err);
   };
 
-  // await t.notThrowsAsync(upload.upload(file))
   did = await upload.upload(file);
   while (!complete) {
     await sleep(1000);
@@ -158,17 +157,18 @@ test.serial('Should upload a file', async (t) => {
 test.serial('Fail download transaction', async (t) => {
   let download = await sharedInstance.getDownloader();
   const err = await t.throwsAsync(download.download(did));
-  // t.is(err.code, 'UNAUTHORIZED');
+  t.is(err.code, 'UNAUTHORIZED');
   t.is(err.message, 'You cant download this file');
 });
 
 test.serial('Fail revoke transaction', async (t) => {
   let access = await sharedInstance.getAccess();
-
-  let err = await t.throwsAsync(access.revoke(did, receiverWallet.address));
-
-  t.is(err.code, 'TRANSACTION');
-  t.is(err.message.substring(3), 'This function can only be called by file owner');
+  try {
+    await access.revoke(did, receiverWallet.address);
+  } catch (err) {
+    t.is(err.code, 'TRANSACTION');
+    t.is(err.message, 'This function can only be called by file owner');
+  }
 });
 
 //Skiped as it returned DID, instead of error
@@ -201,8 +201,7 @@ test.serial('Should download a file', async (t) => {
   download.onProgress = (a, b) => {
     console.log(a, b);
   };
-
-await  t.notThrowsAsync(download.download(did));
+  await t.notThrowsAsync(download.download(did));
 });
 
 test.serial('Share file', async (t) => {
