@@ -32,7 +32,7 @@ const arcanaInstance = new arcana.storage.StorageProvider({ appId, privateKey, e
 ### Uploader
 
 ```js
-const Uploader = arcanaInstance.getUploader();
+const Uploader = await arcanaInstance.getUploader();
 // file: Blob format
 Uploader.upload(file);
 ```
@@ -40,7 +40,7 @@ Uploader.upload(file);
 ### Downloader
 
 ```js
-const Downloader = arcanaInstance.getDownloader();
+const Downloader = await arcanaInstance.getDownloader();
 // did: DID of file which you want to download
 Downloader.download(did);
 ```
@@ -48,7 +48,7 @@ Downloader.download(did);
 ### Access
 
 ```js
-const Access = new arcanaInstance.getAccess();
+const Access = await arcanaInstance.getAccess();
 ```
 
 #### Share a file
@@ -111,7 +111,7 @@ let files = await arcanaInstance.myFiles();
 
 ##### 1.1 On Success
 
-```
+```js
 uploader.onSuccess = () => {
   console.log('Completed file upload');
 };
@@ -119,7 +119,7 @@ uploader.onSuccess = () => {
 
 ##### 1.2 On Error
 
-```
+```js
 uploader.onError = (err) => {
   console.log('Error', err);
 };
@@ -127,7 +127,7 @@ uploader.onError = (err) => {
 
 ##### 1.3 On Progress
 
-```
+```js
 uploader.onProgress = (bytesUploaded: number, bytesTotal: number) => {
   console.log("Completed", bytesUploaded, "out of", bytesTotal)
 };
@@ -137,7 +137,7 @@ uploader.onProgress = (bytesUploaded: number, bytesTotal: number) => {
 
 ##### 2.1 On Success
 
-```
+```js
 downloader.onSuccess = () => {
   console.log('Completed file download');
 };
@@ -145,7 +145,7 @@ downloader.onSuccess = () => {
 
 ##### 2.2 On Progress
 
-```
+```js
 downloader.onProgress = (bytesDownloaded: number, bytesTotal: number) => {
   console.log("Completed", bytesDownloaded, "out of", bytesTotal)
 };

@@ -147,9 +147,7 @@ test.serial('Should upload a file', async (t) => {
     throw Error(err);
   };
 
-  // let fake = sinon.fake.resolves("1234567890")
-  // sinon.replace(upload, "upload", fake);
-  // await t.notThrowsAsync(upload.upload(file))
+
   did = await upload.upload(file);
   // while (!complete) {
   //   await sleep(1000);
@@ -163,11 +161,11 @@ test.serial('Should upload a file', async (t) => {
 test.serial('Fail download transaction', async (t) => {
   let download = await sharedInstance.getDownloader();
   const err = await t.throwsAsync(download.download(did));
-  // t.is(err.code, 'UNAUTHORIZED');
+  t.is(err.code, 'UNAUTHORIZED');
   t.is(err.message, 'You cant download this file');
 });
 
-test.serial.only('Fail revoke transaction', async (t) => {
+test.serial('Fail revoke transaction', async (t) => {
   t.teardown(sinon.restore);
   let access = await sharedInstance.getAccess(),
       fakeRevoke = sinon.fake.rejects('This function can only be called by file owner');
