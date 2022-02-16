@@ -1,7 +1,7 @@
 module.exports = () => {
 	return {
         "files": [
-			"./test/*",
+			"./test/test.ts",
 		],
 		timeout: "50s",
 		extensions : [ "ts"],

@@ -57,7 +57,7 @@ export default class FileWriter {
       const self = this;
       const transaction = this.DB.transaction([self.dbName], 'readonly');
       const irequest = transaction.objectStore(self.dbName).getAll();
-      request.onsuccess = (event: any) => {
+      irequest.onsuccess = (event: any) => {
         const objectUrl = window.URL.createObjectURL(new Blob(event.target.result));
         if (this.type === 'view') {
           return resolve(objectUrl);
@@ -75,7 +75,7 @@ export default class FileWriter {
           }, 100);
         }
       };
-      request.onerror = (e: Event) => {
+      irequest.onerror = (e: Event) => {
         return reject(e);
       };
     });
