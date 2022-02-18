@@ -1,7 +1,7 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-// const gateway = 'http://localhost:9010/';
-const gateway = 'https://gateway-dev.arcana.network/';
+const gateway = 'http://localhost:9010/';
+// const gateway = 'https://gateway-dev.arcana.network/';
 const appId = 1;
 const debug = true;
 const generateString = (length) => {
@@ -58,7 +58,7 @@ describe('Upload File', () => {
     file_count = 0;
 
   before(async () => {
-    file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 20, 'image/txt');
+    file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 8, 'image/txt');
     file = new File([file], file.name, { type: file.type });
     const wallet = await arcana.storage.utils.getRandomWallet();
     arcanaInstance = new arcana.storage.StorageProvider({
@@ -230,5 +230,11 @@ describe('Upload File', () => {
     const Access = await sharedInstance.getAccess();
     let [consumed, total] = await Access.getDownloadLimit(did);
     chai.expect(consumed).equal(file.size);
+  });
+
+  it('Delete Account', async () => {
+    const Access = await sharedInstance.getAccess();
+    await Access.deleteAccount();
+    chai.expect(await Access.getAccountStatus()).equal(2);
   });
 });
