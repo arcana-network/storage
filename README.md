@@ -10,6 +10,16 @@ See [Arcana Technical Whitepaper](https://www.notion.so/arcananetwork/Arcana-Tec
 
 ## Installation
 
+### Pre-requisites
+
+This section lists all the software that must be installed prior to installing  Arcana Storage.  
+TBD
+
+### Dependencies
+
+List of third party libraries that are used under the covers by Arcana Storage.
+TBD
+
 ### Using npm/yarn
 
 ```shell
