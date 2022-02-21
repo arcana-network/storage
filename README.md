@@ -1,5 +1,3 @@
-![Your Repository's Stats](https://github-readme-stats.vercel.app/api?username=Your_GitHub_Username&show_icons=true)
-
 # Arcana Storage
 
 ![Arcana Decentralised Storage](./img/an_d_storage.png)
