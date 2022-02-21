@@ -1,5 +1,8 @@
 # Arcana Storage
 
+![Arcana Decentralised Storage](./img/an_d_storage.png)
+
+Arcana
 ## Installation
 
 ### Using npm/yarn
