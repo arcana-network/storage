@@ -1,24 +1,6 @@
 # Arcana Storage
 
-![Arcana Decentralised Storage](./img/an_d_storage.png)
-
-## What is Arcana Storage?
-
-Arcana Storage enables decentralised storage and Web3 data privacy for dApp users. Upload, download, share files on decentralised storage, in a region of your choice and own your data.
-
-See [Arcana Technical Whitepaper](https://www.notion.so/arcananetwork/Arcana-Technical-Docs-a1d7fd0d2970452586c693e4fee14d08) for details and visit [https://arcana.network](https://arcana.network/) to learn more.
-
 ## Installation
-
-### Pre-requisites
-
-This section lists all the software that must be installed prior to installing  Arcana Storage.  
-TBD
-
-### Dependencies
-
-List of third party libraries that are used under the covers by Arcana Storage.
-TBD
 
 ### Using npm/yarn
 
@@ -37,33 +19,142 @@ You can use the standalone module which includes the polyfills.
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```
 
-## Example
+## Usage
 
-You can refer to an example on how to use Arcana Storage SDK here: [https://github.com/arcana-network/sdk-demo](https://github.com/arcana-network/sdk-demo).
+### Create an Arcana instance
 
-## Documentation
+```js
+// address: Smart contract address of app
+// private key: Secp256K private key
+const arcanaInstance = new arcana.storage.StorageProvider({ appId, privateKey, email });
+```
 
-* [Using Arcana Storage](https://docs.arcana.network/storage)
-* [Arcana Documentation](https://docs.arcana.network/)
+### Uploader
 
-## Development
+```js
+const Uploader = arcanaInstance.getUploader();
+// file: Blob format
+Uploader.upload(file);
+```
 
-How to build, test if the build works and run sample / examples?
-TBD
+### Downloader
 
-## Contribution
+```js
+const Downloader = arcanaInstance.getDownloader();
+// did: DID of file which you want to download
+Downloader.download(did);
+```
 
-We appreciate feedback and contribution to Arcana Storage component. Refer to CONTRIBUTING.md for details.
+### Access
 
-## Support
+```js
+const Access = new arcanaInstance.getAccess();
+```
 
-* For code-level support, open a new [issue](https://github.com/arcana-network/storage/issues)
-* For questions related to usage or feedback, use [Discord](https://discord.gg/w6ej4FtqYS)
+#### Share a file
 
-## Vulnerability Reporting
+```js
+// did: DID of file to be shared
+// publicKey: recipients public key
+// validity: For how long will be the user able to download the file
+Access.share([did], [publicKey], [validity]);
+```
 
-If you find any vulnerability, please report it to security@newfang.io. **Do not report it as a GitHub issue.**  If you are not on our bug bounty program, you can join in through our website.  See bug bounty announcements at our [website](https://arcana.network/).
+#### Revoke access
 
-## License
+```js
+// did: DID of file from which access is removed
+// address: Address of the user who's access is getting revoked
+Access.revoke(did, address);
+```
 
-Arcana Storage is distributed under the [Uniswap Business Source License 1.1](https://github.com/Uniswap/v3-core/blob/main/LICENSE). For details, see LICENSE.md file.
+<!-- #### Change File owner -->
+
+<!-- ```js -->
+<!-- // address: new owner's address
+Access.changeFileOwner(did, address);
+``` -->
+
+#### Delete File
+
+```js
+Access.deleteFile(did);
+```
+
+#### Usage
+
+```js
+//Get consumed and total storage of the current user
+let [consumed, total] = await Access.getUploadLimit();
+```
+
+```js
+//Get consumed and total bandwidth of the current user
+let [consumed, total] = await Access.getDownloadLimit();
+```
+
+#### File shared with current user
+
+```js
+let files = await arcanaInstance.sharedFiles();
+```
+
+#### List of files uploaded by the user
+
+```js
+let files = await arcanaInstance.myFiles();
+```
+
+### FallBack Functions
+
+#### 1. Upload
+
+##### 1.1 On Success
+
+```
+uploader.onSuccess = () => {
+  console.log('Completed file upload');
+};
+```
+
+##### 1.2 On Error
+
+```
+uploader.onError = (err) => {
+  console.log('Error', err);
+};
+```
+
+##### 1.3 On Progress
+
+```
+uploader.onProgress = (bytesUploaded: number, bytesTotal: number) => {
+  console.log("Completed", bytesUploaded, "out of", bytesTotal)
+};
+```
+
+#### 2. Download
+
+##### 2.1 On Success
+
+```
+downloader.onSuccess = () => {
+  console.log('Completed file download');
+};
+```
+
+##### 2.2 On Progress
+
+```
+downloader.onProgress = (bytesDownloaded: number, bytesTotal: number) => {
+  console.log("Completed", bytesDownloaded, "out of", bytesTotal)
+};
+```
+
+## Error List
+
+| Code         | Message                      | Reason                                                                      |
+| ------------ | ---------------------------- | --------------------------------------------------------------------------- |
+| UNAUTHORIZED | You can't download this file | Trying to download a file which is neither owned by you nor shared with you |
+| TRANSACTION  | \*                           | Smart contract Errors                                                       |
+| TRANSACTION  | No space left for user       | You have already consumed your storage or bandwidht limit                   |
