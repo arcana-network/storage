@@ -59,6 +59,15 @@ export class Access {
     return await makeTx(this.appAddress, this.api, this.wallet, 'deleteFile', [fileId]);
   };
 
+  deleteAccount = async () => {
+    return await makeTx(this.appAddress, this.api, this.wallet, 'deleteAccount', []);
+  };
+
+  getAccountStatus = async () => {
+    const arcana = Arcana(this.appAddress, this.wallet);
+    return arcana.status(await this.wallet.getAddress());
+  };
+
   getUploadLimit = async (): Promise<[number, number]> => {
     const arcana = Arcana(this.appAddress, this.wallet);
     let con = await arcana.getUploadLimit();
