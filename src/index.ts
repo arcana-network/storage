@@ -89,6 +89,7 @@ export class StorageProvider {
         Authorization: `Bearer ${res.data.token}`,
       },
     });
+    
     this.appAddress = (await this.api.get(`get-address/?id=${this.appId}`)).data.address;
     this.appAddress = this.appAddress.length === 40 ? '0x' + this.appAddress : this.appAddress;
   };

@@ -2,6 +2,21 @@ import test from 'ava';
 import { StorageProvider, utils } from '../src/index';
 import { Blob as nBlob } from 'blob-polyfill';
 import sinon from 'sinon';
+import moxios from 'moxios';
+import axios from 'axios';
+// import * as stubReqs from './_request_stubs';
+
+import {setupServer} from 'msw/node'
+import { handlers } from "./_request_stubs"
+
+/*
+
+Below to be covered in Integration Tests
+-> Login (due to axios create instance)
+-> Upload (due to tus client instance)
+-> Download  (due to tus client instance)
+*/
+
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = false;
@@ -10,278 +25,362 @@ const appId = 1;
 const debug = false;
 
 const generateString = (length) => {
-  let result = '';
-  const charactersLength = characters.length;
-  while (result.length < length) {
-    result += 'a';
-    // result += characters.charAt(Math.floor(Math.random() * charactersLength));
-  }
-  return result;
+    let result = '';
+    const charactersLength = characters.length;
+    while (result.length < length) {
+        result += 'a';
+        // result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
 };
 
 function sleep(ms) {
-  return new Promise((resolve) => {
-    setTimeout(resolve, ms);
-  });
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
 }
 
 const MockFile = (name, size, mimeType) => {
-  name = name || 'mock.txt';
-  size = size || 1024;
-  mimeType = mimeType || 'plain/txt';
-  var blob = new Blob([generateString(size)], { type: mimeType });
+    name = name || 'mock.txt';
+    size = size || 1024;
+    mimeType = mimeType || 'plain/txt';
+    var blob = new Blob([generateString(size)], { type: mimeType });
 
-  var dummyBlob = new nBlob([blob.arrayBuffer()], { type: mimeType });
-  blob.arrayBuffer = dummyBlob.arrayBuffer;
+    var dummyBlob = new nBlob([blob.arrayBuffer()], { type: mimeType });
+    blob.arrayBuffer = dummyBlob.arrayBuffer;
 
-  blob.lastModifiedDate = new Date();
-  blob.name = name;
-  return blob;
+    blob.lastModifiedDate = new Date();
+    blob.name = name;
+    return blob;
 };
 
 const bytesToHexString = (bytes) => {
-  if (!bytes) return null;
-  bytes = new Uint8Array(bytes);
-  var hexBytes = [];
-  for (var i = 0; i < bytes.length; ++i) {
-    var byteString = bytes[i].toString(16);
-    if (byteString.length < 2) byteString = '0' + byteString;
-    hexBytes.push(byteString);
-  }
-  return hexBytes.join('');
+    if (!bytes) return null;
+    bytes = new Uint8Array(bytes);
+    var hexBytes = [];
+    for (var i = 0; i < bytes.length; ++i) {
+        var byteString = bytes[i].toString(16);
+        if (byteString.length < 2) byteString = '0' + byteString;
+        hexBytes.push(byteString);
+    }
+    return hexBytes.join('');
 };
 
 function printFile(file) {
-  const reader = new FileReader();
-  reader.onload = function (evt) {
-    console.log(evt.target.result);
-  };
-  reader.readAsText(file);
+    const reader = new FileReader();
+    reader.onload = function (evt) {
+        console.log(evt.target.result);
+    };
+    reader.readAsText(file);
 }
 
 const makeEmail = () => {
-  var strValues = 'abcdefg12345';
-  var strEmail = '';
-  var strTmp;
-  for (var i = 0; i < 10; i++) {
-    strTmp = strValues.charAt(Math.round(strValues.length * Math.random()));
-    strEmail = strEmail + strTmp;
-  }
-  strTmp = '';
-  strEmail = strEmail + '@example.com';
-  return strEmail;
+    var strValues = 'abcdefg12345';
+    var strEmail = '';
+    var strTmp;
+    for (var i = 0; i < 10; i++) {
+        strTmp = strValues.charAt(Math.round(strValues.length * Math.random()));
+        strEmail = strEmail + strTmp;
+    }
+    strTmp = '';
+    strEmail = strEmail + '@example.com';
+    return strEmail;
 };
 
 let file,
-  did,
-  arcanaInstance,
-  access,
-  receiverWallet,
-  sharedInstance,
-  file_count = 0;
+    did,
+    arcanaInstance,
+    access,
+    receiverWallet,
+    sharedInstance,
+    file_count = 0;
+
+var spy;
+var server;
 
 test.before(async (t) => {
-  file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
-  file = new File([file], file.name, { type: file.type });
+    // moxios.install()
 
-  // Not working due to un-secure env
-  const wallet = await utils.getRandomWallet();
+    // stubReqs.init(moxios);
+    server = setupServer(...handlers);
 
-  //Using PrivateKey from ganache
-  //  let sPrivateKey = "dffba5d3570743eeb8b8aabf0f996c5c411d2e3f45cb2e585e921ce6c0386051" ;
+    // fakeArcana = sinon.fake.returns({
+    //     convergence: async () => Promise.resolve(String(Math.random()))
+    // })
 
-  try {
-    arcanaInstance = new StorageProvider({
-      appId,
-      privateKey: wallet.privateKey,
-      email: makeEmail(),
-      gateway,
-      debug,
-    });
-    await arcanaInstance.login();
+    // sinon.replace(utils, 'Arcana', fakeArcana);
 
-    //second instance
-    receiverWallet = await utils.getRandomWallet();
-    sharedInstance = new StorageProvider({
-      appId,
-      privateKey: receiverWallet.privateKey,
-      email: makeEmail(),
-      gateway,
-      debug,
-    });
+ 
 
-    access = await arcanaInstance.getAccess();
-  } catch (e) {
-    console.log(e);
-  }
+    file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
+    file = new File([file], file.name, { type: file.type });
+
+    // Not working due to un-secure env
+    // const wallet = await utils.getRandomWallet();
+
+    //Using PrivateKey from ganache
+     let sPrivateKey = "dffba5d3570743eeb8b8aabf0f996c5c411d2e3f45cb2e585e921ce6c0386051" ;
+
+    try {
+        arcanaInstance = new StorageProvider({
+            appId,
+            privateKey: sPrivateKey,
+            email: makeEmail(),
+            gateway,
+            debug,
+        });
+
+        //  moxios.install(arcanaInstance.api);
+        //  stubReqs.init(moxios);
+        
+        // login stub         
+        // sinon.replace(arcanaInstance, 'login', sinon.fake(async ()=> {
+        //     arcanaInstance.wallet = await utils.getWallet(sPrivateKey);
+        //     arcanaInstance.api = axios.create();
+        //     arcanaInstance.appAddress = "0x0000000000000000000000000000000000000000";
+        //     moxios.install(arcanaInstance.api);
+        //     stubReqs.init(moxios);
+        // })
+        //  );
+
+
+
+
+        await arcanaInstance.login();
+     
+    
+        // moxios.wait(() => {
+
+        //     let request = moxios.requests.mostRecent();
+        //     console.log(request.url);
+    
+        //     request.respondWith({
+        //         status: 200,
+        //         response: {
+        //          data: {  address: "0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158"
+        //         }
+        //         }
+        //     });
+    
+        // });    
+
+        // moxios.wait(() => {
+
+        //     let request = moxios.requests.mostRecent();
+        //     console.log(request.url);
+    
+        //     request.respondWith({
+        //         status: 200,
+        //         response: {
+        //          data: {  address: "0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158"
+        //         }
+        //         }
+        //     });
+    
+        // })        
+        
+
+        //second instance
+        // receiverWallet = await utils.getRandomWallet();
+        // sharedInstance = new StorageProvider({
+        //     appId,
+        //     privateKey: receiverWallet.privateKey,
+        //     email: makeEmail(),
+        //     gateway,
+        //     debug,
+        // });
+
+
+        // access = await arcanaInstance.getAccess();
+
+       
+
+    } catch (e) {
+        console.log(e);
+    }
 });
+
+test.after(() => {
+    // moxios.uninstall();
+    // console.log("spy was called", fakeArcana.callCount);
+
+})
 
 test('Generate Wallet', async (t) => {
-  const wallet = await utils.getWallet('dffba5d3570743eeb8b8aabf0f996c5c411d2e3f45cb2e585e921ce6c0386051');
+    const wallet = await utils.getWallet('dffba5d3570743eeb8b8aabf0f996c5c411d2e3f45cb2e585e921ce6c0386051');
 
-  t.is(wallet.address, '0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158');
-  // chai.expect(wallet.address).to.equal('0xa23039d0Fca2af54E8b9ac2ECaE78e3084Cc687b');
+    t.is(wallet.address, '0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158');
+    // chai.expect(wallet.address).to.equal('0xa23039d0Fca2af54E8b9ac2ECaE78e3084Cc687b');
 });
 
-test.serial('My Files should return empty array', async (t) => {
-  // console.log("My Files");
-  let files = await arcanaInstance.myFiles();
-  t.is(files.length, 0);
+test.serial.only('My Files should return empty array', async (t) => {
+    // console.log("My Files");
+    let files = await arcanaInstance.myFiles();
+
+    // moxios.wait(async () => {
+    //     let request = moxios.requests.mostRecent();
+    //     request.respondWith({
+    //         response: []
+    //     })
+    // });
+
+
+    t.is(files.length, 0);
 });
 
-test.serial('Shared Files should return empty array', async (t) => {
-  let files = await arcanaInstance.sharedFiles();
-  // chai.expect(files.length).equal(0);
-  t.is(files.length, 0);
+test.serial.only('Shared Files should return empty array', async (t) => {
+    let files = await arcanaInstance.sharedFiles();
+    // chai.expect(files.length).equal(0);
+    t.is(files.length, 0);
 });
 
 test.serial('Should upload a file', async (t) => {
-  let upload = await arcanaInstance.getUploader();
-  let complete = false;
-  upload.onSuccess = () => {
-    complete = true;
-    file_count += 1;
-  };
-  upload.onError = (err) => {
-    console.log('[ERROR]', err);
-    throw Error(err);
-  };
+    let upload = await arcanaInstance.getUploader();
+    let complete = false;
+    upload.onSuccess = () => {
+        complete = true;
+        file_count += 1;
+    };
+    upload.onError = (err) => {
+        console.log('[ERROR]', err);
+        throw Error(err);
+    };
 
 
-  did = await upload.upload(file);
-  // while (!complete) {
-  //   await sleep(1000);
-  // }
-  t.pass();
-  // t.is(did, '1234567890');
+    did = await upload.upload(file);
+    // while (!complete) {
+    //   await sleep(1000);
+    // }
+    t.pass();
+    // t.is(did, '1234567890');
 
 
 });
 
 test.serial('Fail download transaction', async (t) => {
-  let download = await sharedInstance.getDownloader();
-  const err = await t.throwsAsync(download.download(did));
-  t.is(err.code, 'UNAUTHORIZED');
-  t.is(err.message, 'You cant download this file');
+    let download = await sharedInstance.getDownloader();
+    const err = await t.throwsAsync(download.download(did));
+    t.is(err.code, 'UNAUTHORIZED');
+    t.is(err.message, 'You cant download this file');
 });
 
 test.serial('Fail revoke transaction', async (t) => {
-  t.teardown(sinon.restore);
-  let access = await sharedInstance.getAccess(),
-      fakeRevoke = sinon.fake.rejects('This function can only be called by file owner');
+    t.teardown(sinon.restore);
+    let access = await sharedInstance.getAccess(),
+        fakeRevoke = sinon.fake.rejects('This function can only be called by file owner');
 
-  sinon.replace(access, "revoke", fakeRevoke);
+    sinon.replace(access, "revoke", fakeRevoke);
 
-  let err = await t.throwsAsync(access.revoke(did));
-  t.is(err.message, 'This function can only be called by file owner');
- 
- 
+    let err = await t.throwsAsync(access.revoke(did));
+    t.is(err.message, 'This function can only be called by file owner');
+
+
 });
 
 //Skiped as it returned DID, instead of error
 test.serial('Should skip uploading same file', async (t) => {
-  let upload = await arcanaInstance.getUploader();
-  upload.onSuccess = () => {
-    console.log('Skip file upload');
-  };
+    let upload = await arcanaInstance.getUploader();
+    upload.onSuccess = () => {
+        console.log('Skip file upload');
+    };
 
-  let err = await t.throwsAsync(upload.upload(file));
-  t.is(err.code, 'TRANSACTION');
-  t.true(err.message.includes('File is already uploaded'));
+    let err = await t.throwsAsync(upload.upload(file));
+    t.is(err.code, 'TRANSACTION');
+    t.true(err.message.includes('File is already uploaded'));
 });
 
 test.serial('My files', async (t) => {
-  let files = await arcanaInstance.myFiles();
-  t.is(files.length, 1);
-  t.is(files[0].did, did.substring(2));
-  t.is(files[0].size, file.size);
+    let files = await arcanaInstance.myFiles();
+    t.is(files.length, 1);
+    t.is(files[0].did, did.substring(2));
+    t.is(files[0].size, file.size);
 });
 
 //Error: File must be uploaded before downloading it
 test.serial('Should download a file', async (t) => {
-  //will restore method behaviour
-  t.teardown(sinon.restore);
+    //will restore method behaviour
+    t.teardown(sinon.restore);
 
-  let download = await arcanaInstance.getDownloader();
+    let download = await arcanaInstance.getDownloader();
 
-  let mockDownload = sinon.fake( async (_did) => {
+    let mockDownload = sinon.fake(async (_did) => {
 
-    if(!!_did && !!did && _did === did )  
-    { download.onSuccess();
-      return  Promise.resolve() 
-    }
-     else
-      return Promise.reject(new Error('File not found'));
-  });
+        if (!!_did && !!did && _did === did) {
+            download.onSuccess();
+            return Promise.resolve()
+        }
+        else
+            return Promise.reject(new Error('File not found'));
+    });
 
-  sinon.replace(download, "download", mockDownload);
+    sinon.replace(download, "download", mockDownload);
 
-  download.onSuccess = () => {
-    console.log('Download completed');
-  };
-  
+    download.onSuccess = () => {
+        console.log('Download completed');
+    };
+
     await t.notThrowsAsync(download.download(did));
 
 
 });
 
 test.serial('Share file', async (t) => {
-  let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
-  
-  t.truthy(tx);
+    let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
+
+    t.truthy(tx);
 });
 
 //Error: File must be uploaded before downloading it
 test.serial('Download shared file', async (t) => {
-  let download = await sharedInstance.getDownloader();
-  await t.notThrowsAsync(download.download(did));
+    let download = await sharedInstance.getDownloader();
+    await t.notThrowsAsync(download.download(did));
 });
 
 test.serial('check shared users', async (t) => {
 
-  t.is((await access.getSharedUsers(did))[0], receiverWallet.address);
-  t.is((await access.getSharedUsers(did)).length, 1);
+    t.is((await access.getSharedUsers(did))[0], receiverWallet.address);
+    t.is((await access.getSharedUsers(did)).length, 1);
 });
 
 test.serial('Files shared with self', async (t) => {
-  let files = await sharedInstance.sharedFiles();
-  t.is(files.length, 1);
-  t.is(files[0]['did'], did.substring(2));
-  t.is(files[0]['size'], file.size);
+    let files = await sharedInstance.sharedFiles();
+    t.is(files.length, 1);
+    t.is(files[0]['did'], did.substring(2));
+    t.is(files[0]['size'], file.size);
 });
 
 test.serial('Get consumed and total upload limit', async (t) => {
-  const Access = await arcanaInstance.getAccess();
-  let [consumed, total] = await Access.getUploadLimit(did);
-  
-  t.is(consumed, file.size);
+    const Access = await arcanaInstance.getAccess();
+    let [consumed, total] = await Access.getUploadLimit(did);
+
+    t.is(consumed, file.size);
 });
 
 //Error: tus: failed to upload chunk at offset 0,
 test.serial('Revoke', async (t) => {
-  let before = await access.getSharedUsers(did);
-  let tx = await access.revoke(did, receiverWallet.address);
-  let after = await access.getSharedUsers(did);
+    let before = await access.getSharedUsers(did);
+    let tx = await access.revoke(did, receiverWallet.address);
+    let after = await access.getSharedUsers(did);
 
-  t.truthy(tx);
+    t.truthy(tx);
 
-  t.is(before.includes(receiverWallet.address), true);
-  t.is(after.includes(receiverWallet.address), false);
-  t.is(before.length - after.length, 1);
-  let files = await sharedInstance.sharedFiles();
-  t.is(files.length, 0);
+    t.is(before.includes(receiverWallet.address), true);
+    t.is(after.includes(receiverWallet.address), false);
+    t.is(before.length - after.length, 1);
+    let files = await sharedInstance.sharedFiles();
+    t.is(files.length, 0);
 });
 
 test.serial('Delete File', async (t) => {
 
-  let files = await arcanaInstance.myFiles();
-  
-  t.is(files.length, 1);
-  t.is(files[0].did, did.substring(2));
+    let files = await arcanaInstance.myFiles();
 
-  let tx = await access.deleteFile(did);
-  files = await arcanaInstance.myFiles();
+    t.is(files.length, 1);
+    t.is(files[0].did, did.substring(2));
 
-  t.is(files.length, 0);
-  t.truthy(tx);
+    let tx = await access.deleteFile(did);
+    files = await arcanaInstance.myFiles();
+
+    t.is(files.length, 0);
+    t.truthy(tx);
 });
