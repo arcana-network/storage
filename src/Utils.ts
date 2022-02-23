@@ -103,6 +103,14 @@ export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
   return new Contract(address, arcana.abi, wallet ? wallet : provider) as ArcanaT;
 };
 
+export const Forwarder = (address: string, wallet?: Wallet): ForwarderT => {
+  const provider = getProvider();
+  return new Contract(address, forwarder.abi, wallet ? wallet : provider) as ForwarderT;
+};
+
+
+
+
 const cleanMessage = (message: string): string => {
   if (!message) return '';
   return message
@@ -119,15 +127,20 @@ function hex_to_ascii(str1) {
   return str;
 }
 
-export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
+export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {  
   const arcana: ArcanaT = Arcana(address, wallet);
-  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
-  const forwarderContract: ForwarderT = new Contract(
-    localStorage.getItem('forwarder'),
-    forwarder.abi,
-    provider,
-  ) as ForwarderT;
+  // const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
+  const provider = getProvider();
+  // const forwarderContract: ForwarderT = new Contract(
+  //   localStorage.getItem('forwarder'),
+  //   forwarder.abi,
+  //   provider,
+  // ) as ForwarderT;
+  const forwarderContract: ForwarderT = Forwarder(localStorage.getItem('forwarder'), wallet);
+
   let req = await sign(wallet, arcana, forwarderContract, method, params);
+  console.log('after sign');
+  
   let res = await api.post('api/meta-tx/', req);
   if (res.data.err) {
     throw customError('TRANSACTION', cleanMessage(res.data.err.error.message));
