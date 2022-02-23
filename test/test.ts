@@ -4,10 +4,15 @@ import { Blob as nBlob } from 'blob-polyfill';
 import sinon from 'sinon';
 import moxios from 'moxios';
 import axios from 'axios';
-// import * as stubReqs from './_request_stubs';
-
+import {handlers} from './_request_stubs';
 import {setupServer} from 'msw/node'
-import { handlers } from "./_request_stubs"
+
+import arcana from '../src/contracts/Arcana';
+import forwarder from '../src/contracts/Forwarder';
+
+
+import {deployContract, MockProvider} from 'ethereum-waffle';
+const {deployMockContract} = require('@ethereum-waffle/mock-contract');
 
 /*
 
@@ -95,28 +100,60 @@ let file,
     sharedInstance,
     file_count = 0;
 
-var spy;
+var fakeArcana;
 var server;
 
-test.before(async (t) => {
-    // moxios.install()
-
-    // stubReqs.init(moxios);
+//Mock server & stub setup
+test.serial.before(async () => {
     server = setupServer(...handlers);
+    server.listen();
 
+    //Mock provider
+    const provider = new MockProvider();
+ 
+    const [wallet, otherWallet] = new MockProvider().getWallets();
     // fakeArcana = sinon.fake.returns({
     //     convergence: async () => Promise.resolve(String(Math.random()))
     // })
 
-    // sinon.replace(utils, 'Arcana', fakeArcana);
+    //Arcana
+    const mockArcana = await deployMockContract(wallet, arcana.abi)
 
+    await mockArcana.mock.convergence.returns(String(Math.random()))
+    // await mockContract.mock.getNonce.returns(0)
+
+    sinon.replace(utils, 'Arcana',() => {
+
+       return mockArcana;
+
+    });
+
+
+    //Forwarder
+    const mockForwarder = await deployMockContract(wallet, forwarder.abi);
+    await mockForwarder.mock.getNonce.returns(0);
+
+
+    sinon.replace(utils, 'Forwarder',() => {
+
+        return mockForwarder;
+ 
+     });
  
 
+    sinon.replace(utils, 'getProvider', () => provider);
+    
+   
+
+    //fake maketx 
+
+})
+
+//Wallet setup
+test.serial.before(async (t) => {
+    
     file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
     file = new File([file], file.name, { type: file.type });
-
-    // Not working due to un-secure env
-    // const wallet = await utils.getRandomWallet();
 
     //Using PrivateKey from ganache
      let sPrivateKey = "dffba5d3570743eeb8b8aabf0f996c5c411d2e3f45cb2e585e921ce6c0386051" ;
@@ -130,55 +167,6 @@ test.before(async (t) => {
             debug,
         });
 
-        //  moxios.install(arcanaInstance.api);
-        //  stubReqs.init(moxios);
-        
-        // login stub         
-        // sinon.replace(arcanaInstance, 'login', sinon.fake(async ()=> {
-        //     arcanaInstance.wallet = await utils.getWallet(sPrivateKey);
-        //     arcanaInstance.api = axios.create();
-        //     arcanaInstance.appAddress = "0x0000000000000000000000000000000000000000";
-        //     moxios.install(arcanaInstance.api);
-        //     stubReqs.init(moxios);
-        // })
-        //  );
-
-
-
-
-        await arcanaInstance.login();
-     
-    
-        // moxios.wait(() => {
-
-        //     let request = moxios.requests.mostRecent();
-        //     console.log(request.url);
-    
-        //     request.respondWith({
-        //         status: 200,
-        //         response: {
-        //          data: {  address: "0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158"
-        //         }
-        //         }
-        //     });
-    
-        // });    
-
-        // moxios.wait(() => {
-
-        //     let request = moxios.requests.mostRecent();
-        //     console.log(request.url);
-    
-        //     request.respondWith({
-        //         status: 200,
-        //         response: {
-        //          data: {  address: "0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158"
-        //         }
-        //         }
-        //     });
-    
-        // })        
-        
 
         //second instance
         // receiverWallet = await utils.getRandomWallet();
@@ -193,17 +181,13 @@ test.before(async (t) => {
 
         // access = await arcanaInstance.getAccess();
 
-       
-
     } catch (e) {
         console.log(e);
     }
 });
 
 test.after(() => {
-    // moxios.uninstall();
-    // console.log("spy was called", fakeArcana.callCount);
-
+    server.close();
 })
 
 test('Generate Wallet', async (t) => {
@@ -213,8 +197,10 @@ test('Generate Wallet', async (t) => {
     // chai.expect(wallet.address).to.equal('0xa23039d0Fca2af54E8b9ac2ECaE78e3084Cc687b');
 });
 
-test.serial.only('My Files should return empty array', async (t) => {
+test.serial('My Files should return empty array', async (t) => {
     // console.log("My Files");
+    console.log("test started");
+    
     let files = await arcanaInstance.myFiles();
 
     // moxios.wait(async () => {
@@ -228,13 +214,13 @@ test.serial.only('My Files should return empty array', async (t) => {
     t.is(files.length, 0);
 });
 
-test.serial.only('Shared Files should return empty array', async (t) => {
+test.serial('Shared Files should return empty array', async (t) => {
     let files = await arcanaInstance.sharedFiles();
     // chai.expect(files.length).equal(0);
     t.is(files.length, 0);
 });
 
-test.serial('Should upload a file', async (t) => {
+test.serial.only('Should upload a file', async (t) => {
     let upload = await arcanaInstance.getUploader();
     let complete = false;
     upload.onSuccess = () => {
