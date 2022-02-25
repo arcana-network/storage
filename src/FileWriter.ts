@@ -84,7 +84,6 @@ export default class FileWriter {
   private initDB() {
     return new Promise((resolve, reject) => {
       const self = this;
-      console.log('window indexedDB');
       const request = window.indexedDB.open(this.dbName, 1);
       request.onsuccess = () => {
         self.DB = request.result;

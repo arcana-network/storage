@@ -131,21 +131,19 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   const arcana: ArcanaT = Arcana(address, wallet);
   // const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
   const provider = getProvider();
-  // const forwarderContract: ForwarderT = new Contract(
-  //   localStorage.getItem('forwarder'),
-  //   forwarder.abi,
-  //   provider,
-  // ) as ForwarderT;
   const forwarderContract: ForwarderT = Forwarder(localStorage.getItem('forwarder'), wallet);
 
   let req = await sign(wallet, arcana, forwarderContract, method, params);
-  console.log('after sign');
-  
   let res = await api.post('api/meta-tx/', req);
+
   if (res.data.err) {
     throw customError('TRANSACTION', cleanMessage(res.data.err.error.message));
   }
-  // await new Promise((r) => setTimeout(r, 1000));
+
+  /*
+  //Decoupled checking txn and Making transaction
+
+  await new Promise((r) => setTimeout(r, 1000));
   let tx = await wallet.provider.getTransaction(res.data.txHash);
   try {
     await tx.wait();
@@ -159,8 +157,28 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
       throw customError('', e.error);
     }
   }
+  */
   return res.data;
 };
+
+export const checkTxnStatus = async (wallet: Wallet,txHash: any) => {
+
+  const provider = getProvider();
+  let tx = await wallet.provider.getTransaction(txHash);
+  try {
+    await tx.wait();
+  } catch (e) {
+    let code = await provider.call(tx, tx.blockNumber);
+    let reason = hex_to_ascii(code.substr(138));
+    console.log('revert reason', reason);
+    if (reason) {
+      throw customError('TRANSACTION', cleanMessage(reason));
+    } else {
+      throw customError('', e.error);
+    }
+  }
+
+}
 
 export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
   const iv = new Uint8Array(16);
@@ -222,6 +240,7 @@ export const decryptKey = async (privateKey: string, encryptedKey: string): Prom
 export const getEncryptedKey = async (address: string, fileId: string): Promise<string> => {
   const arcana = Arcana(address);
   const file = await arcana.files(fileId);
+
   return utils.toUtf8String(file.encryptedKey);
 };
 

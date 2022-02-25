@@ -43,10 +43,7 @@ export class StorageProvider {
   setConvergence = async () => {
     await this.login();
     if (!this.convergence) {
-      this.arcana = utils.Arcana(this.appAddress);
-      
-      console.log('Getting convergence');
-      
+      this.arcana = utils.Arcana(this.appAddress);      
       this.convergence = await this.arcana.convergence(await this.wallet.getAddress());
       if (!this.convergence) {
         const conv = String(Math.random());    
@@ -95,7 +92,6 @@ export class StorageProvider {
     
     this.appAddress = (await this.api.get(`get-address/?id=${this.appId}`)).data.address;
     this.appAddress = this.appAddress.length === 40 ? '0x' + this.appAddress : this.appAddress;
-   
     
   };
 

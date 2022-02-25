@@ -37,6 +37,7 @@ export class Uploader {
   };
 
   onUpload = async (host: string, token: string, did: string) => {
+    
     if (host) {
       let res;
       for (let i = 0; i < 5; i++) {
@@ -69,6 +70,7 @@ export class Uploader {
     }
   };
 
+  //TODO: decouple upload , hashing, makeTx, uploading
   upload = async (fileRaw: any, chunkSize: number = 10 * 2 ** 20) => {
     let file = fileRaw;
     const walletAddress = await this.wallet.getAddress();
@@ -138,6 +140,7 @@ export class Uploader {
     let endpoint = host + 'files/';
     // console.log('Token: ', token);
     // console.log('Endpoint: ', endpoint);
+
     let upload = new tus.Upload(file, {
       endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
@@ -171,9 +174,11 @@ export class Uploader {
       if (previousUploads.length) {
         upload.resumeFromPreviousUpload(previousUploads[0]);
       }
+    
       // Start the upload
       upload.start();
     });
+
     return did;
   };
 }

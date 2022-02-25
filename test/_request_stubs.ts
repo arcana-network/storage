@@ -58,9 +58,6 @@ export const handlers = [
   // gateway calls
   rest.get("https://gateway02.arcana.network/get-config/", (req, res, ctx) => {
 
-  
-    
-
     return res(
         ctx.json({
             "Factory": "0xC392ACbF071750876DF339D26dA542EbE5738646",
@@ -86,9 +83,6 @@ export const handlers = [
   }),
   rest.get("https://gateway02.arcana.network/get-nonce/", (req, res, ctx) => {
 
-    
-    
-
     return res(
         ctx.text("0")
       )
@@ -107,7 +101,7 @@ export const handlers = [
   rest.get("https://gateway02.arcana.network/api/get-address/", (req, res, ctx) => {
 
     return res(
-        ctx.json({ host: 'https://my.upload.url/', address: '0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158' })
+        ctx.json({ host: 'https://localhost:3000/', address: '0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158' })
     );
 
   }),
@@ -117,58 +111,7 @@ export const handlers = [
         ctx.json({ address: "0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158"})
     );
 
-  }),
-
-  rest.post("https://gateway02.arcana.network/api/meta-tx/", (req, res, ctx) => {
-
-    console.log(req.body);
-    
-
-    return res( ctx.json(
-        {
-            wait : Promise.resolve()
-        }
-    ));
-
-   
-
-  } ),
-
-  //Chain calls
-  rest.post("https://blockchain-dev.arcana.network/", (req:any, res, ctx) => {
-        console.log("chain",req.body.method);
-
-        return;
-
-
-        return res(ctx.json({"jsonrpc": "2.0",
-        "id": req.body.id,
-        "result": "0x2328"
-    }
-    
-    ));
-
-
-        switch(req.body.method){
-            case "eth_chainId": 
-                return res(ctx.json({"jsonrpc": "2.0",
-            "id": req.body.id,
-            "result": "0x2328"
-        }));
-            
-            default: 
-                return res(null);
-        
-        }
-        
-
   })
-
-
-
-
-
-
 
 ]
 
