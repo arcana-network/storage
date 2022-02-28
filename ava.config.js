@@ -2,10 +2,10 @@ module.exports = () => {
 	return {
         "files": [
 
-			//   "./test/test.ts",
+			  "./test/test.ts",
 			//  "./test/Wallet.test.ts"
 			//   "./test/Files.test.ts",
-			  "./test/Access.test.ts"
+			//   "./test/Access.test.ts"
 		],
 		timeout: "50s",
 		extensions : [ "ts"],
