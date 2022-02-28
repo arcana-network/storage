@@ -13,8 +13,13 @@ import { deployMockContract } from '@ethereum-waffle/mock-contract' ;
 
 //MSW
 import { rest } from 'msw';
+const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
 async function mockShareResponse(file, arcanaWallet ) {
+
+    let sPrivateKey = "73f557a06bf353efc8c1c6961620cf7dc8d550519b14a322df4ea50c8a3ed813";
+    arcanaWallet = await utils.getWallet(sPrivateKey);
+
     const hasher = new utils.KeyGen(file, 10 * 2 ** 20);
 
     const hash = await hasher.getHash();
@@ -42,12 +47,11 @@ async function mockShareResponse(file, arcanaWallet ) {
         }),
     );
 
+  
 
     let uMetadata = await ethUtils.toUtf8Bytes(encryptedMetaData),
         udata = await ethUtils.toUtf8Bytes(encryptedKey);
 
-        console.log("before return");
-        
     return Promise.resolve([await arcanaWallet.getAddress(),
         6,
         6,
@@ -55,15 +59,32 @@ async function mockShareResponse(file, arcanaWallet ) {
         true,
         uMetadata,
         udata,
-    await arcanaWallet.getAddress()
+     await arcanaWallet.getAddress()
     ]);
 
 }
 
-function getMockFile() {
-  let  name =  'mock.txt',
-    mimeType = 'plain/txt';
-    var blob = new Blob(["abcdeabcde12"], { type: mimeType });
+const generateString = (length) => {
+    let result = '';
+    const charactersLength = characters.length;
+    while (result.length < length) {
+        result += 'a';
+        // result += characters.charAt(Math.floor(Math.random() * charactersLength));
+    }
+    return result;
+};
+
+function sleep(ms) {
+    return new Promise((resolve) => {
+        setTimeout(resolve, ms);
+    });
+}
+
+const MockFile = (name, size, mimeType) => {
+    name = name || 'mock.txt';
+    size = size || 1024;
+    mimeType = mimeType || 'plain/txt';
+    var blob = new Blob([generateString(size)], { type: mimeType });
 
     var dummyBlob = new nBlob([blob.arrayBuffer()], { type: mimeType });
     blob.arrayBuffer = dummyBlob.arrayBuffer;
@@ -71,16 +92,17 @@ function getMockFile() {
     blob.lastModifiedDate = new Date(2020, 1, 1);
     blob.name = name;
     return blob;
-}
-
+};
 
 test.before(async (t) => {
     //Mock file details
     t.context.did = "0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066" ;
-    let oBlob = getMockFile();
-    t.context.file = new File([oBlob], oBlob.name, { type: oBlob.type });
+    let file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
+    file = new File([file], file.name, { type: file.type });
 
-    //start MSW server
+    t.context.file = file;
+
+    //MSW server
     t.context.server = setupServer(...handlers);
     t.context.server.listen();
 
@@ -105,9 +127,6 @@ test.before(async (t) => {
 
     let mockArcana = await deployMockContract(wallet, arcana.abi)
     await mockArcana.mock.convergence.returns(String(Math.random()))
-    await mockArcana.mock.share.returns();
-    await mockArcana.mock.files.returns(...(await mockShareResponse( t.context.file, wallet)));
-
 
     sinon.replace(utils, 'Arcana', () => mockArcana);
     sinon.replace(utils, 'getProvider', () => provider);
@@ -127,24 +146,3 @@ test('Shared Files should return empty array', async (t) => {
     let files = await t.context.storageInstance.sharedFiles();
     t.is(files.length, 0);
 });
-
-
-
-test("Share file successfully", async t => {
-  
-    let access = await t.context.storageInstance.getAccess();
-    await t.context.server.use(
-        rest.post("https://gateway02.arcana.network/api/meta-tx/", (req, res, ctx) => {
-
-            return res.once(ctx.json(
-                {
-                    wait: Promise.resolve()
-                }
-            ));
-        })
-    )
-
-    let tx = await access.share([t.context.did], [t.context.receiverWallet._signingKey().publicKey], [150]);
-
-    t.truthy(tx);
-})

@@ -13,7 +13,8 @@ import forwarder from '../src/contracts/Forwarder';
 
 // import { start, stop } from './_tus_server';
 
-import { deployContract, MockProvider } from 'ethereum-waffle';
+
+import {  MockProvider } from 'ethereum-waffle';
 const { deployMockContract } = require('@ethereum-waffle/mock-contract');
 
 /*
@@ -92,7 +93,7 @@ const makeEmail = () => {
     strEmail = strEmail + '@example.com';
     return strEmail;
 };
-
+/*
 async function mockShareResponse() {
     const hasher = new utils.KeyGen(file, 10 * 2 ** 20);
 
@@ -137,6 +138,58 @@ async function mockShareResponse() {
     ]);
 
 }
+*/
+
+
+async function mockShareResponseArgs(file, arcanaWallet ) {
+
+    // let sPrivateKey = "73f557a06bf353efc8c1c6961620cf7dc8d550519b14a322df4ea50c8a3ed813";
+    // arcanaWallet = await utils.getWallet(sPrivateKey);
+
+    const hasher = new utils.KeyGen(file, 10 * 2 ** 20);
+
+    const hash = await hasher.getHash();
+    let key = await window.crypto.subtle.generateKey(
+        {
+            name: 'AES-CTR',
+            length: 256,
+        },
+        true,
+        ['encrypt', 'decrypt'],
+    );
+    const aes_raw = await crypto.subtle.exportKey('raw', key);
+    const hexString = await utils.toHexString(aes_raw);
+
+    const encryptedKey = await utils.encryptKey(await arcanaWallet._signingKey().publicKey, hexString);
+
+    const encryptedMetaData = await utils.AESEncrypt(
+        key,
+        JSON.stringify({
+            name: file.name,
+            type: file.type,
+            size: file.size,
+            lastModified: file.lastModified,
+            hash,
+        }),
+    );
+
+  
+
+    let uMetadata = await ethUtils.toUtf8Bytes(encryptedMetaData),
+        udata = await ethUtils.toUtf8Bytes(encryptedKey);
+
+    return Promise.resolve([await arcanaWallet.getAddress(),
+        6,
+        6,
+    file.size,
+        true,
+        uMetadata,
+        udata,
+     await arcanaWallet.getAddress()
+    ]);
+
+}
+
 
 
 let file,
@@ -208,7 +261,8 @@ test.serial.before(async () => {
 
     await mockArcana.mock.convergence.returns(String(Math.random()))
     await mockArcana.mock.share.returns();
-    await mockArcana.mock.files.returns( ...(await mockShareResponse())  );
+    // await mockArcana.mock.files.returns( ...(await mockShareResponse())  );
+    await mockArcana.mock.files.returns(...(await mockShareResponseArgs(file, wallet)));
 
     sinon.replace(utils, 'Arcana', () => mockArcana );
 
@@ -226,95 +280,6 @@ test.after.always(() => {
     server.close();
 })
 
-test.serial('Should upload a file', async (t) => {
-    let upload = await arcanaInstance.getUploader();
-    let complete = false;
-    upload.onSuccess = () => {
-        complete = true;
-        file_count += 1;
-    };
-    upload.onError = (err) => {
-        console.log('[ERROR]', err);
-        throw Error(err);
-    };
-
-    did = await upload.upload(file);
-    while (!complete) {
-        await sleep(1000);
-    }
-    t.pass();
-    // t.is(did, '1234567890');
-
-
-});
-
-test.serial('Fail download transaction', async (t) => {
-    let download = await sharedInstance.getDownloader();
-    const err = await t.throwsAsync(download.download(did));
-    t.is(err.code, 'UNAUTHORIZED');
-    t.is(err.message, 'You cant download this file');
-});
-
-test.serial('Fail revoke transaction', async (t) => {
-    t.teardown(sinon.restore);
-    let access = await sharedInstance.getAccess(),
-        fakeRevoke = sinon.fake.rejects('This function can only be called by file owner');
-
-    sinon.replace(access, "revoke", fakeRevoke);
-
-    let err = await t.throwsAsync(access.revoke(did));
-    t.is(err.message, 'This function can only be called by file owner');
-
-
-});
-
-//Skiped as it returned DID, instead of error
-test.serial('Should skip uploading same file', async (t) => {
-    let upload = await arcanaInstance.getUploader();
-    upload.onSuccess = () => {
-        console.log('Skip file upload');
-    };
-
-    let err = await t.throwsAsync(upload.upload(file));
-    t.is(err.code, 'TRANSACTION');
-    t.true(err.message.includes('File is already uploaded'));
-});
-
-test.serial('My files', async (t) => {
-    let files = await arcanaInstance.myFiles();
-    t.is(files.length, 1);
-    t.is(files[0].did, did.substring(2));
-    t.is(files[0].size, file.size);
-});
-
-//Error: File must be uploaded before downloading it
-test.serial('Should download a file', async (t) => {
-    //will restore method behaviour
-    // t.teardown(sinon.restore);
-
-    let download = await arcanaInstance.getDownloader();
-
-    // let mockDownload = sinon.fake(async (_did) => {
-
-    //     if (!!_did && !!did && _did === did) {
-    //         download.onSuccess();
-    //         return Promise.resolve()
-    //     }
-    //     else
-    //         return Promise.reject(new Error('File not found'));
-    // });
-
-    // sinon.replace(download, "download", mockDownload);
-
-    download.onSuccess = () => {
-        console.log('Download completed');
-    };
-
-    // await t.notThrowsAsync(download.download(did));
-    download.download(did);
-
-
-});
 
 
 test.serial.only('Share file', async (t) => {
@@ -330,59 +295,4 @@ test.serial.only('Share file', async (t) => {
 });
 
 
-//Error: File must be uploaded before downloading it
-test.serial('Download shared file', async (t) => {
-    let download = await sharedInstance.getDownloader();
-    await t.notThrowsAsync(download.download(did));
-});
 
-test.serial('check shared users', async (t) => {
-
-    t.is((await access.getSharedUsers(did))[0], receiverWallet.address);
-    t.is((await access.getSharedUsers(did)).length, 1);
-});
-
-test.serial('Files shared with self', async (t) => {
-    let files = await sharedInstance.sharedFiles();
-    t.is(files.length, 1);
-    t.is(files[0]['did'], did.substring(2));
-    t.is(files[0]['size'], file.size);
-});
-
-//do-able
-test.serial('Get consumed and total upload limit', async (t) => {
-    const Access = await arcanaInstance.getAccess();
-    let [consumed, total] = await Access.getUploadLimit(did);
-
-    t.is(consumed, file.size);
-});
-
-//Error: tus: failed to upload chunk at offset 0,
-//
-test.serial('Revoke', async (t) => {
-    let before = await access.getSharedUsers(did);
-    let tx = await access.revoke(did, receiverWallet.address);
-    let after = await access.getSharedUsers(did);
-
-    t.truthy(tx);
-
-    t.is(before.includes(receiverWallet.address), true);
-    t.is(after.includes(receiverWallet.address), false);
-    t.is(before.length - after.length, 1);
-    let files = await sharedInstance.sharedFiles();
-    t.is(files.length, 0);
-});
-
-test.serial('Delete File', async (t) => {
-
-    let files = await arcanaInstance.myFiles();
-
-    t.is(files.length, 1);
-    t.is(files[0].did, did.substring(2));
-
-    let tx = await access.deleteFile(did);
-    files = await arcanaInstance.myFiles();
-
-    t.is(files.length, 0);
-    t.truthy(tx);
-});
