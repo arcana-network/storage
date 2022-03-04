@@ -31,7 +31,7 @@ export class KeyGen {
     return new Promise((resolve, reject) => {
       this._chunk_reader(position, length, binary, (evt: any) => {
         if (evt.target.error == null) {
-          resolve({ data: evt.target.result, length: evt.total });
+          resolve({ data: evt.target.result, length: evt.target.result.byteLength });
         } else {
           reject(evt.target.error);
         }
@@ -126,7 +126,7 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('api/meta-tx/', req);
   if (res.data.err) {
-    throw customError('TRANSACTION', cleanMessage(res.data.err.message));
+    throw customError('TRANSACTION', cleanMessage(res.data.err.error.message));
   }
   /*
   //decoupled into two function
