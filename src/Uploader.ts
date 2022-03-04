@@ -16,10 +16,10 @@ import { utils, BigNumber } from 'ethers';
 import { AxiosInstance } from 'axios';
 
 export class Uploader {
-  private wallet: any;
-  private convergence: string;
-  private api: AxiosInstance;
-  private appAddress: string;
+  private readonly wallet: any;
+  private readonly convergence: string;
+  private readonly api: AxiosInstance;
+  private readonly appAddress: string;
 
   constructor(appAddress: string, wallet: any, convergence: string, api: AxiosInstance) {
     this.wallet = wallet;
@@ -76,12 +76,12 @@ export class Uploader {
       file = new Blob([new Uint8Array(await file.arrayBuffer())], { type: file.type });
       file.name = fileRaw.name;
       // file['lastModified'] = fileRaw.lastModified;
-      file['name'] = fileRaw.name;
+      file.name = fileRaw.name;
     }
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
-    let prevKey = localStorage.getItem(`${walletAddress}::key::${hash}`);
+    const prevKey = localStorage.getItem(`${walletAddress}::key::${hash}`);
     let host = localStorage.getItem(`${walletAddress}::host::${hash}`);
     let token = localStorage.getItem(`${walletAddress}::token::${hash}`);
     const did = utils.id(hash + this.convergence);
@@ -118,10 +118,10 @@ export class Uploader {
         }),
       );
 
-      let node = (await this.api.get('/api/get-address/')).data;
+      const node = (await this.api.get('/api/get-address/')).data;
       host = node.host;
 
-      let res = await makeTx(this.appAddress, this.api, this.wallet, 'uploadInit', [
+      const res = await makeTx(this.appAddress, this.api, this.wallet, 'uploadInit', [
         did,
         BigNumber.from(6),
         BigNumber.from(4),
@@ -135,10 +135,10 @@ export class Uploader {
       localStorage.setItem(`${walletAddress}::key::${hash}`, encryptedKey);
       localStorage.setItem(`${walletAddress}::token::${hash}`, token);
     }
-    let endpoint = host + 'files/';
+    const endpoint = host + 'files/';
     // console.log('Token: ', token);
     // console.log('Endpoint: ', endpoint);
-    let upload = new tus.Upload(file, {
+    const upload = new tus.Upload(file, {
       endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       metadata: {
@@ -153,14 +153,14 @@ export class Uploader {
         this.onUpload(host, token, did);
       },
       fileReader: new FileReader(key),
-      fingerprint: function (file, options) {
+      fingerprint (file, options) {
         return Promise.resolve(options.metadata.hash);
       },
       headers: {
         Authorization: `Bearer ${token}`,
       },
       chunkSize,
-      onBeforeRequest: function (req) {
+      onBeforeRequest (req) {
         req.setHeader('signature', 'sig');
       },
     });
