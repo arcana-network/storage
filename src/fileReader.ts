@@ -1,4 +1,3 @@
-import readAsByteArray from 'tus-js-client/lib/browser/readAsByteArray';
 import Encryptor from './encrypt';
 
 class FileSource {
@@ -13,16 +12,12 @@ class FileSource {
   }
 
   async slice(start, end) {
-    if (false) {
-      return readAsByteArray(this._file.slice(start, end));
-    }
-
     let value = this._file.slice(start, end);
     const en = new Encryptor(this.key, start);
     return value.arrayBuffer().then((buffer) => {
       return en.encrypt(buffer).then((d) => {
         value = new Blob([d]);
-        return { value };
+        return { value, done: true };
       });
     });
   }
