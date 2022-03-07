@@ -1,7 +1,7 @@
 {
   "name": "@arcana/storage",
   "version": "0.1.3",
-  "description": "Upload, Download, Share can be performed using this SDK",
+  "description": "Secure, decentralised storage SDK for dApps to store (upload, download) and share (or revoke) access to stored data managed by Arcana Network Smart Contracts.",
   "main": "dist/index.js",
   "browser": "dist/index.js",
   "unpkg": "dist/standalone/storage.umd.js",
