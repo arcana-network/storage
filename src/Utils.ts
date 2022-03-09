@@ -128,24 +128,7 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   if (res.data.err) {
     throw customError('TRANSACTION', cleanMessage(res.data.err.error.message));
   }
-  /*
-  //decoupled into two function
-  await new Promise((r) => setTimeout(r, 1000));
-  let tx = await wallet.provider.getTransaction(res.data.txHash);
-  try {
-    await tx.wait();
-  } catch (e) {
-    let code = await provider.call(tx, tx.blockNumber);
-    let reason = hex_to_ascii(code.substr(138));
-    console.log('revert reason', reason);
-    if (reason) {
-      throw customError('TRANSACTION', cleanMessage(reason));
-    } else {
-      throw customError('', e.error);
-    }
-  }
-  */
-
+  //Decoupled checking txns
   await checkTxnStatus(wallet, res.data.txHash);
 
   return res.data;
