@@ -95,7 +95,7 @@ export class StorageProvider {
 
   myFiles = async () => {
     await this.setConvergence();
-    let res = await this.api('api/list-files/');
+    let res = await this.api('list-files/');
     let data = [];
     if (res.data) data = res.data;
     return data;
@@ -103,7 +103,7 @@ export class StorageProvider {
 
   sharedFiles = async () => {
     await this.setConvergence();
-    let res = await this.api('api/shared-files/');
+    let res = await this.api('shared-files/');
     let data = [];
     if (res.data) data = res.data;
     return data;
