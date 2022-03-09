@@ -7,7 +7,7 @@ module.exports = () => {
 		extensions : [ "ts"],
 		require: [
 			 "ts-node/register/transpile-only",
-             "./test/_setup.js"
+             "./tests/_setup.js"
         ],
 		"verbose": true
 	};

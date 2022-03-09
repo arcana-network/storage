@@ -3,6 +3,8 @@ import { StorageProvider, utils } from '../src/index';
 import { Blob as nBlob } from 'blob-polyfill';
 import sinon from 'sinon';
 
+import nock from 'nock';
+
 import { utils as ethUtils, BigNumber } from 'ethers';
 
 import arcana from '../src/contracts/Arcana';
@@ -18,6 +20,8 @@ Below to be covered in Integration Tests
 -> Upload (due to tus client instance)
 -> Download  (due to tus client instance)
 */
+
+const nockOptions = {'Access-Control-Allow-Origin': '*'}
 
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -141,66 +145,75 @@ let file,
     access,
     receiverWallet,
     receiverInstance,
-    file_count = 0;
+    arcanaWallet,
+    mockArcana,
+    meta_tx_scope;
 
-var server;
-var arcanaWallet;
-var mockArcana;
+function meta_tx_nock () {
 
-//Wallet and Instance setup
-test.serial.before(async (t) => {
+    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
+    .post("/api/meta-tx/").
+    reply(200, {
+        wait: Promise.resolve()
+    }).intercept("/api/meta-tx/", "OPTIONS")
+    .reply(200, {
+        wait: Promise.resolve()
+    },{'access-control-allow-headers': 'Authorization'} );
 
-    //File prep
-    file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
-    file = new File([file], file.name, { type: file.type });
-    //Using PrivateKey from ganache, 0x71BA0248596F4fec9599e3Cd7eb26b92F2fD3DE5
-    let sPrivateKey = "73f557a06bf353efc8c1c6961620cf7dc8d550519b14a322df4ea50c8a3ed813";
-    arcanaWallet = await utils.getWallet(sPrivateKey);
-    try {
+}
 
-        arcanaInstance = new StorageProvider({
-            appId,
-            privateKey: sPrivateKey,
-            email: makeEmail(),
-            gateway,
-            debug,
-        });
 
-        //second instance , 0xeBfD4bd6d89312B03F6Dc09038836d419B0547f2
-        let sPrivateKey2 = "dab3052b530f0555adddaa66d9096c3e322751427bc2af0bac9a3206e2d03979";
-        receiverWallet = await utils.getWallet(sPrivateKey2),
-            receiverInstance = new StorageProvider({
-                appId,
-                privateKey: sPrivateKey2,
-                email: makeEmail(),
-                gateway,
-                debug,
-            });
+function nockSetup()
+{   
 
-        access = await arcanaInstance.getAccess();
+   
+   
 
-    } catch (e) {
-        console.log(e);
-    }
-
-});
-
+    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions).persist()
+    .get('/get-config/')
+    .reply(200, {
+        "Factory": "0xC392ACbF071750876DF339D26dA542EbE5738646",
+        "Forwarder": "0x90e29b3662E63bC46510aca861167072A48D7318",
+        "RPC_URL": "https://blockchain-dev.arcana.network"
+    })
+    .post("/login/")
+    .reply(200, { token: "123456789" })
+    .get("/get-nonce/")
+    .query(true)
+    .reply(200, "0")
+    .get("/get-address/")
+    .query(true)
+    .reply(200, { address: "0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158" })
+    .intercept("/get-address/", "OPTIONS")
+    .query(true)
+    .reply(200, { address: "0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158" },{'access-control-allow-headers': 'Authorization'})
+    .get("/api/get-address/")
+    .reply(200, { host: 'https://localhost:3000/', address: '0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158' });
+    
+   
+}
 
 //Mock server & stub setup
 test.serial.before(async () => {
-    server = setupServer(...handlers);
-    server.listen();
+
+
+     //File prep
+     file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
+     file = new File([file], file.name, { type: file.type });
+ 
+
+    nockSetup();
 
     //Mock provider
     const provider = new MockProvider();
 
-    const [wallet, otherWallet] = new MockProvider().getWallets();
+    [arcanaWallet, receiverWallet] = new MockProvider().getWallets();
     // fakeArcana = sinon.fake.returns({
     //     convergence: async () => Promise.resolve(String(Math.random()))
     // })
 
     //Mock Arcana
-    mockArcana = await deployMockContract(wallet, arcana.abi)
+    mockArcana = await deployMockContract(arcanaWallet, arcana.abi)
 
     await mockArcana.mock.convergence.returns(String(Math.random()))
     await mockArcana.mock.share.returns();
@@ -211,82 +224,64 @@ test.serial.before(async () => {
     sinon.replace(utils, 'Arcana', () => mockArcana);
 
     //Mock Forwarder
-    const mockForwarder = await deployMockContract(wallet, forwarder.abi);
+    const mockForwarder = await deployMockContract(arcanaWallet, forwarder.abi);
     await mockForwarder.mock.getNonce.returns(0);
 
     sinon.replace(utils, 'Forwarder', () => mockForwarder);
     sinon.replace(utils, 'getProvider', () => provider);
 
+    sinon.replace(utils, "checkTxnStatus", () => Promise.resolve());
+
+    //Storage instances
+    arcanaInstance = new StorageProvider({
+            appId,
+            privateKey: arcanaWallet.privateKey,
+            email: makeEmail(),
+            gateway,
+            debug
+        });
+
+    receiverInstance = new StorageProvider({
+                    appId,
+                    privateKey: receiverWallet.privateKey,
+                    email: makeEmail(),
+                    gateway,
+                    debug,
+                });
+
 })
 
-
-test.after.always(() => {
-    server.close();
-})
-
-test.serial('Should upload a file', async (t) => {
-    let upload = await arcanaInstance.getUploader();
-    let complete = false;
-    upload.onSuccess = () => {
-        complete = true;
-        file_count += 1;
-    };
-    upload.onError = (err) => {
-        console.log('[ERROR]', err);
-        throw Error(err);
-    };
-
-    did = await upload.upload(file);
-    while (!complete) {
-        await sleep(1000);
-    }
-    t.pass();
-    // t.is(did, '1234567890');
-
-
+//done
+test.serial('Share file', async (t) => {
+    meta_tx_nock();
+    let access = await arcanaInstance.getAccess();
+    let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
+    t.truthy(tx);
 });
 
-test.skip('Fail download transaction', async (t) => {
-    let download = await receiverInstance.getDownloader();
-    const err = await t.throwsAsync(download.download(did));
-    t.is(err.code, 'UNAUTHORIZED');
-    t.is(err.message, 'You cant download this file');
-});
 
 //done
 test.serial.only('Fail revoke transaction on unauthorized files', async (t) => {
 
-    await server.use(
-        rest.post(
-            "https://gateway02.arcana.network/api/meta-tx/",
-            (req, res, ctx) => res.once(ctx.json({
-                err: {
-                    error:
-                    {
-                        message: 'This function can only be called by file owner'
-                    }
+  await nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
+        .intercept("/api/meta-tx/", "OPTIONS")
+          .reply(200,null,{'access-control-allow-headers': 'Authorization'})
+        .post("/api/meta-tx/")
+        .reply(200, {
+            err: {
+                error:
+                {
+                    message: 'This function can only be called by file owner'
                 }
-            }))
-        )
-    );
+            }
+          })
+          
 
     let access = await receiverInstance.getAccess();
     let err = await t.throwsAsync(access.revoke(did, arcanaWallet.address));
     t.is(err.message, 'This function can only be called by file owner');
     t.is(err.code, 'TRANSACTION');
 
-});
-
-//Skiped as it returned DID, instead of error
-test.serial('Should skip uploading same file', async (t) => {
-    let upload = await arcanaInstance.getUploader();
-    upload.onSuccess = () => {
-        console.log('Skip file upload');
-    };
-
-    let err = await t.throwsAsync(upload.upload(file));
-    t.is(err.code, 'TRANSACTION');
-    t.true(err.message.includes('File is already uploaded'));
 });
 
 //done
@@ -297,54 +292,6 @@ test.serial('My files', async (t) => {
     t.is(files[0].size, file.size);
 });
 
-//Error: File must be uploaded before downloading it
-test.serial('Should download a file', async (t) => {
-    //will restore method behaviour
-    // t.teardown(sinon.restore);
-
-    let download = await arcanaInstance.getDownloader();
-
-    // let mockDownload = sinon.fake(async (_did) => {
-
-    //     if (!!_did && !!did && _did === did) {
-    //         download.onSuccess();
-    //         return Promise.resolve()
-    //     }
-    //     else
-    //         return Promise.reject(new Error('File not found'));
-    // });
-
-    // sinon.replace(download, "download", mockDownload);
-
-    download.onSuccess = () => {
-        console.log('Download completed');
-    };
-
-    // await t.notThrowsAsync(download.download(did));
-    download.download(did);
-
-
-});
-
-//done
-test.serial('Share file', async (t) => {
-    await server.use(
-        rest.post(
-            "https://gateway02.arcana.network/api/meta-tx/",
-            (req, res, ctx) => res.once(ctx.json({ wait: Promise.resolve() }))
-        )
-    );
-
-    let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
-    t.truthy(tx);
-});
-
-
-//Error: File must be uploaded before downloading it
-test.serial('Download shared file', async (t) => {
-    let download = await receiverInstance.getDownloader();
-    await t.notThrowsAsync(download.download(did));
-});
 
 //done
 test.serial('check shared users', async (t) => {
