@@ -261,9 +261,9 @@ test.serial('Share file', async (t) => {
 
 
 //done
-test.serial.only('Fail revoke transaction on unauthorized files', async (t) => {
+test.serial('Fail revoke transaction on unauthorized files', async (t) => {
 
-  await nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
+    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
         .intercept("/api/meta-tx/", "OPTIONS")
           .reply(200,null,{'access-control-allow-headers': 'Authorization'})
         .post("/api/meta-tx/")
@@ -285,29 +285,13 @@ test.serial.only('Fail revoke transaction on unauthorized files', async (t) => {
 });
 
 //done
-test.serial('My files', async (t) => {
-    let files = await arcanaInstance.myFiles();
-    t.is(files.length, 1);
-    t.is(files[0].did, did.substring(2));
-    t.is(files[0].size, file.size);
-});
-
-
-//done
-test.serial('check shared users', async (t) => {
-    t.is((await access.getSharedUsers(did))[0], receiverWallet.address);
-    t.is((await access.getSharedUsers(did)).length, 1);
-});
-
-//done
 test.serial('Files shared with self', async (t) => {
 
-    await server.use(
-        rest.get(
-            "https://gateway02.arcana.network/api/shared-files/",
-            (req, res, ctx) => res.once(ctx.json([{ did: did.substring(2), size: file.size }]))
-        )
-    );
+    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
+    .get("/api/shared-files/")
+    .reply(200, [{ did: did.substring(2) , size: file.size}], { 'access-control-allow-headers': 'Authorization' })
+    .intercept("/api/shared-files/", "OPTIONS")
+    .reply(200,null,{ 'access-control-allow-headers': 'Authorization' });
 
     let files = await receiverInstance.sharedFiles();
     t.is(files.length, 1);
@@ -323,16 +307,12 @@ test.serial('Get consumed and total upload limit', async (t) => {
     t.is(consumed, file.size);
 });
 
-//Error: tus: failed to upload chunk at offset 0,
 //done
 test.serial('Revoke', async (t) => {
 
-    await server.use(
-        rest.post(
-            "https://gateway02.arcana.network/api/meta-tx/",
-            (req, res, ctx) => res.once(ctx.json({ wait: Promise.resolve() }))
-        )
-    );
+    let access = await arcanaInstance.getAccess();
+
+    meta_tx_nock();
     await mockArcana.mock.getAllUsers.returns([await receiverWallet.address]);
 
     let before = await access.getSharedUsers(did);
@@ -347,42 +327,42 @@ test.serial('Revoke', async (t) => {
     t.is(after.includes(receiverWallet.address), false);
     t.is(before.length - after.length, 1);
 
-    await server.use(
-        rest.get(
-            "https://gateway02.arcana.network/api/shared-files/",
-            (req, res, ctx) => res.once(ctx.json([]))
-        )
-    );
-
+    await nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
+        .get("/api/shared-files/")
+        .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
+        .intercept("/api/shared-files/", "OPTIONS")
+        .reply(200,null,{ 'access-control-allow-headers': 'Authorization' });
 
     let files = await receiverInstance.sharedFiles();
     t.is(files.length, 0);
+
 });
 
 //done
 test.serial('Delete File', async (t) => {
-    await server.use(
-        rest.post(
-            "https://gateway02.arcana.network/api/meta-tx/",
-            (req, res, ctx) => res.once(ctx.json({ wait: Promise.resolve() }))
-        )
-    );
+      meta_tx_nock();
 
-    await server.use(
-        rest.get(
-            "https://gateway02.arcana.network/api/list-files/",
-            (req, res, ctx) => res.once(ctx.json([{ did: did.substring(2) }]))
-        )
-    );
-
-
-    let files = await arcanaInstance.myFiles();
+    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
+    .get("/api/list-files/")
+    .reply(200, [{ did: did.substring(2) }], { 'access-control-allow-headers': 'Authorization' })
+    .intercept("/api/list-files/", "OPTIONS")
+    .reply(200,null,{ 'access-control-allow-headers': 'Authorization' });
+    
+    let access = await arcanaInstance.getAccess(),
+        files = await arcanaInstance.myFiles();
 
     t.is(files.length, 1);
     t.is(files[0].did, did.substring(2));
 
+    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
+    .get("/api/list-files/")
+    .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
+    .intercept("/api/list-files/", "OPTIONS")
+    .reply(200,null,{ 'access-control-allow-headers': 'Authorization' });
+
     let tx = await access.deleteFile(did);
     files = await arcanaInstance.myFiles();
+
 
     t.is(files.length, 0);
     t.truthy(tx);
