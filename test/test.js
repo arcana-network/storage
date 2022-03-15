@@ -3,7 +3,7 @@ const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567
 const gateway = 'http://localhost:9010/api/v1/';
 // const gateway = 'https://gateway-dev.arcana.network/';
 const appId = 1;
-const debug = true;
+const debug = false;
 const generateString = (length) => {
   let result = '';
   const charactersLength = characters.length;
