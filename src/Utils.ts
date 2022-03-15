@@ -31,7 +31,7 @@ export class KeyGen {
     return new Promise((resolve, reject) => {
       this._chunk_reader(position, length, binary, (evt: any) => {
         if (evt.target.error == null) {
-          resolve({ data: evt.target.result, length: evt.total });
+          resolve({ data: evt.target.result, length: evt.target.result.byteLength });
         } else {
           reject(evt.target.error);
         }
@@ -97,6 +97,12 @@ export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
   return new Contract(address, arcana.abi, wallet ? wallet : provider) as ArcanaT;
 };
 
+export const Forwarder = (address: string, wallet?: Wallet): ForwarderT => {
+  const provider = getProvider();
+  return new Contract(address, forwarder.abi, wallet ? wallet : provider) as ForwarderT;
+};
+
+
 const cleanMessage = (message: string): string => {
   if (!message) return '';
   return message
@@ -115,32 +121,38 @@ function hex_to_ascii(str1) {
 
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
   const arcana: ArcanaT = Arcana(address, wallet);
-  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
-  const forwarderContract: ForwarderT = new Contract(
-    localStorage.getItem('forwarder'),
-    forwarder.abi,
-    provider,
-  ) as ForwarderT;
+  const forwarderContract: ForwarderT = Forwarder(localStorage.getItem('forwarder'), wallet);
+
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('meta-tx/', req);
   if (res.data.err) {
     throw customError('TRANSACTION', cleanMessage(res.data.err));
   }
-  let tx = await wallet.provider.getTransaction(res.data.txHash);
+  //Decoupled checking txns
+  await checkTxnStatus(wallet, res.data.txHash);
+
+  return res.data;
+};
+
+
+export const checkTxnStatus = async (wallet: Wallet,txHash: string) => {
+  await new Promise((r) => setTimeout(r, 1000));
+  const provider = getProvider();
+  let tx = await wallet.provider.getTransaction(txHash);
   try {
     await tx.wait();
   } catch (e) {
     let code = await provider.call(tx, tx.blockNumber);
     let reason = hex_to_ascii(code.substr(138));
-    console.log('revert reason', reason);
+
     if (reason) {
       throw customError('TRANSACTION', cleanMessage(reason));
     } else {
       throw customError('', e.error);
     }
   }
-  return res.data;
-};
+
+}
 
 export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
   const iv = new Uint8Array(16);
