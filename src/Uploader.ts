@@ -72,12 +72,6 @@ export class Uploader {
   upload = async (fileRaw: any, chunkSize: number = 10 * 2 ** 20) => {
     let file = fileRaw;
     const walletAddress = await this.wallet.getAddress();
-    if (file instanceof File) {
-      file = new Blob([new Uint8Array(await file.arrayBuffer())], { type: file.type });
-      file.name = fileRaw.name;
-      // file['lastModified'] = fileRaw.lastModified;
-      file['name'] = fileRaw.name;
-    }
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
