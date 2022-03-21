@@ -19,7 +19,7 @@
     "prepare": "npm run build",
     "prepublish": "npm run build",
     "postversion": "git push && git push --tags",
-    "integration-test": "mocha 'test/**/*.ts' --recursive --timeout 3000000 -R spec --ui bdd"
+    "integration-test": "mocha 'integration-tests/**/*.ts' --recursive --timeout 3000000 -R spec --ui bdd"
   },
   "repository": {
     "type": "git",
