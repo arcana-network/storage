@@ -26,7 +26,7 @@ const nockOptions = {'Access-Control-Allow-Origin': '*'}
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = false;
-const gateway = 'https://gateway02.arcana.network/';
+const gateway = 'https://gateway02.arcana.network/api/v1/';
 const appId = 1;
 const debug = false;
 
@@ -151,11 +151,11 @@ let file,
 
 function meta_tx_nock () {
 
-    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
-    .post("/api/meta-tx/").
+    nock(gateway).defaultReplyHeaders(nockOptions)
+    .post("/meta-tx/").
     reply(200, {
         wait: Promise.resolve()
-    }).intercept("/api/meta-tx/", "OPTIONS")
+    }).intercept("/meta-tx/", "OPTIONS")
     .reply(200, {
         wait: Promise.resolve()
     },{'access-control-allow-headers': 'Authorization'} );
@@ -169,7 +169,7 @@ function nockSetup()
    
    
 
-    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions).persist()
+    nock(gateway).defaultReplyHeaders(nockOptions).persist()
     .get('/get-config/')
     .reply(200, {
         "Factory": "0xC392ACbF071750876DF339D26dA542EbE5738646",
@@ -187,7 +187,7 @@ function nockSetup()
     .intercept("/get-address/", "OPTIONS")
     .query(true)
     .reply(200, { address: "0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158" },{'access-control-allow-headers': 'Authorization'})
-    .get("/api/get-address/")
+    .get("/get-node-address/")
     .reply(200, { host: 'https://localhost:3000/', address: '0x98f92D5B2Eb666f993c5930624C2a73a3ED5B158' });
     
    
@@ -263,10 +263,10 @@ test.serial('Share file', async (t) => {
 //done
 test.serial('Fail revoke transaction on unauthorized files', async (t) => {
 
-    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
-        .intercept("/api/meta-tx/", "OPTIONS")
+    nock(gateway).defaultReplyHeaders(nockOptions)
+        .intercept("/meta-tx/", "OPTIONS")
           .reply(200,null,{'access-control-allow-headers': 'Authorization'})
-        .post("/api/meta-tx/")
+        .post("/meta-tx/")
         .reply(200, {
             err: {
                 error:
@@ -287,10 +287,10 @@ test.serial('Fail revoke transaction on unauthorized files', async (t) => {
 //done
 test.serial('Files shared with self', async (t) => {
 
-    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
-    .get("/api/shared-files/")
+    nock(gateway).defaultReplyHeaders(nockOptions)
+    .get("/shared-files/")
     .reply(200, [{ did: did.substring(2) , size: file.size}], { 'access-control-allow-headers': 'Authorization' })
-    .intercept("/api/shared-files/", "OPTIONS")
+    .intercept("/shared-files/", "OPTIONS")
     .reply(200,null,{ 'access-control-allow-headers': 'Authorization' });
 
     let files = await receiverInstance.sharedFiles();
@@ -327,10 +327,10 @@ test.serial('Revoke', async (t) => {
     t.is(after.includes(receiverWallet.address), false);
     t.is(before.length - after.length, 1);
 
-    await nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
-        .get("/api/shared-files/")
+    await nock(gateway).defaultReplyHeaders(nockOptions)
+        .get("/shared-files/")
         .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
-        .intercept("/api/shared-files/", "OPTIONS")
+        .intercept("/shared-files/", "OPTIONS")
         .reply(200,null,{ 'access-control-allow-headers': 'Authorization' });
 
     let files = await receiverInstance.sharedFiles();
@@ -342,10 +342,10 @@ test.serial('Revoke', async (t) => {
 test.serial('Delete File', async (t) => {
       meta_tx_nock();
 
-    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
-    .get("/api/list-files/")
+    nock(gateway).defaultReplyHeaders(nockOptions)
+    .get("/list-files/")
     .reply(200, [{ did: did.substring(2) }], { 'access-control-allow-headers': 'Authorization' })
-    .intercept("/api/list-files/", "OPTIONS")
+    .intercept("/list-files/", "OPTIONS")
     .reply(200,null,{ 'access-control-allow-headers': 'Authorization' });
     
     let access = await arcanaInstance.getAccess(),
@@ -354,10 +354,10 @@ test.serial('Delete File', async (t) => {
     t.is(files.length, 1);
     t.is(files[0].did, did.substring(2));
 
-    nock('https://gateway02.arcana.network/').defaultReplyHeaders(nockOptions)
-    .get("/api/list-files/")
+    nock(gateway).defaultReplyHeaders(nockOptions)
+    .get("/list-files/")
     .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
-    .intercept("/api/list-files/", "OPTIONS")
+    .intercept("/list-files/", "OPTIONS")
     .reply(200,null,{ 'access-control-allow-headers': 'Authorization' });
 
     let tx = await access.deleteFile(did);
