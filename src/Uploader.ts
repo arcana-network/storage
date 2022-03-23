@@ -72,12 +72,6 @@ export class Uploader {
   upload = async (fileRaw: any, chunkSize: number = 10 * 2 ** 20) => {
     let file = fileRaw;
     const walletAddress = await this.wallet.getAddress();
-    if (file instanceof File) {
-      file = new Blob([new Uint8Array(await file.arrayBuffer())], { type: file.type });
-      file.name = fileRaw.name;
-      // file['lastModified'] = fileRaw.lastModified;
-      file['name'] = fileRaw.name;
-    }
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
@@ -118,7 +112,7 @@ export class Uploader {
         }),
       );
 
-      let node = (await this.api.get('/api/get-address/')).data;
+      let node = (await this.api.get('/get-node-address/')).data;
       host = node.host;
 
       let res = await makeTx(this.appAddress, this.api, this.wallet, 'uploadInit', [
@@ -136,8 +130,8 @@ export class Uploader {
       localStorage.setItem(`${walletAddress}::token::${hash}`, token);
     }
     let endpoint = host + 'files/';
-    // console.log('Token: ', token);
-    // console.log('Endpoint: ', endpoint);
+    console.log('Token: ', token);
+    console.log('Endpoint: ', endpoint);
     let upload = new tus.Upload(file, {
       endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],

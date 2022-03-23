@@ -1,4 +1,3 @@
-import readAsByteArray from 'tus-js-client/lib/browser/readAsByteArray';
 import Encryptor from './encrypt';
 
 class FileSource {
@@ -18,7 +17,7 @@ class FileSource {
     return value.arrayBuffer().then((buffer) => {
       return en.encrypt(buffer).then((d) => {
         value = new Blob([d]);
-        return { value };
+        return { value, done: true };
       });
     });
   }
