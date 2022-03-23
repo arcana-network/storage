@@ -25,6 +25,8 @@ export class Access {
         f = f.substring(0, 2) !== '0x' ? '0x' + f : f;
         const EK = await getEncryptedKey(this.appAddress, f);
         const key = await decryptKey(this.wallet.privateKey, EK);
+
+
         await Promise.all(
           publicKey.map(async (p) => {
             const pubKey = p.slice(p.length - 128);
@@ -35,6 +37,10 @@ export class Access {
         );
       }),
     );
+
+  
+    
+
     return await makeTx(this.appAddress, this.api, this.wallet, 'share', [
       fileId,
       address,
