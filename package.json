@@ -19,7 +19,8 @@
     "prepare": "npm run build",
     "prepublish": "npm run build",
     "postversion": "git push && git push --tags",
-    "test": "c8 ava"
+    "test": "c8 ava",
+    "integration-test": "mocha 'integration-tests/**/*.ts' --recursive --timeout 3000000 -R spec --ui bdd"
   },
   "repository": {
     "type": "git",
