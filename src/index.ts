@@ -1,87 +1,87 @@
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { Access } from './Access';
-import * as utils from './Utils';
-import { Wallet } from 'ethers';
+import { Config, getProvider, customError } from './Utils';
+import { providers } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
-import { Arcana as ArcanaT } from './typechain';
-import * as Sentry from '@sentry/browser';
+import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
 
 export class StorageProvider {
-  private wallet: Wallet;
-  private convergence: string;
+  private provider: providers.Web3Provider;
   private email: string;
   private api: AxiosInstance;
   private appAddress: string;
   private appId: number;
-  private arcana: ArcanaT;
   private gateway: string;
-  private privateKey: string;
+  private chainId: number;
 
-  constructor(config: utils.Config) {
-    this.privateKey = config.privateKey;
+  constructor(config: Config) {
+    // If provider is provided by the user, use that provider
+    if (config.provider) {
+      this.provider = getProvider(config.provider);
+    }
     this.email = config.email;
     this.appId = config.appId;
-    if (config.debug) {
-      Sentry.init({
-        dsn: 'https://1a411b6bfed244de8f6a7d64bb432bd4@o1011868.ingest.sentry.io/6081085',
-        integrations: [new Integrations.BrowserTracing()],
-        tracesSampleRate: 1.0,
-      });
-    }
-    if (!this.privateKey) {
-      throw 'Null wallet';
-    }
     if (!config.gateway) {
       this.gateway = 'https://gateway-testnet.arcana.network/';
     } else {
       this.gateway = config.gateway;
     }
+    if (!this.chainId) {
+      this.chainId = 40404;
+    } else {
+      this.chainId = config.chainId;
+    }
+    if (config.debug) {
+      SentryInit({
+        dsn: 'https://1a411b6bfed244de8f6a7d64bb432bd4@o1011868.ingest.sentry.io/6081085',
+        integrations: [
+          new Integrations.BrowserTracing({
+            tracingOrigins: [this.gateway],
+          }),
+        ],
+        tracesSampleRate: 1.0,
+      });
+    }
   }
 
-  setConvergence = async () => {
-    await this.login();
-    if (!this.convergence) {
-      this.arcana = utils.Arcana(this.appAddress);
-      this.convergence = await this.arcana.convergence(await this.wallet.getAddress());
-      if (!this.convergence) {
-        const conv = String(Math.random());
-        await utils.makeTx(this.appAddress, this.api, this.wallet, 'setConvergence', [conv]);
-        this.convergence = conv;
-      }
-    }
-  };
-
   getUploader = async () => {
-    await this.setConvergence();
-    return new Uploader(this.appAddress, this.wallet, this.convergence, this.api);
+    await this.login();
+    return new Uploader(this.appAddress, this.provider, this.api);
   };
 
   getAccess = async () => {
-    await this.setConvergence();
-    return new Access(this.appAddress, this.wallet, this.convergence, this.api);
+    await this.login();
+    return new Access(this.appAddress, this.provider, this.api);
   };
 
   getDownloader = async () => {
-    await this.setConvergence();
-    return new Downloader(this.appAddress, this.wallet, this.convergence, this.api);
+    await this.login();
+    return new Downloader(this.appAddress, this.provider, this.api);
   };
 
   login = async () => {
+    // Already login hence return null response as no need to login again
+    if (this.api) {
+      return;
+    }
+    if (!this.provider) {
+      // @ts-ignore
+      if (window.ethereum) {
+        throw customError;
+      }
+    }
     let res = (await axios.get(this.gateway + 'get-config/')).data;
     localStorage.setItem('forwarder', res['Forwarder']);
-    localStorage.setItem('rpc_url', res['RPC_URL']);
-
-    this.wallet = utils.getWallet(this.privateKey);
-
-    let nonce = (await axios.get(this.gateway + `get-nonce/?address=${this.wallet.address}`)).data;
-    let sig = await this.wallet.signMessage(String(nonce));
-
+    let accounts = await this.provider.send('eth_requestAccounts', []);
+    let nonce = (await axios.get(this.gateway + `get-nonce/?address=${accounts[0]}`)).data;
+    const signer = await this.provider.getSigner();
+    let sig = await signer.signMessage(String(nonce));
     res = await axios.post(this.gateway + `login/`, {
       signature: sig,
       email: this.email,
-      address: this.wallet.address,
+      address: accounts[0],
     });
     this.api = axios.create({
       baseURL: this.gateway,
@@ -94,7 +94,7 @@ export class StorageProvider {
   };
 
   myFiles = async () => {
-    await this.setConvergence();
+    await this.login();
     let res = await this.api('list-files/');
     let data = [];
     if (res.data) data = res.data;
@@ -102,15 +102,10 @@ export class StorageProvider {
   };
 
   sharedFiles = async () => {
-    await this.setConvergence();
+    await this.login();
     let res = await this.api('shared-files/');
     let data = [];
     if (res.data) data = res.data;
     return data;
   };
-
-  getContract = async () => {
-    return this.arcana;
-  };
 }
-export { utils };

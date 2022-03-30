@@ -34,15 +34,13 @@ export function createAndDownloadBlobFile(body, filename) {
 }
 
 export class Downloader {
-  private wallet: any;
-  private convergence: string;
+  private provider: any;
   private hasher;
   private api: AxiosInstance;
   private appAddress: string;
 
-  constructor(appAddress: string, wallet: any, convergence: string, api: AxiosInstance) {
-    this.wallet = wallet;
-    this.convergence = convergence;
+  constructor(appAddress: string, provider: any, api: AxiosInstance) {
+    this.provider = provider;
     this.hasher = new Sha256();
     this.api = api;
     this.appAddress = appAddress;
@@ -52,19 +50,24 @@ export class Downloader {
   onProgress = async (bytesDownloaded: number, bytesTotal: number) => {};
 
   download = async (did) => {
+    console.log('from downloader', did);
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
-    const arcana = Arcana(this.appAddress, this.wallet);
+    const arcana = Arcana(this.appAddress, this.provider);
+    // @ts-ignore
+    window.arcana = arcana;
+    // @ts-ignore
+    window.appAddress = this.appAddress;
+    // @ts-ignore
+    window.provider = this.provider;
+
     let file;
     try {
-      file = await arcana.getFile(did, readHash);
+      file = await arcana.getFile(did, readHash, { from: await this.provider.getSigner().getAddress() });
     } catch (e) {
       throw customError('UNAUTHORIZED', "You can't download this file");
     }
-    let res = await makeTx(this.appAddress, this.api, this.wallet, 'checkPermission', [did, readHash]);
-    const decryptedKey = await decryptWithPrivateKey(
-      this.wallet.privateKey,
-      JSON.parse(utils.toUtf8String(file.encryptedKey)),
-    );
+    let res = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [did, readHash]);
+    const decryptedKey = utils.toUtf8String(file.encryptedKey);
     const key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, [
       'encrypt',
       'decrypt',

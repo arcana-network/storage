@@ -17,20 +17,50 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface ArcanaIInterface extends ethers.utils.Interface {
   functions: {
+    "aggregateLogin()": FunctionFragment;
+    "appId()": FunctionFragment;
+    "appName()": FunctionFragment;
+    "initialize(string,address,address,bool,uint128)": FunctionFragment;
     "setAppLevelLimit(uint256,uint256)": FunctionFragment;
+    "setDefaultLimit(uint256,uint256)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "aggregateLogin",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "appId", values?: undefined): string;
+  encodeFunctionData(functionFragment: "appName", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "initialize",
+    values: [string, string, string, boolean, BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "setAppLevelLimit",
     values: [BigNumberish, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "setDefaultLimit",
+    values: [BigNumberish, BigNumberish]
+  ): string;
 
   decodeFunctionResult(
+    functionFragment: "aggregateLogin",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "appId", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "appName", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
+  decodeFunctionResult(
     functionFragment: "setAppLevelLimit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setDefaultLimit",
     data: BytesLike
   ): Result;
 
@@ -81,12 +111,60 @@ export class ArcanaI extends BaseContract {
   interface: ArcanaIInterface;
 
   functions: {
+    aggregateLogin(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    appId(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    appName(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    initialize(
+      arg0: string,
+      arg1: string,
+      arg2: string,
+      arg3: boolean,
+      arg4: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     setAppLevelLimit(
       store: BigNumberish,
       bandwidth: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    setDefaultLimit(
+      store: BigNumberish,
+      bandwidth: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
   };
+
+  aggregateLogin(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  appId(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  appName(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  initialize(
+    arg0: string,
+    arg1: string,
+    arg2: string,
+    arg3: boolean,
+    arg4: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   setAppLevelLimit(
     store: BigNumberish,
@@ -94,8 +172,35 @@ export class ArcanaI extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  setDefaultLimit(
+    store: BigNumberish,
+    bandwidth: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   callStatic: {
+    aggregateLogin(overrides?: CallOverrides): Promise<BigNumber>;
+
+    appId(overrides?: CallOverrides): Promise<BigNumber>;
+
+    appName(overrides?: CallOverrides): Promise<string>;
+
+    initialize(
+      arg0: string,
+      arg1: string,
+      arg2: string,
+      arg3: boolean,
+      arg4: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     setAppLevelLimit(
+      store: BigNumberish,
+      bandwidth: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setDefaultLimit(
       store: BigNumberish,
       bandwidth: BigNumberish,
       overrides?: CallOverrides
@@ -105,7 +210,34 @@ export class ArcanaI extends BaseContract {
   filters: {};
 
   estimateGas: {
+    aggregateLogin(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    appId(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    appName(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    initialize(
+      arg0: string,
+      arg1: string,
+      arg2: string,
+      arg3: boolean,
+      arg4: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     setAppLevelLimit(
+      store: BigNumberish,
+      bandwidth: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setDefaultLimit(
       store: BigNumberish,
       bandwidth: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -113,7 +245,34 @@ export class ArcanaI extends BaseContract {
   };
 
   populateTransaction: {
+    aggregateLogin(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    appId(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    appName(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    initialize(
+      arg0: string,
+      arg1: string,
+      arg2: string,
+      arg3: boolean,
+      arg4: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     setAppLevelLimit(
+      store: BigNumberish,
+      bandwidth: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setDefaultLimit(
       store: BigNumberish,
       bandwidth: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }

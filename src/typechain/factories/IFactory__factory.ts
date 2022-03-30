@@ -16,6 +16,21 @@ const _abi = [
       },
       {
         internalType: "address",
+        name: "_owner",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "_store",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_bandwidth",
+        type: "uint256",
+      },
+      {
+        internalType: "address",
         name: "_relayer",
         type: "address",
       },
@@ -34,10 +49,56 @@ const _abi = [
         name: "_appId",
         type: "uint128",
       },
+      {
+        internalType: "uint8",
+        name: "_walletMode",
+        type: "uint8",
+      },
+      {
+        internalType: "string[]",
+        name: "_client",
+        type: "string[]",
+      },
+      {
+        internalType: "string[]",
+        name: "_clientId",
+        type: "string[]",
+      },
     ],
     name: "createNewApp",
     outputs: [],
     stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "_address",
+        type: "address",
+      },
+    ],
+    name: "gateway",
+    outputs: [
+      {
+        components: [
+          {
+            internalType: "bytes32",
+            name: "x",
+            type: "bytes32",
+          },
+          {
+            internalType: "bytes32",
+            name: "y",
+            type: "bytes32",
+          },
+        ],
+        internalType: "struct IFactory.publicKey",
+        name: "",
+        type: "tuple",
+      },
+    ],
+    stateMutability: "view",
     type: "function",
   },
   {

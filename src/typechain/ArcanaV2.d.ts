@@ -20,7 +20,7 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface ArcanaInterface extends ethers.utils.Interface {
+interface ArcanaV2Interface extends ethers.utils.Interface {
   functions: {
     "accessSpecifier(bytes32,bytes32,address)": FunctionFragment;
     "aggregateLogin()": FunctionFragment;
@@ -65,6 +65,7 @@ interface ArcanaInterface extends ethers.utils.Interface {
     "uploadClose(bytes32)": FunctionFragment;
     "uploadInit(bytes32,uint256,uint256,uint256,bytes,bytes,address)": FunctionFragment;
     "userAccess(bytes32,bytes32,uint256)": FunctionFragment;
+    "version()": FunctionFragment;
     "walletType()": FunctionFragment;
   };
 
@@ -221,6 +222,7 @@ interface ArcanaInterface extends ethers.utils.Interface {
     functionFragment: "userAccess",
     values: [BytesLike, BytesLike, BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "version", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "walletType",
     values?: undefined
@@ -344,6 +346,7 @@ interface ArcanaInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "uploadInit", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "userAccess", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "version", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "walletType", data: BytesLike): Result;
 
   events: {
@@ -423,7 +426,7 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type UpgradedEvent = TypedEvent<[string] & { implementation: string }>;
 
-export class Arcana extends BaseContract {
+export class ArcanaV2 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -464,7 +467,7 @@ export class Arcana extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: ArcanaInterface;
+  interface: ArcanaV2Interface;
 
   functions: {
     accessSpecifier(
@@ -736,6 +739,8 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[string]>;
 
+    version(overrides?: CallOverrides): Promise<[string]>;
+
     walletType(overrides?: CallOverrides): Promise<[number]>;
   };
 
@@ -1004,6 +1009,8 @@ export class Arcana extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  version(overrides?: CallOverrides): Promise<string>;
+
   walletType(overrides?: CallOverrides): Promise<number>;
 
   callStatic: {
@@ -1258,6 +1265,8 @@ export class Arcana extends BaseContract {
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    version(overrides?: CallOverrides): Promise<string>;
 
     walletType(overrides?: CallOverrides): Promise<number>;
   };
@@ -1647,6 +1656,8 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    version(overrides?: CallOverrides): Promise<BigNumber>;
+
     walletType(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
@@ -1874,6 +1885,8 @@ export class Arcana extends BaseContract {
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    version(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     walletType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
