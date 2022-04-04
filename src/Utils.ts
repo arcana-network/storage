@@ -10,10 +10,11 @@ import { AxiosInstance } from 'axios';
 
 export type Config = {
   appId: number;
-  privateKey: string;
+  provider: any;
   email: string;
   gateway: any;
   debug: any;
+  chainId: any;
 };
 
 export class KeyGen {
@@ -88,20 +89,17 @@ interface encryptedI {
   mac: string;
 }
 
-export const getProvider = () => {
-  return new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
+export const getProvider = (provider: any) => {
+  return new providers.Web3Provider(provider);
 };
 
-export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
-  const provider = getProvider();
-  return new Contract(address, arcana.abi, wallet ? wallet : provider) as ArcanaT;
+export const Arcana = (address: string, provider): ArcanaT => {
+  return new Contract(address, arcana.abi, provider) as ArcanaT;
 };
 
-export const Forwarder = (address: string, wallet?: Wallet): ForwarderT => {
-  const provider = getProvider();
-  return new Contract(address, forwarder.abi, wallet ? wallet : provider) as ForwarderT;
+export const Forwarder = (address: string, provider): ForwarderT => {
+  return new Contract(address, forwarder.abi, provider) as ForwarderT;
 };
-
 
 const cleanMessage = (message: string): string => {
   if (!message) return '';
@@ -134,11 +132,9 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   return res.data;
 };
 
-
-export const checkTxnStatus = async (wallet: Wallet,txHash: string) => {
+export const checkTxnStatus = async (provider, txHash: string) => {
   await new Promise((r) => setTimeout(r, 1000));
-  const provider = getProvider();
-  let tx = await wallet.provider.getTransaction(txHash);
+  let tx = await provider.getTransaction(txHash);
   try {
     await tx.wait();
   } catch (e) {
@@ -151,8 +147,7 @@ export const checkTxnStatus = async (wallet: Wallet,txHash: string) => {
       throw customError('', e.error);
     }
   }
-
-}
+};
 
 export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
   const iv = new Uint8Array(16);
@@ -185,23 +180,6 @@ export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
   return str;
 };
 
-export const createChildKey = async (privateKey: string, index: number) => {
-  const enc = new TextEncoder();
-  const key = await window.crypto.subtle.importKey(
-    'raw', // raw format of the key - should be Uint8Array
-    fromHexString(privateKey),
-    {
-      // algorithm details
-      name: 'HMAC',
-      hash: { name: 'SHA-256' },
-    },
-    false, // export = false
-    ['sign', 'verify'], // what this key can do
-  );
-  const signature = await window.crypto.subtle.sign('HMAC', key, enc.encode(String(index)));
-  return getWallet(toHexString(signature));
-};
-
 export const encryptKey = async (publicKey: string, key: string): Promise<any> => {
   const encrypted = await encryptWithPublicKey(publicKey.substring(publicKey.length - 128), key);
   return JSON.stringify(encrypted);
@@ -211,26 +189,16 @@ export const decryptKey = async (privateKey: string, encryptedKey: string): Prom
   return await decryptWithPrivateKey(privateKey, JSON.parse(encryptedKey));
 };
 
-export const getEncryptedKey = async (address: string, fileId: string): Promise<string> => {
-  const arcana = Arcana(address);
+export const getEncryptedKey = async (address: string, fileId: string, provider: any): Promise<string> => {
+  const arcana = Arcana(address, provider);
   const file = await arcana.files(fileId);
   return utils.toUtf8String(file.encryptedKey);
 };
 
-export const isFileUploaded = async (address: string, fileId: string): Promise<boolean> => {
-  const arcana = Arcana(address);
+export const isFileUploaded = async (address: string, fileId: string, provider: any): Promise<boolean> => {
+  const arcana = Arcana(address, provider);
   const file = await arcana.files(fileId);
   return file.uploaded;
-};
-
-export const getWallet = (privateKey: string) => {
-  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
-  return new Wallet(privateKey, provider);
-};
-
-export const getRandomWallet = () => {
-  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
-  return Wallet.createRandom().connect(provider);
 };
 
 export const parseHex = (hex) => {

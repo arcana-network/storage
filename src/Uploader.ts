@@ -5,25 +5,21 @@ import {
   makeTx,
   AESEncrypt,
   encryptKey,
-  decryptKey,
-  getProvider,
   customError,
   isFileUploaded,
 } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
-import { utils, BigNumber } from 'ethers';
+import { utils, BigNumber, ethers } from 'ethers';
 import { AxiosInstance } from 'axios';
 
 export class Uploader {
-  private wallet: any;
-  private convergence: string;
+  private provider: any;
   private api: AxiosInstance;
   private appAddress: string;
 
-  constructor(appAddress: string, wallet: any, convergence: string, api: AxiosInstance) {
-    this.wallet = wallet;
-    this.convergence = convergence;
+  constructor(appAddress: string, provider: any, api: AxiosInstance) {
+    this.provider = provider;
     this.api = api;
     this.appAddress = appAddress;
   }
@@ -48,9 +44,8 @@ export class Uploader {
           console.log('retrying to fetch tx hash');
         }
       }
-      const provider = getProvider();
       try {
-        const tx = await provider.getTransaction(
+        const tx = await this.provider.getTransaction(
           res.data.hash.substring(0, 2) == '0x' ? res.data.hash : '0x' + res.data.hash,
         );
         await tx.wait();
@@ -71,20 +66,22 @@ export class Uploader {
 
   upload = async (fileRaw: any, chunkSize: number = 10 * 2 ** 20) => {
     let file = fileRaw;
-    const walletAddress = await this.wallet.getAddress();
+    const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
     let prevKey = localStorage.getItem(`${walletAddress}::key::${hash}`);
     let host = localStorage.getItem(`${walletAddress}::host::${hash}`);
     let token = localStorage.getItem(`${walletAddress}::token::${hash}`);
-    const did = utils.id(hash + this.convergence);
-    const wallet = this.wallet;
-
+    const sign_hash = await this.provider.send('personal_sign', [
+      `Sign this to proceed with the encryption of file with hash ${hash}`,
+      walletAddress,
+    ]);
+    const did = utils.id(hash + sign_hash);
+    console.log({ did });
     if (prevKey) {
-      const decryptedKey = await decryptKey(this.wallet.privateKey, prevKey);
-      key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, ['encrypt']);
-      if (await isFileUploaded(this.appAddress, did)) {
+      key = await window.crypto.subtle.importKey('raw', fromHexString(prevKey), 'AES-CTR', false, ['encrypt']);
+      if (await isFileUploaded(this.appAddress, did, this.provider)) {
         throw customError('TRANSACTION', `File is already uploaded. DID is ${did}`);
       }
     } else {
@@ -98,9 +95,6 @@ export class Uploader {
       );
       const aes_raw = await crypto.subtle.exportKey('raw', key);
       const hexString = toHexString(aes_raw);
-
-      const encryptedKey = await encryptKey(this.wallet._signingKey().publicKey, hexString);
-
       const encryptedMetaData = await AESEncrypt(
         key,
         JSON.stringify({
@@ -114,25 +108,22 @@ export class Uploader {
 
       let node = (await this.api.get('/get-node-address/')).data;
       host = node.host;
-
-      let res = await makeTx(this.appAddress, this.api, this.wallet, 'uploadInit', [
+      let res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(6),
         BigNumber.from(4),
         BigNumber.from(file.size),
         utils.toUtf8Bytes(encryptedMetaData),
-        utils.toUtf8Bytes(encryptedKey),
+        utils.toUtf8Bytes(hexString),
         node.address,
       ]);
       token = res.token;
       localStorage.setItem(`${walletAddress}::host:${hash}`, host);
-      localStorage.setItem(`${walletAddress}::key::${hash}`, encryptedKey);
+      localStorage.setItem(`${walletAddress}::key::${hash}`, hexString);
       localStorage.setItem(`${walletAddress}::token::${hash}`, token);
     }
     let endpoint = host + 'files/';
-    console.log('Token: ', token);
-    console.log('Endpoint: ', endpoint);
-    let upload = new tus.Upload(file, {
+	  let upload = new tus.Upload(file, {
       endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       metadata: {

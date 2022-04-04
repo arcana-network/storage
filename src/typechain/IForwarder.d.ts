@@ -19,45 +19,35 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface OwnableInterface extends ethers.utils.Interface {
+interface IForwarderInterface extends ethers.utils.Interface {
   functions: {
-    "owner()": FunctionFragment;
-    "renounceOwnership()": FunctionFragment;
-    "transferOwnership(address)": FunctionFragment;
+    "execute((address,address,uint256,uint256,uint256,bytes),bytes)": FunctionFragment;
+    "getNonce(address)": FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "renounceOwnership",
-    values?: undefined
+    functionFragment: "execute",
+    values: [
+      {
+        from: string;
+        to: string;
+        value: BigNumberish;
+        gas: BigNumberish;
+        nonce: BigNumberish;
+        data: BytesLike;
+      },
+      BytesLike
+    ]
   ): string;
-  encodeFunctionData(
-    functionFragment: "transferOwnership",
-    values: [string]
-  ): string;
+  encodeFunctionData(functionFragment: "getNonce", values: [string]): string;
 
-  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "renounceOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getNonce", data: BytesLike): Result;
 
-  events: {
-    "OwnershipTransferred(address,address)": EventFragment;
-  };
-
-  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  events: {};
 }
 
-export type OwnershipTransferredEvent = TypedEvent<
-  [string, string] & { previousOwner: string; newOwner: string }
->;
-
-export class Ownable extends BaseContract {
+export class IForwarder extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -98,84 +88,93 @@ export class Ownable extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: OwnableInterface;
+  interface: IForwarderInterface;
 
   functions: {
-    owner(overrides?: CallOverrides): Promise<[string]>;
-
-    renounceOwnership(
+    execute(
+      req: {
+        from: string;
+        to: string;
+        value: BigNumberish;
+        gas: BigNumberish;
+        nonce: BigNumberish;
+        data: BytesLike;
+      },
+      signature: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
+    getNonce(from: string, overrides?: CallOverrides): Promise<[BigNumber]>;
   };
 
-  owner(overrides?: CallOverrides): Promise<string>;
-
-  renounceOwnership(
+  execute(
+    req: {
+      from: string;
+      to: string;
+      value: BigNumberish;
+      gas: BigNumberish;
+      nonce: BigNumberish;
+      data: BytesLike;
+    },
+    signature: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  transferOwnership(
-    newOwner: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
+  getNonce(from: string, overrides?: CallOverrides): Promise<BigNumber>;
 
   callStatic: {
-    owner(overrides?: CallOverrides): Promise<string>;
-
-    renounceOwnership(overrides?: CallOverrides): Promise<void>;
-
-    transferOwnership(
-      newOwner: string,
+    execute(
+      req: {
+        from: string;
+        to: string;
+        value: BigNumberish;
+        gas: BigNumberish;
+        nonce: BigNumberish;
+        data: BytesLike;
+      },
+      signature: BytesLike,
       overrides?: CallOverrides
-    ): Promise<void>;
+    ): Promise<[boolean, string]>;
+
+    getNonce(from: string, overrides?: CallOverrides): Promise<BigNumber>;
   };
 
-  filters: {
-    "OwnershipTransferred(address,address)"(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): TypedEventFilter<
-      [string, string],
-      { previousOwner: string; newOwner: string }
-    >;
-
-    OwnershipTransferred(
-      previousOwner?: string | null,
-      newOwner?: string | null
-    ): TypedEventFilter<
-      [string, string],
-      { previousOwner: string; newOwner: string }
-    >;
-  };
+  filters: {};
 
   estimateGas: {
-    owner(overrides?: CallOverrides): Promise<BigNumber>;
-
-    renounceOwnership(
+    execute(
+      req: {
+        from: string;
+        to: string;
+        value: BigNumberish;
+        gas: BigNumberish;
+        nonce: BigNumberish;
+        data: BytesLike;
+      },
+      signature: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
+    getNonce(from: string, overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    renounceOwnership(
+    execute(
+      req: {
+        from: string;
+        to: string;
+        value: BigNumberish;
+        gas: BigNumberish;
+        nonce: BigNumberish;
+        data: BytesLike;
+      },
+      signature: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    transferOwnership(
-      newOwner: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
+    getNonce(
+      from: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
   };
 }

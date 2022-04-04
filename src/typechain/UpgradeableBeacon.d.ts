@@ -19,55 +19,61 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface IArcanaInterface extends ethers.utils.Interface {
+interface UpgradeableBeaconInterface extends ethers.utils.Interface {
   functions: {
-    "setAppName(string)": FunctionFragment;
-    "setClientId(string,string)": FunctionFragment;
-    "setClientIds(string[],string[])": FunctionFragment;
-    "setDefaultLimit(uint256,uint256)": FunctionFragment;
-    "setUserLevelLimit(address,uint256,uint256)": FunctionFragment;
+    "implementation()": FunctionFragment;
+    "owner()": FunctionFragment;
+    "renounceOwnership()": FunctionFragment;
+    "transferOwnership(address)": FunctionFragment;
+    "upgradeTo(address)": FunctionFragment;
   };
 
-  encodeFunctionData(functionFragment: "setAppName", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "setClientId",
-    values: [string, string]
+    functionFragment: "implementation",
+    values?: undefined
+  ): string;
+  encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "renounceOwnership",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "setClientIds",
-    values: [string[], string[]]
+    functionFragment: "transferOwnership",
+    values: [string]
   ): string;
-  encodeFunctionData(
-    functionFragment: "setDefaultLimit",
-    values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setUserLevelLimit",
-    values: [string, BigNumberish, BigNumberish]
-  ): string;
+  encodeFunctionData(functionFragment: "upgradeTo", values: [string]): string;
 
-  decodeFunctionResult(functionFragment: "setAppName", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setClientId",
+    functionFragment: "implementation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setClientIds",
+    functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(
-    functionFragment: "setDefaultLimit",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setUserLevelLimit",
-    data: BytesLike
-  ): Result;
+  decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
 
-  events: {};
+  events: {
+    "OwnershipTransferred(address,address)": EventFragment;
+    "Upgraded(address)": EventFragment;
+  };
+
+  getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
 
-export class IArcana extends BaseContract {
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string] & { previousOwner: string; newOwner: string }
+>;
+
+export type UpgradedEvent = TypedEvent<[string] & { implementation: string }>;
+
+export class UpgradeableBeacon extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -108,161 +114,126 @@ export class IArcana extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: IArcanaInterface;
+  interface: UpgradeableBeaconInterface;
 
   functions: {
-    setAppName(
-      _name: string,
+    implementation(overrides?: CallOverrides): Promise<[string]>;
+
+    owner(overrides?: CallOverrides): Promise<[string]>;
+
+    renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setClientId(
-      _client: string,
-      _clientId: string,
+    transferOwnership(
+      newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setClientIds(
-      _client: string[],
-      _clientId: string[],
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setDefaultLimit(
-      _store: BigNumberish,
-      _bandwidth: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setUserLevelLimit(
-      user: string,
-      store: BigNumberish,
-      bandwidth: BigNumberish,
+    upgradeTo(
+      newImplementation: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
 
-  setAppName(
-    _name: string,
+  implementation(overrides?: CallOverrides): Promise<string>;
+
+  owner(overrides?: CallOverrides): Promise<string>;
+
+  renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setClientId(
-    _client: string,
-    _clientId: string,
+  transferOwnership(
+    newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setClientIds(
-    _client: string[],
-    _clientId: string[],
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setDefaultLimit(
-    _store: BigNumberish,
-    _bandwidth: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setUserLevelLimit(
-    user: string,
-    store: BigNumberish,
-    bandwidth: BigNumberish,
+  upgradeTo(
+    newImplementation: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    setAppName(_name: string, overrides?: CallOverrides): Promise<void>;
+    implementation(overrides?: CallOverrides): Promise<string>;
 
-    setClientId(
-      _client: string,
-      _clientId: string,
+    owner(overrides?: CallOverrides): Promise<string>;
+
+    renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    transferOwnership(
+      newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setClientIds(
-      _client: string[],
-      _clientId: string[],
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setDefaultLimit(
-      _store: BigNumberish,
-      _bandwidth: BigNumberish,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
-    setUserLevelLimit(
-      user: string,
-      store: BigNumberish,
-      bandwidth: BigNumberish,
+    upgradeTo(
+      newImplementation: string,
       overrides?: CallOverrides
     ): Promise<void>;
   };
 
-  filters: {};
+  filters: {
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): TypedEventFilter<
+      [string, string],
+      { previousOwner: string; newOwner: string }
+    >;
+
+    OwnershipTransferred(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): TypedEventFilter<
+      [string, string],
+      { previousOwner: string; newOwner: string }
+    >;
+
+    "Upgraded(address)"(
+      implementation?: string | null
+    ): TypedEventFilter<[string], { implementation: string }>;
+
+    Upgraded(
+      implementation?: string | null
+    ): TypedEventFilter<[string], { implementation: string }>;
+  };
 
   estimateGas: {
-    setAppName(
-      _name: string,
+    implementation(overrides?: CallOverrides): Promise<BigNumber>;
+
+    owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setClientId(
-      _client: string,
-      _clientId: string,
+    transferOwnership(
+      newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setClientIds(
-      _client: string[],
-      _clientId: string[],
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setDefaultLimit(
-      _store: BigNumberish,
-      _bandwidth: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setUserLevelLimit(
-      user: string,
-      store: BigNumberish,
-      bandwidth: BigNumberish,
+    upgradeTo(
+      newImplementation: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    setAppName(
-      _name: string,
+    implementation(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setClientId(
-      _client: string,
-      _clientId: string,
+    transferOwnership(
+      newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setClientIds(
-      _client: string[],
-      _clientId: string[],
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setDefaultLimit(
-      _store: BigNumberish,
-      _bandwidth: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setUserLevelLimit(
-      user: string,
-      store: BigNumberish,
-      bandwidth: BigNumberish,
+    upgradeTo(
+      newImplementation: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };

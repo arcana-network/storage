@@ -18,25 +18,25 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface IBeaconInterface extends ethers.utils.Interface {
+interface IERC1822ProxiableUpgradeableInterface extends ethers.utils.Interface {
   functions: {
-    "implementation()": FunctionFragment;
+    "proxiableUUID()": FunctionFragment;
   };
 
   encodeFunctionData(
-    functionFragment: "implementation",
+    functionFragment: "proxiableUUID",
     values?: undefined
   ): string;
 
   decodeFunctionResult(
-    functionFragment: "implementation",
+    functionFragment: "proxiableUUID",
     data: BytesLike
   ): Result;
 
   events: {};
 }
 
-export class IBeacon extends BaseContract {
+export class IERC1822ProxiableUpgradeable extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -77,25 +77,25 @@ export class IBeacon extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: IBeaconInterface;
+  interface: IERC1822ProxiableUpgradeableInterface;
 
   functions: {
-    implementation(overrides?: CallOverrides): Promise<[string]>;
+    proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
   };
 
-  implementation(overrides?: CallOverrides): Promise<string>;
+  proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
   callStatic: {
-    implementation(overrides?: CallOverrides): Promise<string>;
+    proxiableUUID(overrides?: CallOverrides): Promise<string>;
   };
 
   filters: {};
 
   estimateGas: {
-    implementation(overrides?: CallOverrides): Promise<BigNumber>;
+    proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    implementation(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

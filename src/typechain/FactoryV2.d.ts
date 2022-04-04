@@ -20,7 +20,7 @@ import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
 import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
-interface FactoryInterface extends ethers.utils.Interface {
+interface FactoryV2Interface extends ethers.utils.Interface {
   functions: {
     "app(address)": FunctionFragment;
     "createNewApp(string,address,uint256,uint256,address,bool,bool,uint128,uint8,string[],string[])": FunctionFragment;
@@ -50,6 +50,7 @@ interface FactoryInterface extends ethers.utils.Interface {
     "updateNodeIp(address,string)": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
+    "version()": FunctionFragment;
     "voteUser(address,address,bool)": FunctionFragment;
     "voteUserRegistration(address,address,address)": FunctionFragment;
   };
@@ -154,6 +155,7 @@ interface FactoryInterface extends ethers.utils.Interface {
     functionFragment: "upgradeToAndCall",
     values: [string, BytesLike]
   ): string;
+  encodeFunctionData(functionFragment: "version", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "voteUser",
     values: [string, string, boolean]
@@ -242,6 +244,7 @@ interface FactoryInterface extends ethers.utils.Interface {
     functionFragment: "upgradeToAndCall",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "version", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "voteUser", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "voteUserRegistration",
@@ -279,7 +282,7 @@ export type OwnershipTransferredEvent = TypedEvent<
 
 export type UpgradedEvent = TypedEvent<[string] & { implementation: string }>;
 
-export class Factory extends BaseContract {
+export class FactoryV2 extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
   attach(addressOrName: string): this;
   deployed(): Promise<this>;
@@ -320,7 +323,7 @@ export class Factory extends BaseContract {
     toBlock?: string | number | undefined
   ): Promise<Array<TypedEvent<EventArgsArray & EventArgsObject>>>;
 
-  interface: FactoryInterface;
+  interface: FactoryV2Interface;
 
   functions: {
     app(arg0: string, overrides?: CallOverrides): Promise<[string]>;
@@ -447,6 +450,8 @@ export class Factory extends BaseContract {
       data: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    version(overrides?: CallOverrides): Promise<[string] & { ver: string }>;
 
     voteUser(
       _app: string,
@@ -583,6 +588,8 @@ export class Factory extends BaseContract {
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  version(overrides?: CallOverrides): Promise<string>;
+
   voteUser(
     _app: string,
     _user: string,
@@ -715,6 +722,8 @@ export class Factory extends BaseContract {
       data: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
+
+    version(overrides?: CallOverrides): Promise<string>;
 
     voteUser(
       _app: string,
@@ -912,6 +921,8 @@ export class Factory extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    version(overrides?: CallOverrides): Promise<BigNumber>;
+
     voteUser(
       _app: string,
       _user: string,
@@ -1059,6 +1070,8 @@ export class Factory extends BaseContract {
       data: BytesLike,
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
+
+    version(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     voteUser(
       _app: string,

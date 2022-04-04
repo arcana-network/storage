@@ -17,18 +17,18 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface ForwarderInterface extends ethers.utils.Interface {
   functions: {
-    "execute(tuple,bytes)": FunctionFragment;
+    "execute((address,address,uint256,uint256,uint256,bytes),bytes)": FunctionFragment;
+    "factory()": FunctionFragment;
     "getNonce(address)": FunctionFragment;
-    "isGateway(address)": FunctionFragment;
-    "modifyGateway(address,bool)": FunctionFragment;
     "owner()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "setFactory(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "verify(tuple,bytes)": FunctionFragment;
+    "verify((address,address,uint256,uint256,uint256,bytes),bytes)": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -45,17 +45,14 @@ interface ForwarderInterface extends ethers.utils.Interface {
       BytesLike
     ]
   ): string;
+  encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(functionFragment: "getNonce", values: [string]): string;
-  encodeFunctionData(functionFragment: "isGateway", values: [string]): string;
-  encodeFunctionData(
-    functionFragment: "modifyGateway",
-    values: [string, boolean]
-  ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "setFactory", values: [string]): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
@@ -76,17 +73,14 @@ interface ForwarderInterface extends ethers.utils.Interface {
   ): string;
 
   decodeFunctionResult(functionFragment: "execute", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "getNonce", data: BytesLike): Result;
-  decodeFunctionResult(functionFragment: "isGateway", data: BytesLike): Result;
-  decodeFunctionResult(
-    functionFragment: "modifyGateway",
-    data: BytesLike
-  ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setFactory", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
     data: BytesLike
@@ -99,6 +93,10 @@ interface ForwarderInterface extends ethers.utils.Interface {
 
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
 }
+
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string] & { previousOwner: string; newOwner: string }
+>;
 
 export class Forwarder extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -157,19 +155,18 @@ export class Forwarder extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    factory(overrides?: CallOverrides): Promise<[string]>;
+
     getNonce(from: string, overrides?: CallOverrides): Promise<[BigNumber]>;
-
-    isGateway(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
-
-    modifyGateway(
-      node: string,
-      value: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setFactory(
+      _factory: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -205,19 +202,18 @@ export class Forwarder extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  factory(overrides?: CallOverrides): Promise<string>;
+
   getNonce(from: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-  isGateway(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-  modifyGateway(
-    node: string,
-    value: boolean,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
 
   owner(overrides?: CallOverrides): Promise<string>;
 
   renounceOwnership(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setFactory(
+    _factory: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -253,19 +249,15 @@ export class Forwarder extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean, string]>;
 
+    factory(overrides?: CallOverrides): Promise<string>;
+
     getNonce(from: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    isGateway(arg0: string, overrides?: CallOverrides): Promise<boolean>;
-
-    modifyGateway(
-      node: string,
-      value: boolean,
-      overrides?: CallOverrides
-    ): Promise<void>;
 
     owner(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    setFactory(_factory: string, overrides?: CallOverrides): Promise<void>;
 
     transferOwnership(
       newOwner: string,
@@ -287,6 +279,14 @@ export class Forwarder extends BaseContract {
   };
 
   filters: {
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): TypedEventFilter<
+      [string, string],
+      { previousOwner: string; newOwner: string }
+    >;
+
     OwnershipTransferred(
       previousOwner?: string | null,
       newOwner?: string | null
@@ -310,19 +310,18 @@ export class Forwarder extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    factory(overrides?: CallOverrides): Promise<BigNumber>;
+
     getNonce(from: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    isGateway(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    modifyGateway(
-      node: string,
-      value: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setFactory(
+      _factory: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -359,25 +358,21 @@ export class Forwarder extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getNonce(
       from: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    isGateway(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    modifyGateway(
-      node: string,
-      value: boolean,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setFactory(
+      _factory: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
