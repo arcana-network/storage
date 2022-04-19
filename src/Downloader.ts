@@ -9,7 +9,7 @@ import {
   getDKGNodes,
   retriveFromDKG,
 } from './Utils';
-import { utils } from 'ethers';
+import { utils, Wallet } from 'ethers';
 import FileWriter from './FileWriter';
 import { readHash } from './constant';
 import Sha256 from './SHA256';
@@ -62,12 +62,18 @@ export class Downloader {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
     const arcana = Arcana(this.appAddress, this.provider);
     let file;
+
     try {
       file = await arcana.getFile(did, readHash, { from: await this.provider.getSigner().getAddress() });
     } catch (e) {
       throw customError('UNAUTHORIZED', "You can't download this file");
     }
-    let res = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [did, readHash]);
+    let ephemeralWallet = await Wallet.createRandom();
+    let res = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [
+      did,
+      readHash,
+      ephemeralWallet.address,
+    ]);
     let shares = {};
     const nodes = await getDKGNodes(this.provider);
     for (let i = 0; i < nodes.length; i++) {
