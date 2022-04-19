@@ -4,14 +4,20 @@ import {
   toHexString,
   makeTx,
   AESEncrypt,
-  encryptKey,
   customError,
   isFileUploaded,
+  storeInDKG,
+  getDKGNodes,
 } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
-import { utils, BigNumber, ethers } from 'ethers';
+import { utils, BigNumber, Wallet, ethers } from 'ethers';
 import { AxiosInstance } from 'axios';
+import { split } from 'shamir';
+import { encrypt } from 'eciesjs';
+import { join } from 'shamir';
+
+import { randomBytes } from 'crypto-browserify';
 
 export class Uploader {
   private provider: any;
@@ -35,12 +41,12 @@ export class Uploader {
   onUpload = async (host: string, token: string, did: string) => {
     if (host) {
       let res;
-      for (let i = 0; i < 5; i++) {
+      for (let i = 0; i < 8; i++) {
         try {
           res = await this.api.get(`${host}hash`, { headers: { Authorization: `Bearer ${token}` } });
           break;
         } catch {
-          await new Promise((r) => setTimeout(r, 1000));
+          await new Promise((r) => setTimeout(r, 500));
           console.log('retrying to fetch tx hash');
         }
       }
@@ -78,7 +84,6 @@ export class Uploader {
       walletAddress,
     ]);
     const did = utils.id(hash + sign_hash);
-    console.log({ did });
     if (prevKey) {
       key = await window.crypto.subtle.importKey('raw', fromHexString(prevKey), 'AES-CTR', false, ['encrypt']);
       if (await isFileUploaded(this.appAddress, did, this.provider)) {
@@ -108,22 +113,35 @@ export class Uploader {
 
       let node = (await this.api.get('/get-node-address/')).data;
       host = node.host;
+      let ephemeralWallet = await Wallet.createRandom();
       let res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
-        BigNumber.from(6),
-        BigNumber.from(4),
         BigNumber.from(file.size),
         utils.toUtf8Bytes(encryptedMetaData),
-        utils.toUtf8Bytes(hexString),
         node.address,
+        ephemeralWallet.address,
       ]);
       token = res.token;
+
+      // Fetch DKG Node Details from dkg contract
+      const nodes = await getDKGNodes(this.provider);
+      // Doing shamir secrete sharing
+      const parts = nodes.length;
+      // At least 2/3rd nodes is required for share recovery
+      const quorum = nodes.length - Math.floor(nodes.length / 3);
+      const shares = split(randomBytes, parts, quorum, new Uint8Array(aes_raw));
+      for (let i = 0; i < parts; i++) {
+        // const publicKey = nodes[i].pubKx._hex.replace('0x', '04') + nodes[i].pubKy._hex.replace('0x', '');
+        // let ciphertext = encrypt(publicKey, shares[i + 1]);
+        await storeInDKG(nodes[i].declaredIp, { did: did, data: shares[i + 1] });
+      }
+      console.log({ key: new Uint8Array(aes_raw), derived: join(shares), shares });
       localStorage.setItem(`${walletAddress}::host:${hash}`, host);
       localStorage.setItem(`${walletAddress}::key::${hash}`, hexString);
       localStorage.setItem(`${walletAddress}::token::${hash}`, token);
     }
     let endpoint = host + 'files/';
-	  let upload = new tus.Upload(file, {
+    let upload = new tus.Upload(file, {
       endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       metadata: {

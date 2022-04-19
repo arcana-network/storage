@@ -28,10 +28,9 @@ interface ArcanaInterface extends ethers.utils.Interface {
     "appName()": FunctionFragment;
     "changeFileOwner(bytes32,address)": FunctionFragment;
     "changeUserStatus(address,uint8)": FunctionFragment;
-    "checkPermission(bytes32,bytes32)": FunctionFragment;
+    "checkPermission(bytes32,bytes32,address)": FunctionFragment;
     "clientID(string)": FunctionFragment;
     "consumption(address)": FunctionFragment;
-    "convergence(address)": FunctionFragment;
     "defaultLimit()": FunctionFragment;
     "deleteAccount()": FunctionFragment;
     "deleteFile(bytes32)": FunctionFragment;
@@ -53,17 +52,16 @@ interface ArcanaInterface extends ethers.utils.Interface {
     "setAppName(string)": FunctionFragment;
     "setClientId(string,string)": FunctionFragment;
     "setClientIds(string[],string[])": FunctionFragment;
-    "setConvergence(string)": FunctionFragment;
     "setDefaultLimit(uint256,uint256)": FunctionFragment;
     "setUserLevelLimit(address,uint256,uint256)": FunctionFragment;
-    "share(bytes32[],address[],bytes32[],bytes[],uint256[])": FunctionFragment;
-    "shareUser(bytes32[],address[],bytes32[],bytes[],uint256[])": FunctionFragment;
+    "share(bytes32[],address[],bytes32[],uint256[])": FunctionFragment;
+    "shareUser(bytes32[],address[],bytes32[],uint256[])": FunctionFragment;
     "status(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
     "uploadClose(bytes32)": FunctionFragment;
-    "uploadInit(bytes32,uint256,uint256,uint256,bytes,bytes,address)": FunctionFragment;
+    "uploadInit(bytes32,uint256,bytes,address,address)": FunctionFragment;
     "userAccess(bytes32,bytes32,uint256)": FunctionFragment;
     "walletType()": FunctionFragment;
   };
@@ -88,11 +86,10 @@ interface ArcanaInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "checkPermission",
-    values: [BytesLike, BytesLike]
+    values: [BytesLike, BytesLike, string]
   ): string;
   encodeFunctionData(functionFragment: "clientID", values: [string]): string;
   encodeFunctionData(functionFragment: "consumption", values: [string]): string;
-  encodeFunctionData(functionFragment: "convergence", values: [string]): string;
   encodeFunctionData(
     functionFragment: "defaultLimit",
     values?: undefined
@@ -172,10 +169,6 @@ interface ArcanaInterface extends ethers.utils.Interface {
     values: [string[], string[]]
   ): string;
   encodeFunctionData(
-    functionFragment: "setConvergence",
-    values: [string]
-  ): string;
-  encodeFunctionData(
     functionFragment: "setDefaultLimit",
     values: [BigNumberish, BigNumberish]
   ): string;
@@ -185,11 +178,11 @@ interface ArcanaInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "share",
-    values: [BytesLike[], string[], BytesLike[], BytesLike[], BigNumberish[]]
+    values: [BytesLike[], string[], BytesLike[], BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "shareUser",
-    values: [BytesLike[], string[], BytesLike[], BytesLike[], BigNumberish[]]
+    values: [BytesLike[], string[], BytesLike[], BigNumberish[]]
   ): string;
   encodeFunctionData(functionFragment: "status", values: [string]): string;
   encodeFunctionData(
@@ -207,15 +200,7 @@ interface ArcanaInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "uploadInit",
-    values: [
-      BytesLike,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike,
-      string
-    ]
+    values: [BytesLike, BigNumberish, BytesLike, string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "userAccess",
@@ -251,10 +236,6 @@ interface ArcanaInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "clientID", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "consumption",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "convergence",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -315,10 +296,6 @@ interface ArcanaInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
-    functionFragment: "setConvergence",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
     functionFragment: "setDefaultLimit",
     data: BytesLike
   ): Result;
@@ -350,10 +327,10 @@ interface ArcanaInterface extends ethers.utils.Interface {
     "AdminChanged(address,address)": EventFragment;
     "BeaconUpgraded(address)": EventFragment;
     "DeleteFileEvent(address,bytes32)": EventFragment;
-    "NewFileUpdate(address,bytes32,uint256,uint256,uint256)": EventFragment;
+    "NewFileUpdate(address,bytes32,uint256)": EventFragment;
     "NewPermissionCheck(address,bytes32,uint256,bytes32)": EventFragment;
     "NewShare(address,bytes32,address,bytes32,uint256)": EventFragment;
-    "NewUpdateACK(address,bytes32,address,bytes32)": EventFragment;
+    "NewUpdateAccess(address,bytes32,address,bytes32)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Upgraded(address)": EventFragment;
   };
@@ -364,7 +341,7 @@ interface ArcanaInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "NewFileUpdate"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewPermissionCheck"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewShare"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewUpdateACK"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewUpdateAccess"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
@@ -380,11 +357,9 @@ export type DeleteFileEventEvent = TypedEvent<
 >;
 
 export type NewFileUpdateEvent = TypedEvent<
-  [string, string, BigNumber, BigNumber, BigNumber] & {
+  [string, string, BigNumber] & {
     identity: string;
     file: string;
-    n: BigNumber;
-    k: BigNumber;
     fileSize: BigNumber;
   }
 >;
@@ -408,7 +383,7 @@ export type NewShareEvent = TypedEvent<
   }
 >;
 
-export type NewUpdateACKEvent = TypedEvent<
+export type NewUpdateAccessEvent = TypedEvent<
   [string, string, string, string] & {
     identity: string;
     file: string;
@@ -472,9 +447,7 @@ export class Arcana extends BaseContract {
       arg1: BytesLike,
       arg2: string,
       overrides?: CallOverrides
-    ): Promise<
-      [string, BigNumber] & { encryptedKey: string; validity: BigNumber }
-    >;
+    ): Promise<[BigNumber]>;
 
     aggregateLogin(overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -497,6 +470,7 @@ export class Arcana extends BaseContract {
     checkPermission(
       _file: BytesLike,
       _accessType: BytesLike,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -508,8 +482,6 @@ export class Arcana extends BaseContract {
     ): Promise<
       [BigNumber, BigNumber] & { store: BigNumber; bandwidth: BigNumber }
     >;
-
-    convergence(arg0: string, overrides?: CallOverrides): Promise<[string]>;
 
     defaultLimit(
       overrides?: CallOverrides
@@ -532,23 +504,11 @@ export class Arcana extends BaseContract {
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<
-      [
-        string,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        boolean,
-        string,
-        string,
-        string
-      ] & {
+      [string, BigNumber, boolean, string, string] & {
         owner: string;
-        n: BigNumber;
-        k: BigNumber;
         fileSize: BigNumber;
         uploaded: boolean;
         encryptedMetaData: string;
-        encryptedKey: string;
         storageNode: string;
       }
     >;
@@ -569,23 +529,11 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<
       [
-        [
-          string,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          boolean,
-          string,
-          string,
-          string
-        ] & {
+        [string, BigNumber, boolean, string, string] & {
           owner: string;
-          n: BigNumber;
-          k: BigNumber;
           fileSize: BigNumber;
           uploaded: boolean;
           encryptedMetaData: string;
-          encryptedKey: string;
           storageNode: string;
         }
       ]
@@ -659,11 +607,6 @@ export class Arcana extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setConvergence(
-      _convergence: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
     setDefaultLimit(
       _store: BigNumberish,
       _bandwidth: BigNumberish,
@@ -681,7 +624,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -690,7 +632,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -720,12 +661,10 @@ export class Arcana extends BaseContract {
 
     uploadInit(
       _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
       _fileSize: BigNumberish,
       _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
       _storageNode: string,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -744,9 +683,7 @@ export class Arcana extends BaseContract {
     arg1: BytesLike,
     arg2: string,
     overrides?: CallOverrides
-  ): Promise<
-    [string, BigNumber] & { encryptedKey: string; validity: BigNumber }
-  >;
+  ): Promise<BigNumber>;
 
   aggregateLogin(overrides?: CallOverrides): Promise<boolean>;
 
@@ -769,6 +706,7 @@ export class Arcana extends BaseContract {
   checkPermission(
     _file: BytesLike,
     _accessType: BytesLike,
+    _ephemeral_address: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -780,8 +718,6 @@ export class Arcana extends BaseContract {
   ): Promise<
     [BigNumber, BigNumber] & { store: BigNumber; bandwidth: BigNumber }
   >;
-
-  convergence(arg0: string, overrides?: CallOverrides): Promise<string>;
 
   defaultLimit(
     overrides?: CallOverrides
@@ -804,23 +740,11 @@ export class Arcana extends BaseContract {
     arg0: BytesLike,
     overrides?: CallOverrides
   ): Promise<
-    [
-      string,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      boolean,
-      string,
-      string,
-      string
-    ] & {
+    [string, BigNumber, boolean, string, string] & {
       owner: string;
-      n: BigNumber;
-      k: BigNumber;
       fileSize: BigNumber;
       uploaded: boolean;
       encryptedMetaData: string;
-      encryptedKey: string;
       storageNode: string;
     }
   >;
@@ -838,23 +762,11 @@ export class Arcana extends BaseContract {
     _accessType: BytesLike,
     overrides?: CallOverrides
   ): Promise<
-    [
-      string,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      boolean,
-      string,
-      string,
-      string
-    ] & {
+    [string, BigNumber, boolean, string, string] & {
       owner: string;
-      n: BigNumber;
-      k: BigNumber;
       fileSize: BigNumber;
       uploaded: boolean;
       encryptedMetaData: string;
-      encryptedKey: string;
       storageNode: string;
     }
   >;
@@ -927,11 +839,6 @@ export class Arcana extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setConvergence(
-    _convergence: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
   setDefaultLimit(
     _store: BigNumberish,
     _bandwidth: BigNumberish,
@@ -949,7 +856,6 @@ export class Arcana extends BaseContract {
     _files: BytesLike[],
     _user: string[],
     _accessType: BytesLike[],
-    _encryptedKey: BytesLike[],
     _validity: BigNumberish[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -958,7 +864,6 @@ export class Arcana extends BaseContract {
     _files: BytesLike[],
     _user: string[],
     _accessType: BytesLike[],
-    _encryptedKey: BytesLike[],
     _validity: BigNumberish[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -988,12 +893,10 @@ export class Arcana extends BaseContract {
 
   uploadInit(
     _file: BytesLike,
-    _n: BigNumberish,
-    _k: BigNumberish,
     _fileSize: BigNumberish,
     _encryptedMetaData: BytesLike,
-    _encryptedKey: BytesLike,
     _storageNode: string,
+    _ephemeral_address: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -1012,9 +915,7 @@ export class Arcana extends BaseContract {
       arg1: BytesLike,
       arg2: string,
       overrides?: CallOverrides
-    ): Promise<
-      [string, BigNumber] & { encryptedKey: string; validity: BigNumber }
-    >;
+    ): Promise<BigNumber>;
 
     aggregateLogin(overrides?: CallOverrides): Promise<boolean>;
 
@@ -1037,6 +938,7 @@ export class Arcana extends BaseContract {
     checkPermission(
       _file: BytesLike,
       _accessType: BytesLike,
+      _ephemeral_address: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
@@ -1048,8 +950,6 @@ export class Arcana extends BaseContract {
     ): Promise<
       [BigNumber, BigNumber] & { store: BigNumber; bandwidth: BigNumber }
     >;
-
-    convergence(arg0: string, overrides?: CallOverrides): Promise<string>;
 
     defaultLimit(
       overrides?: CallOverrides
@@ -1067,23 +967,11 @@ export class Arcana extends BaseContract {
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<
-      [
-        string,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        boolean,
-        string,
-        string,
-        string
-      ] & {
+      [string, BigNumber, boolean, string, string] & {
         owner: string;
-        n: BigNumber;
-        k: BigNumber;
         fileSize: BigNumber;
         uploaded: boolean;
         encryptedMetaData: string;
-        encryptedKey: string;
         storageNode: string;
       }
     >;
@@ -1103,23 +991,11 @@ export class Arcana extends BaseContract {
       _accessType: BytesLike,
       overrides?: CallOverrides
     ): Promise<
-      [
-        string,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        boolean,
-        string,
-        string,
-        string
-      ] & {
+      [string, BigNumber, boolean, string, string] & {
         owner: string;
-        n: BigNumber;
-        k: BigNumber;
         fileSize: BigNumber;
         uploaded: boolean;
         encryptedMetaData: string;
-        encryptedKey: string;
         storageNode: string;
       }
     >;
@@ -1185,11 +1061,6 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setConvergence(
-      _convergence: string,
-      overrides?: CallOverrides
-    ): Promise<void>;
-
     setDefaultLimit(
       _store: BigNumberish,
       _bandwidth: BigNumberish,
@@ -1207,7 +1078,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1216,7 +1086,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1243,12 +1112,10 @@ export class Arcana extends BaseContract {
 
     uploadInit(
       _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
       _fileSize: BigNumberish,
       _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
       _storageNode: string,
+      _ephemeral_address: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1297,38 +1164,22 @@ export class Arcana extends BaseContract {
       file?: BytesLike | null
     ): TypedEventFilter<[string, string], { identity: string; file: string }>;
 
-    "NewFileUpdate(address,bytes32,uint256,uint256,uint256)"(
+    "NewFileUpdate(address,bytes32,uint256)"(
       identity?: string | null,
       file?: BytesLike | null,
-      n?: null,
-      k?: null,
       fileSize?: null
     ): TypedEventFilter<
-      [string, string, BigNumber, BigNumber, BigNumber],
-      {
-        identity: string;
-        file: string;
-        n: BigNumber;
-        k: BigNumber;
-        fileSize: BigNumber;
-      }
+      [string, string, BigNumber],
+      { identity: string; file: string; fileSize: BigNumber }
     >;
 
     NewFileUpdate(
       identity?: string | null,
       file?: BytesLike | null,
-      n?: null,
-      k?: null,
       fileSize?: null
     ): TypedEventFilter<
-      [string, string, BigNumber, BigNumber, BigNumber],
-      {
-        identity: string;
-        file: string;
-        n: BigNumber;
-        k: BigNumber;
-        fileSize: BigNumber;
-      }
+      [string, string, BigNumber],
+      { identity: string; file: string; fileSize: BigNumber }
     >;
 
     "NewPermissionCheck(address,bytes32,uint256,bytes32)"(
@@ -1395,7 +1246,7 @@ export class Arcana extends BaseContract {
       }
     >;
 
-    "NewUpdateACK(address,bytes32,address,bytes32)"(
+    "NewUpdateAccess(address,bytes32,address,bytes32)"(
       identity?: string | null,
       file?: BytesLike | null,
       user?: string | null,
@@ -1405,7 +1256,7 @@ export class Arcana extends BaseContract {
       { identity: string; file: string; user: string; accessType: string }
     >;
 
-    NewUpdateACK(
+    NewUpdateAccess(
       identity?: string | null,
       file?: BytesLike | null,
       user?: string | null,
@@ -1469,14 +1320,13 @@ export class Arcana extends BaseContract {
     checkPermission(
       _file: BytesLike,
       _accessType: BytesLike,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     clientID(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     consumption(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
-    convergence(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     defaultLimit(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1570,11 +1420,6 @@ export class Arcana extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setConvergence(
-      _convergence: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
     setDefaultLimit(
       _store: BigNumberish,
       _bandwidth: BigNumberish,
@@ -1592,7 +1437,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1601,7 +1445,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1631,12 +1474,10 @@ export class Arcana extends BaseContract {
 
     uploadInit(
       _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
       _fileSize: BigNumberish,
       _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
       _storageNode: string,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1679,6 +1520,7 @@ export class Arcana extends BaseContract {
     checkPermission(
       _file: BytesLike,
       _accessType: BytesLike,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1688,11 +1530,6 @@ export class Arcana extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     consumption(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
-    convergence(
       arg0: string,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
@@ -1795,11 +1632,6 @@ export class Arcana extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setConvergence(
-      _convergence: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
     setDefaultLimit(
       _store: BigNumberish,
       _bandwidth: BigNumberish,
@@ -1817,7 +1649,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -1826,7 +1657,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -1859,12 +1689,10 @@ export class Arcana extends BaseContract {
 
     uploadInit(
       _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
       _fileSize: BigNumberish,
       _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
       _storageNode: string,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 

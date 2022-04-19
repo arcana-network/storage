@@ -74,6 +74,7 @@ export class StorageProvider {
     }
     let res = (await axios.get(this.gateway + 'get-config/')).data;
     localStorage.setItem('forwarder', res['Forwarder']);
+    localStorage.setItem('dkg', res['DKG']);
     let accounts = await this.provider.send('eth_requestAccounts', []);
     let nonce = (await axios.get(this.gateway + `get-nonce/?address=${accounts[0]}`)).data;
     const signer = await this.provider.getSigner();
