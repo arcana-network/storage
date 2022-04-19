@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { ethers, utils } from 'ethers';
 import { readHash } from './constant';
-import { makeTx, getEncryptedKey, decryptKey, encryptKey, parseHex, Arcana } from './Utils';
+import { makeTx,  parseHex, Arcana } from './Utils';
 
 export class Access {
   private provider: any;
@@ -21,12 +21,9 @@ export class Access {
     await Promise.all(
       fileId.map(async (f) => {
         f = f.substring(0, 2) !== '0x' ? '0x' + f : f;
-        const key = await getEncryptedKey(this.appAddress, f, this.provider);
         await Promise.all(
           publicKey.map(async (p) => {
-            const pubKey = p.slice(p.length - 128);
             address.push(utils.computeAddress(p));
-            encryptedKey.push(utils.toUtf8Bytes(await encryptKey(pubKey, key)));
             accessType.push(readHash);
           }),
         );
@@ -36,7 +33,6 @@ export class Access {
       fileId,
       address,
       accessType,
-      encryptedKey,
       validity,
     ]);
   };
