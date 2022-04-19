@@ -2,10 +2,10 @@ import './SHA256';
 import Sha256 from './SHA256';
 import { Contract, providers, Wallet, utils, Bytes } from 'ethers';
 import arcana from './contracts/Arcana';
+import dkg from './contracts/DKG';
 import forwarder from './contracts/Forwarder';
-import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
 import { sign } from './signer';
-import { Arcana as ArcanaT, Forwarder as ForwarderT } from './typechain';
+import { Arcana as ArcanaT, Forwarder as ForwarderT, NodeList as NodeListT } from './typechain';
 import { AxiosInstance } from 'axios';
 
 export type Config = {
@@ -97,6 +97,10 @@ export const Arcana = (address: string, provider): ArcanaT => {
   return new Contract(address, arcana.abi, provider) as ArcanaT;
 };
 
+export const DKG = (address: string, provider): NodeListT => {
+  return new Contract(address, dkg.abi, provider) as NodeListT;
+};
+
 export const Forwarder = (address: string, provider): ForwarderT => {
   return new Contract(address, forwarder.abi, provider) as ForwarderT;
 };
@@ -120,7 +124,6 @@ function hex_to_ascii(str1) {
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
   const arcana: ArcanaT = Arcana(address, wallet);
   const forwarderContract: ForwarderT = Forwarder(localStorage.getItem('forwarder'), wallet);
-
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('meta-tx/', req);
   if (res.data.err) {
@@ -181,18 +184,11 @@ export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
 };
 
 export const encryptKey = async (publicKey: string, key: string): Promise<any> => {
-  const encrypted = await encryptWithPublicKey(publicKey.substring(publicKey.length - 128), key);
-  return JSON.stringify(encrypted);
+  return 'key';
 };
 
 export const decryptKey = async (privateKey: string, encryptedKey: string): Promise<string> => {
-  return await decryptWithPrivateKey(privateKey, JSON.parse(encryptedKey));
-};
-
-export const getEncryptedKey = async (address: string, fileId: string, provider: any): Promise<string> => {
-  const arcana = Arcana(address, provider);
-  const file = await arcana.files(fileId);
-  return utils.toUtf8String(file.encryptedKey);
+  return 'key';
 };
 
 export const isFileUploaded = async (address: string, fileId: string, provider: any): Promise<boolean> => {
@@ -209,4 +205,21 @@ export const customError = (code: string, message: string): Error => {
   const error: any = new Error(cleanMessage(message));
   error.code = code;
   return error;
+};
+
+export const storeInDKG = (url: string, req: any) => {
+  localStorage.setItem(`${url}req${req.did}`, req.data.join());
+};
+
+export const retriveFromDKG = (url: string, req: any) => {
+  //@ts-ignore
+  return new Uint8Array(localStorage.getItem(`${url}req${req.did}`).split(','));
+};
+
+export const getDKGNodes = async (provider): Promise<any[]> => {
+  // Fetch DKG Node Details from dkg contract
+  const dkg = DKG(localStorage.getItem('dkg'), provider);
+  const nodes = await dkg.getCurrentEpochDetails();
+  console.log({ nodes });
+  return nodes;
 };

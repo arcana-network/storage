@@ -1,11 +1,20 @@
 import Decryptor from './decrypt';
-import { decryptWithPrivateKey } from 'eth-crypto';
-import { Arcana, hasher2Hex, fromHexString, AESDecrypt, makeTx, customError } from './Utils';
-import { utils } from 'ethers';
+import {
+  Arcana,
+  hasher2Hex,
+  fromHexString,
+  AESDecrypt,
+  makeTx,
+  customError,
+  getDKGNodes,
+  retriveFromDKG,
+} from './Utils';
+import { utils, Wallet } from 'ethers';
 import FileWriter from './FileWriter';
 import { readHash } from './constant';
 import Sha256 from './SHA256';
 import { AxiosInstance } from 'axios';
+import { join } from 'shamir';
 
 const downloadBlob = (blob, fileName) => {
   // @ts-ignore
@@ -50,28 +59,31 @@ export class Downloader {
   onProgress = async (bytesDownloaded: number, bytesTotal: number) => {};
 
   download = async (did) => {
-    console.log('from downloader', did);
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
     const arcana = Arcana(this.appAddress, this.provider);
-    // @ts-ignore
-    window.arcana = arcana;
-    // @ts-ignore
-    window.appAddress = this.appAddress;
-    // @ts-ignore
-    window.provider = this.provider;
-
     let file;
+
     try {
       file = await arcana.getFile(did, readHash, { from: await this.provider.getSigner().getAddress() });
     } catch (e) {
       throw customError('UNAUTHORIZED', "You can't download this file");
     }
-    let res = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [did, readHash]);
-    const decryptedKey = utils.toUtf8String(file.encryptedKey);
-    const key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, [
-      'encrypt',
-      'decrypt',
+    let ephemeralWallet = await Wallet.createRandom();
+    let res = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [
+      did,
+      readHash,
+      ephemeralWallet.address,
     ]);
+    let shares = {};
+    const nodes = await getDKGNodes(this.provider);
+    for (let i = 0; i < nodes.length; i++) {
+      shares[i + 1] = await retriveFromDKG(nodes[i].declaredIp, { did });
+    }
+    console.log({ shares });
+    let decryptedKey = join(shares);
+    console.log({ decryptedKey });
+
+    const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt']);
 
     const fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)));
 
