@@ -61,7 +61,6 @@ export class Downloader {
   download = async (did) => {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
     const arcana = Arcana(this.appAddress, this.provider);
-
     let file;
     try {
       file = await arcana.getFile(did, readHash, { from: await this.provider.getSigner().getAddress() });
