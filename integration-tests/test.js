@@ -230,3 +230,30 @@ describe('Upload File', () => {
   //   chai.expect(await Access.getAccountStatus()).equal(2);
   // });
 });
+
+
+describe("Negative testing", ()=> {
+  let file, appId = 1001;
+  before(()=> {
+    file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 2, 'image/txt');
+    file = new File([file], file.name, { type: file.type });
+
+
+  })
+
+  it("Should return correct error for invalid app" , async ()=> {
+   let arcanaInstance = new arcana.storage.StorageProvider({
+      appId,
+      provider: window.ethereum,
+      email: makeEmail(),
+      gateway,
+      debug,
+    });
+
+
+    await arcanaInstance.login().catch(()=> {
+      chai.expect(true).is.true;
+    });
+
+  })
+})

@@ -90,8 +90,14 @@ export class StorageProvider {
         Authorization: `Bearer ${res.data.token}`,
       },
     });
-    this.appAddress = (await this.api.get(`get-address/?id=${this.appId}`)).data.address;
-    this.appAddress = this.appAddress.length === 40 ? '0x' + this.appAddress : this.appAddress;
+  
+     //fetch app address
+     res = await this.api.get(`get-address/?id=${this.appId}`);
+     if(!(res.data.address)){
+         throw new Error("App not found");
+     }
+     this.appAddress = res.data.address.length === 40 ? '0x' + res.data.address : res.data.address;
+
   };
 
   myFiles = async () => {
