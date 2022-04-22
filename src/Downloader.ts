@@ -1,5 +1,5 @@
 import Decryptor from './decrypt';
-import { Arcana, hasher2Hex, AESDecrypt, makeTx, customError, getDKGNodes, retriveFromDKG } from './Utils';
+import { Arcana, hasher2Hex, AESDecrypt, makeTx, customError, getDKGNodes } from './Utils';
 import { utils, Wallet } from 'ethers';
 import FileWriter from './FileWriter';
 import { readHash } from './constant';
@@ -84,9 +84,7 @@ export class Downloader {
       });
 
       let sh = res.data.result.share;
-      console.log('private key', ephemeralWallet.privateKey);
       shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh));
-      console.log(i + 1, sh, decrypt(ephemeralWallet.privateKey, decodeHex(sh)));
     }
     let decryptedKey = join(shares);
 

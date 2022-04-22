@@ -6,7 +6,6 @@ import {
   AESEncrypt,
   customError,
   isFileUploaded,
-  storeInDKG,
   getDKGNodes,
 } from './Utils';
 import * as tus from 'tus-js-client';
@@ -15,10 +14,9 @@ import { utils, BigNumber, Wallet, ethers } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
 import { split } from 'shamir';
 import { encrypt } from 'eciesjs';
-import { join } from 'shamir';
 
 import { randomBytes } from 'crypto-browserify';
-import { deepCopy, id } from 'ethers/lib/utils';
+import { id } from 'ethers/lib/utils';
 
 export class Uploader {
   private provider: any;
@@ -133,18 +131,13 @@ export class Uploader {
       // At least 2/3rd nodes is required for share recovery
       const quorum = nodes.length - Math.floor(nodes.length / 3);
       const shares = split(randomBytes, parts, quorum, new Uint8Array(aes_raw));
-      // @ts-ignore
-      window.shares = [];
       for (let i = 0; i < parts; i++) {
         const publicKey = nodes[i].pubKx._hex.replace('0x', '') + nodes[i].pubKy._hex.replace('0x', '');
         let ciphertext_raw = encrypt(publicKey, shares[i + 1]);
         let ciphertext = ciphertext_raw.toString('hex');
         localStorage.setItem('pk', ephemeralWallet.privateKey);
-        // @ts-ignore
-        window.shares[i + 1] = shares[i + 1];
-        console.log({ ciphertext, share: shares[i + 1].toString('hex') });
         let url = 'https://' + nodes[i].declaredIp + '/rpc';
-        let res = await axios.post(url, {
+        await axios.post(url, {
           jsonrpc: '2.0',
           method: 'StoreKeyShare',
           id: 10,

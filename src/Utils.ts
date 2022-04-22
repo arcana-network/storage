@@ -207,15 +207,6 @@ export const customError = (code: string, message: string): Error => {
   return error;
 };
 
-export const storeInDKG = (url: string, req: any) => {
-  localStorage.setItem(`${url}req${req.did}`, req.data.join());
-};
-
-export const retriveFromDKG = (url: string, req: any) => {
-  //@ts-ignore
-  return new Uint8Array(localStorage.getItem(`${url}req${req.did}`).split(','));
-};
-
 export const getDKGNodes = async (provider): Promise<any[]> => {
   // Fetch DKG Node Details from dkg contract
   const dkg = DKG(localStorage.getItem('dkg'), provider);
