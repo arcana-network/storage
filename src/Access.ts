@@ -14,16 +14,13 @@ export class Access {
     this.appAddress = appAddress;
   }
 
-  share = async (fileId: string[], publicKey: string[], validity: number[]): Promise<string> => {
-    let address = [];
-    let encryptedKey = [];
+  share = async (fileId: string[], address: string[], validity: number[]): Promise<string> => {
     let accessType = [];
     await Promise.all(
       fileId.map(async (f) => {
         f = f.substring(0, 2) !== '0x' ? '0x' + f : f;
         await Promise.all(
-          publicKey.map(async (p) => {
-            address.push(utils.computeAddress(p));
+          address.map(async (p) => {
             accessType.push(readHash);
           }),
         );
