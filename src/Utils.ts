@@ -220,6 +220,5 @@ export const getDKGNodes = async (provider): Promise<any[]> => {
   // Fetch DKG Node Details from dkg contract
   const dkg = DKG(localStorage.getItem('dkg'), provider);
   const nodes = await dkg.getCurrentEpochDetails();
-  console.log({ nodes });
   return nodes;
 };

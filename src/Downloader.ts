@@ -1,20 +1,14 @@
 import Decryptor from './decrypt';
-import {
-  Arcana,
-  hasher2Hex,
-  fromHexString,
-  AESDecrypt,
-  makeTx,
-  customError,
-  getDKGNodes,
-  retriveFromDKG,
-} from './Utils';
+import { Arcana, hasher2Hex, AESDecrypt, makeTx, customError, getDKGNodes, retriveFromDKG } from './Utils';
 import { utils, Wallet } from 'ethers';
 import FileWriter from './FileWriter';
 import { readHash } from './constant';
 import Sha256 from './SHA256';
-import { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { join } from 'shamir';
+import { id } from 'ethers/lib/utils';
+import { decodeHex } from 'eciesjs/dist/utils';
+import { decrypt } from 'eciesjs';
 
 const downloadBlob = (blob, fileName) => {
   // @ts-ignore
@@ -61,7 +55,8 @@ export class Downloader {
   download = async (did) => {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
     const arcana = Arcana(this.appAddress, this.provider);
-    let file;
+    let file, txHash;
+    const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
 
     try {
       file = await arcana.getFile(did, readHash, { from: await this.provider.getSigner().getAddress() });
@@ -74,14 +69,26 @@ export class Downloader {
       readHash,
       ephemeralWallet.address,
     ]);
+    txHash = res.txHash;
     let shares = {};
     const nodes = await getDKGNodes(this.provider);
     for (let i = 0; i < nodes.length; i++) {
-      shares[i + 1] = await retriveFromDKG(nodes[i].declaredIp, { did });
+      let res = await axios.post('https://' + nodes[i].declaredIp + '/rpc', {
+        jsonrpc: '2.0',
+        method: 'RetrieveKeyShare',
+        id: 10,
+        params: {
+          tx_hash: txHash,
+          signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash: txHash }))),
+        },
+      });
+
+      let sh = res.data.result.share;
+      console.log('private key', ephemeralWallet.privateKey);
+      shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh));
+      console.log(i + 1, sh, decrypt(ephemeralWallet.privateKey, decodeHex(sh)));
     }
-    console.log({ shares });
     let decryptedKey = join(shares);
-    console.log({ decryptedKey });
 
     const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt']);
 

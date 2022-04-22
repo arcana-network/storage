@@ -12,12 +12,13 @@ import {
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
 import { utils, BigNumber, Wallet, ethers } from 'ethers';
-import { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
 import { split } from 'shamir';
 import { encrypt } from 'eciesjs';
 import { join } from 'shamir';
 
 import { randomBytes } from 'crypto-browserify';
+import { deepCopy, id } from 'ethers/lib/utils';
 
 export class Uploader {
   private provider: any;
@@ -79,6 +80,7 @@ export class Uploader {
     let prevKey = localStorage.getItem(`${walletAddress}::key::${hash}`);
     let host = localStorage.getItem(`${walletAddress}::host::${hash}`);
     let token = localStorage.getItem(`${walletAddress}::token::${hash}`);
+    let tx_hash;
     const sign_hash = await this.provider.send('personal_sign', [
       `Sign this to proceed with the encryption of file with hash ${hash}`,
       walletAddress,
@@ -122,6 +124,7 @@ export class Uploader {
         ephemeralWallet.address,
       ]);
       token = res.token;
+      tx_hash = res.txHash;
 
       // Fetch DKG Node Details from dkg contract
       const nodes = await getDKGNodes(this.provider);
@@ -130,12 +133,28 @@ export class Uploader {
       // At least 2/3rd nodes is required for share recovery
       const quorum = nodes.length - Math.floor(nodes.length / 3);
       const shares = split(randomBytes, parts, quorum, new Uint8Array(aes_raw));
+      // @ts-ignore
+      window.shares = [];
       for (let i = 0; i < parts; i++) {
-        // const publicKey = nodes[i].pubKx._hex.replace('0x', '04') + nodes[i].pubKy._hex.replace('0x', '');
-        // let ciphertext = encrypt(publicKey, shares[i + 1]);
-        await storeInDKG(nodes[i].declaredIp, { did: did, data: shares[i + 1] });
+        const publicKey = nodes[i].pubKx._hex.replace('0x', '') + nodes[i].pubKy._hex.replace('0x', '');
+        let ciphertext_raw = encrypt(publicKey, shares[i + 1]);
+        let ciphertext = ciphertext_raw.toString('hex');
+        localStorage.setItem('pk', ephemeralWallet.privateKey);
+        // @ts-ignore
+        window.shares[i + 1] = shares[i + 1];
+        console.log({ ciphertext, share: shares[i + 1].toString('hex') });
+        let url = 'https://' + nodes[i].declaredIp + '/rpc';
+        let res = await axios.post(url, {
+          jsonrpc: '2.0',
+          method: 'StoreKeyShare',
+          id: 10,
+          params: {
+            tx_hash,
+            encrypted_share: ciphertext,
+            signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash, encrypted_share: ciphertext }))),
+          },
+        });
       }
-      console.log({ key: new Uint8Array(aes_raw), derived: join(shares), shares });
       localStorage.setItem(`${walletAddress}::host:${hash}`, host);
       localStorage.setItem(`${walletAddress}::key::${hash}`, hexString);
       localStorage.setItem(`${walletAddress}::token::${hash}`, token);
