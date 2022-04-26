@@ -1,7 +1,7 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-// const gateway = 'http://localhost:9010/api/v1/';
-const gateway = 'https://gateway-dev.arcana.network/api/v1/';
+const gateway = 'http://localhost:9010/api/v1/';
+// const gateway = 'https://gateway-dev.arcana.network/api/v1/';
 const appId = 1;
 const debug = false;
 const generateString = (length) => {
@@ -75,10 +75,10 @@ describe('Upload File', () => {
   //   chai.expect(files.length).equal(0);
   // });
 
-  it('Shared Files should return empty array', async () => {
-    let files = await arcanaInstance.sharedFiles();
-    chai.expect(files.length).equal(0);
-  });
+  // it('Shared Files should return empty array', async () => {
+  //   let files = await arcanaInstance.sharedFiles();
+  //   chai.expect(files.length).equal(0);
+  // });
 
   it('Should upload a file', async () => {
     let upload = await arcanaInstance.getUploader();
@@ -151,16 +151,16 @@ describe('Upload File', () => {
   //   chai.expect(files[0]['size']).equal(file.size);
   // });
 
-  it('Should download a file', async () => {
-    let download = await arcanaInstance.getDownloader();
-    download.onSuccess = () => {
-      console.log('Download completed');
-    };
-    download.onProgress = (a, b) => {
-      console.log(a, b);
-    };
-    await download.download(did);
-  });
+  // it('Should download a file', async () => {
+  //   let download = await arcanaInstance.getDownloader();
+  //   download.onSuccess = () => {
+  //     console.log('Download completed');
+  //   };
+  //   download.onProgress = (a, b) => {
+  //     console.log(a, b);
+  //   };
+  //   await download.download(did);
+  // });
 
   // it('Share file', async () => {
   //   access = await arcanaInstance.getAccess();
@@ -197,10 +197,25 @@ describe('Upload File', () => {
   //   chai.expect(tx).exist;
   // });
 
-  // // it('Change File Owner', async () => {
-  // //   let tx = await access.changeFileOwner(did, receiverWallet.address);
-  // //   chai.expect(tx).not.null;
-  // // });
+  it('Change File Owner', async () => {
+    access = await arcanaInstance.getAccess();
+    let newOwner = '0x04efC2A7E86cBaD7e5e65fc60eedfa92A413890e';
+    let tx = await access.changeFileOwner(did, newOwner);
+    chai.expect(tx).not.null;
+    alert(`Change Metamask Account to ${newOwner}`);
+    await new Promise((resolve) => setTimeout(resolve, 5000));
+    let newOwnerInstance = new arcana.storage.StorageProvider({
+      appId,
+      provider: window.ethereum,
+      email: makeEmail(),
+      gateway,
+      debug,
+    });
+    let files = await newOwnerInstance.myFiles();
+    chai.expect(files.length).equal(1);
+    // files = await arcanaInstance.myFiles();
+    // chai.expect(files.length).equal(0);
+  });
 
   // it('Get consumed and total upload limit', async () => {
   //   const Access = await arcanaInstance.getAccess();
@@ -231,18 +246,16 @@ describe('Upload File', () => {
   // });
 });
 
-
-describe("Negative testing", ()=> {
-  let file, appId = 1001;
-  before(()=> {
+describe('Negative testing', () => {
+  let file,
+    appId = 1001;
+  before(() => {
     file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 2, 'image/txt');
     file = new File([file], file.name, { type: file.type });
+  });
 
-
-  })
-
-  it("Should return correct error for invalid app" , async ()=> {
-   let arcanaInstance = new arcana.storage.StorageProvider({
+  it('Should return correct error for invalid app', async () => {
+    let arcanaInstance = new arcana.storage.StorageProvider({
       appId,
       provider: window.ethereum,
       email: makeEmail(),
@@ -250,10 +263,8 @@ describe("Negative testing", ()=> {
       debug,
     });
 
-
-    await arcanaInstance.login().catch(()=> {
+    await arcanaInstance.login().catch(() => {
       chai.expect(true).is.true;
     });
-
-  })
-})
+  });
+});
