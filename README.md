@@ -57,8 +57,8 @@ const Access = new arcanaInstance.getAccess();
 ```js
 // did: DID of file to be shared
 // address: recipients address
-// validity: For how long will be the user able to download the file
-Access.share([did], [address], [validity]);
+// validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds
+Access.share([did], [address]);
 ```
 
 #### Revoke access

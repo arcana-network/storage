@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
-import { ethers, utils } from 'ethers';
+import { BigNumber, ethers } from 'ethers';
 import { readHash } from './constant';
-import { makeTx,  parseHex, Arcana } from './Utils';
+import { makeTx, parseHex, Arcana, customError } from './Utils';
 
 export class Access {
   private provider: any;
@@ -26,11 +26,23 @@ export class Access {
         );
       }),
     );
+
+    let actualValidity
+    if (Array.isArray(validity)) {
+      if (!validity.every(x => BigNumber.isBigNumber(x) || Number.isFinite(x))) {
+        throw customError('TRANSACTION', 'Invalid argument passed to validity. Values must be a Number or a BigNumber')
+      }
+    } else if (validity == null) {
+      actualValidity = [ethers.constants.MaxUint256]
+    } else {
+      throw customError('TRANSACTION', 'Validity must be undefined or an array.')
+    }
+
     return await makeTx(this.appAddress, this.api, this.provider, 'share', [
       fileId,
       address,
       accessType,
-      validity,
+      actualValidity,
     ]);
   };
 
