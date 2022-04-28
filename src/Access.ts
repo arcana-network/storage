@@ -18,7 +18,7 @@ export class Access {
     let accessType = [];
     await Promise.all(
       fileId.map(async (f) => {
-        f = f.substring(0, 2) !== '0x' ? '0x' + f : f;
+        f = parseHex(f)
         await Promise.all(
           address.map(async (p) => {
             accessType.push(readHash);
@@ -38,6 +38,8 @@ export class Access {
       throw customError('TRANSACTION', 'Validity must be undefined or an array.')
     }
 
+    address = address.map(a => parseHex(a))
+
     return await makeTx(this.appAddress, this.api, this.provider, 'share', [
       fileId,
       address,
@@ -48,11 +50,13 @@ export class Access {
 
   revoke = async (fileId: string, address: string): Promise<string> => {
     fileId = parseHex(fileId);
+    address = parseHex(address)
     return await makeTx(this.appAddress, this.api, this.provider, 'revoke', [fileId, address, readHash]);
   };
 
   changeFileOwner = async (fileId: string, newOwnerAddress: string): Promise<string> => {
     fileId = parseHex(fileId);
+    newOwnerAddress = parseHex(newOwnerAddress)
     return await makeTx(this.appAddress, this.api, this.provider, 'changeFileOwner', [fileId, newOwnerAddress]);
   };
 

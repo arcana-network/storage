@@ -198,7 +198,7 @@ export const isFileUploaded = async (address: string, fileId: string, provider: 
 };
 
 export const parseHex = (hex) => {
-  return hex.substring(0, 2) != '0x' ? '0x' + hex : hex;
+  return hex.substring(0, 2) !== '0x' ? '0x' + hex : hex;
 };
 
 export const customError = (code: string, message: string): Error => {
