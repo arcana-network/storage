@@ -12,12 +12,11 @@ Licensor:             Arcana Network
 Licensed Work:        Arcana Storage SDK, Auth, Keystore
                       The Licensed Work is (c) 2022 Arcana Network
 
-Additional Use Grant: Any uses listed and defined at
-                      [TO be Updated to Arcana specific information
-                       v3-core-license-grants.uniswap.eth]
+Additional Use Grant: Any additional uses listed and defined at
+                      [Arcana Terms of Service](./ArcanaToS.txt).
 
-Change Date:          The earlier of [TBD 2023-04-01] or a date specified at
-                      [TBD v3-core-license-date.uniswap.eth]
+Change Date:          The earlier of 2026-05-11 or a date specified at
+                      [Arcana Terms of Service](./ArcanaToS.txt).
 
 Change License:       GNU General Public License v2.0 or later
 
@@ -39,7 +38,7 @@ above terminate.
 If your use of the Licensed Work does not comply with the requirements
 currently in effect as described in this License, you must purchase a
 commercial license from the Licensor, its affiliated entities, or authorized
-resellers, or you must refrain from using the Licensed Work.
+resellers or you must refrain from using the Licensed Work.
 
 All copies of the original and modified Licensed Work, and derivative works
 of the Licensed Work, are subject to this License. This License applies
@@ -48,8 +47,8 @@ for each version of the Licensed Work released by Licensor.
 
 You must conspicuously display this License on each original or modified copy
 of the Licensed Work. If you receive the Licensed Work in original or
-modified form from a third party, the terms and conditions set forth in this
-License apply to your use of that work.
+modified form from a third party, the terms, and conditions set forth in this 
+License applies to your use of that work.
 
 Any use of the Licensed Work in violation of this License will automatically
 terminate your rights under this License for the current and all other
