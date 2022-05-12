@@ -80,24 +80,31 @@ describe('Upload File', () => {
   //   chai.expect(files.length).equal(0);
   // });
 
-  it('Should upload a file', async () => {
-    let upload = await arcanaInstance.getUploader();
-    let complete = false;
-    upload.onSuccess = () => {
-      console.log('Completed file upload');
-      complete = true;
-      file_count += 1;
-    };
-    did = await upload.upload(file);
-    console.log('did', did);
-    upload.onError = (err) => {
-      console.log(err);
-      throw Error(err);
-    };
-    while (!complete) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-    }
+  it('Should download a file', async () => {
+    let downloadArcana = new arcana.storage.StorageProvider({
+      gateway,
+    });
+    await downloadArcana.downloadDID('0x13372127a7dc005a1d752568f6a8c199e7850571a5dc01fcec5fee8ac9de5334');
   });
+
+  // it('Should upload a file', async () => {
+  //   let upload = await arcanaInstance.getUploader();
+  //   let complete = false;
+  //   upload.onSuccess = () => {
+  //     console.log('Completed file upload');
+  //     complete = true;
+  //     file_count += 1;
+  //   };
+  //   did = await upload.upload(file);
+  //   console.log('did', did);
+  //   upload.onError = (err) => {
+  //     console.log(err);
+  //     throw Error(err);
+  //   };
+  //   while (!complete) {
+  //     await new Promise((resolve) => setTimeout(resolve, 800));
+  //   }
+  // });
 
   // it('Fail download tranaction', async () => {
   //   receiverWallet = await arcana.storage.utils.getRandomWallet();
@@ -197,25 +204,25 @@ describe('Upload File', () => {
   //   chai.expect(tx).exist;
   // });
 
-  it('Change File Owner', async () => {
-    access = await arcanaInstance.getAccess();
-    let newOwner = '0x04efC2A7E86cBaD7e5e65fc60eedfa92A413890e';
-    let tx = await access.changeFileOwner(did, newOwner);
-    chai.expect(tx).not.null;
-    alert(`Change Metamask Account to ${newOwner}`);
-    await new Promise((resolve) => setTimeout(resolve, 5000));
-    let newOwnerInstance = new arcana.storage.StorageProvider({
-      appId,
-      provider: window.ethereum,
-      email: makeEmail(),
-      gateway,
-      debug,
-    });
-    let files = await newOwnerInstance.myFiles();
-    chai.expect(files.length).equal(1);
-    // files = await arcanaInstance.myFiles();
-    // chai.expect(files.length).equal(0);
-  });
+  // it('Change File Owner', async () => {
+  //   access = await arcanaInstance.getAccess();
+  //   let newOwner = '0x04efC2A7E86cBaD7e5e65fc60eedfa92A413890e';
+  //   let tx = await access.changeFileOwner(did, newOwner);
+  //   chai.expect(tx).not.null;
+  //   alert(`Change Metamask Account to ${newOwner}`);
+  //   await new Promise((resolve) => setTimeout(resolve, 5000));
+  //   let newOwnerInstance = new arcana.storage.StorageProvider({
+  //     appId,
+  //     provider: window.ethereum,
+  //     email: makeEmail(),
+  //     gateway,
+  //     debug,
+  //   });
+  //   let files = await newOwnerInstance.myFiles();
+  //   chai.expect(files.length).equal(1);
+  //   // files = await arcanaInstance.myFiles();
+  //   // chai.expect(files.length).equal(0);
+  // });
 
   // it('Get consumed and total upload limit', async () => {
   //   const Access = await arcanaInstance.getAccess();
@@ -246,25 +253,25 @@ describe('Upload File', () => {
   // });
 });
 
-describe('Negative testing', () => {
-  let file,
-    appId = 1001;
-  before(() => {
-    file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 2, 'image/txt');
-    file = new File([file], file.name, { type: file.type });
-  });
+// describe('Negative testing', () => {
+//   let file,
+//     appId = 1001;
+//   before(() => {
+//     file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 2, 'image/txt');
+//     file = new File([file], file.name, { type: file.type });
+//   });
 
-  it('Should return correct error for invalid app', async () => {
-    let arcanaInstance = new arcana.storage.StorageProvider({
-      appId,
-      provider: window.ethereum,
-      email: makeEmail(),
-      gateway,
-      debug,
-    });
+//   it('Should return correct error for invalid app', async () => {
+//     let arcanaInstance = new arcana.storage.StorageProvider({
+//       appId,
+//       provider: window.ethereum,
+//       email: makeEmail(),
+//       gateway,
+//       debug,
+//     });
 
-    await arcanaInstance.login().catch(() => {
-      chai.expect(true).is.true;
-    });
-  });
-});
+//     await arcanaInstance.login().catch(() => {
+//       chai.expect(true).is.true;
+//     });
+//   });
+// });

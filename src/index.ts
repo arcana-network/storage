@@ -1,11 +1,12 @@
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { Access } from './Access';
-import { Config, getProvider, customError } from './Utils';
-import { providers } from 'ethers';
+import { Config, getProvider, customError, parseHex } from './Utils';
+import { Contract, providers } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
+import DID from './contracts/DID';
 
 export class StorageProvider {
   private provider: providers.Web3Provider;
@@ -16,10 +17,20 @@ export class StorageProvider {
   private gateway: string;
   private chainId: number;
 
-  constructor(config: Config) {
+  constructor(cfg: Config) {
+    let config;
+    if (cfg) {
+      config = cfg;
+    } else {
+      config = {};
+    }
+
     // If provider is provided by the user, use that provider
     if (config.provider) {
       this.provider = getProvider(config.provider);
+    } else {
+      // @ts-ignore
+      this.provider = getProvider(window.ethereum);
     }
     this.email = config.email;
     this.appId = config.appId;
@@ -45,6 +56,15 @@ export class StorageProvider {
       });
     }
   }
+
+  downloadDID = async (did: string) => {
+    await this.login();
+    let contract = new Contract(localStorage.getItem('did'), DID.abi, this.provider);
+    let file = await contract.getFile(parseHex(did));
+    this.appAddress = file.app;
+    let downloader = new Downloader(this.appAddress, this.provider, this.api);
+    await downloader.download(did);
+  };
 
   getUploader = async () => {
     await this.login();
@@ -75,6 +95,7 @@ export class StorageProvider {
     let res = (await axios.get(this.gateway + 'get-config/')).data;
     localStorage.setItem('forwarder', res['Forwarder']);
     localStorage.setItem('dkg', res['DKG']);
+    localStorage.setItem('did', res['DID']);
     let accounts = await this.provider.send('eth_requestAccounts', []);
     let nonce = (await axios.get(this.gateway + `get-nonce/?address=${accounts[0]}`)).data;
     const signer = await this.provider.getSigner();
@@ -90,14 +111,16 @@ export class StorageProvider {
         Authorization: `Bearer ${res.data.token}`,
       },
     });
-  
-     //fetch app address
-     res = await this.api.get(`get-address/?id=${this.appId}`);
-     if(!(res.data.address)){
-         throw new Error("App not found");
-     }
-     this.appAddress = res.data.address.length === 40 ? '0x' + res.data.address : res.data.address;
 
+    if (this.appId) {
+      // fetch app address
+      res = await this.api.get(`get-address/?id=${this.appId}`);
+      if (res.data.address) {
+        this.appAddress = res.data.address.length === 40 ? '0x' + res.data.address : res.data.address;
+      } else {
+        throw new Error('App not found');
+      }
+    }
   };
 
   myFiles = async () => {
