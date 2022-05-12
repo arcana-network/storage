@@ -67,4 +67,4 @@ We appreciate your feedback and contribution to Arcana Storage component. Open a
 
 Arcana Storage is distributed under the [Uniswap Business Source License 1.1](https://github.com/Uniswap/v3-core/blob/main/LICENSE).
 
-For details see [Arcana License](./LICENSE.txt).
+For details see [Arcana License](https://github.com/arcana-network/license/blob/main/LICENSE.md).
