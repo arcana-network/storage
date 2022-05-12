@@ -26,7 +26,8 @@ import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```js
 // address: Smart contract address of app
 // provider: Web3provider (Eg: If you have installed metamask then window.ethereum will work)
-// Default value of provider is window.ethereum
+//           Default value of provider is window.ethereum
+// appId: This field is optional. If you want to download a file with just did then you won't require this field
 const arcanaInstance = new arcana.storage.StorageProvider({ appId, provider, email });
 ```
 
@@ -104,6 +105,14 @@ let files = await arcanaInstance.sharedFiles();
 
 ```js
 let files = await arcanaInstance.myFiles();
+```
+
+### Download DID without any app id
+
+```js
+// Pass the provider if required otherwise it will choose window.ethereum by default
+let arcanaInstance = new arcana.storage.StorageProvider();
+await arcanaInstance.downloadDID('<did of the file>');
 ```
 
 ### FallBack Functions
