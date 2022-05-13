@@ -109,7 +109,6 @@ export class StorageProvider {
       did,
       image: res.request.responseURL + '/' + did,
     });
-    console.log(res2);
     return res2.request.responseURL + '/' + did;
   };
 
