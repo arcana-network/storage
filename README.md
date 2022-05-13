@@ -1,35 +1,11 @@
-<br/>
+# Arcana Storage
 
-<h1 align="center"><img src="./images/arcana_logo.png" height="24px"> </h1>
+## Installation
 
-<h3 align="center">
-
-[Arcana Network](https://arcana.network/) Storage SDK
-
-<br/>
-
-<div align="center"><img src="./images/arcana_storage.png"  width="100%"/></div>
-
-# 💪 Key Features
-
-<p>🗄️ &nbsp; Save dApp user data in Arcana data store</p>
-<p>🧩 &nbsp; Encrypt / Decrypt File data and metadata</p>
-<p>📂 &nbsp; Share data with other dApp users</p>
-<p>🔒 &nbsp; Revoke access to shared data</p>
-<p>🖼️ &nbsp; Change data ownership</p>
-<p>📈 &nbsp; Track data accesses via public blockchain browsers</p>
-
-# 🏗️ Installation
-
-## npm
+### Using npm/yarn
 
 ```shell
 npm i @arcana/storage
-```
-
-## yarn
-
-```shell
 yarn add @arcana/storage
 ```
 
@@ -43,28 +19,171 @@ You can use the standalone module which includes the polyfills.
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```
 
-# 📋 Prerequisites
+## Usage
 
-Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.arcana.network/).
+### Create an Arcana instance
 
-A unique **AppId** will be assigned to your dApp and you need to provide this to Arcana Storage SDK in order to use the SDK functionality.
+```js
+// address: Smart contract address of app
+// provider: Web3provider (Eg: If you have installed metamask then window.ethereum will work)
+//           Default value of provider is window.ethereum
+// appId: This field is optional. If you want to download a file with just did then you won't require this field
+const arcanaInstance = new arcana.storage.StorageProvider({ appId, provider, email });
+```
 
-# 📚 Documentation
+### Uploader
 
-Check out [Arcana Network documentation](https://docs.arcana.network/) for [Storage SDK Quick Start Guide](https://docs.arcana.network/stgsdk_qs), [Usage Guide](https://docs.arcana.network/stgsdk_usage) and [API reference Guide](https://docs.arcana.network/stg_ref).
+```js
+const Uploader = arcanaInstance.getUploader();
+// file: Blob format
+Uploader.upload(file);
+```
 
-Refer to the [sample app code](https://docs.arcana.network/demo-app) or the [How To Guides](https://docs.arcana.network/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
+### Downloader
 
-# 💡 Support
+```js
+const Downloader = arcanaInstance.getDownloader();
+// did: DID of file which you want to download
+Downloader.download(did);
+```
 
-For any support or integration related queries, contact [Arcana support team](mailto:https://support@newfang.io).
+### Access
 
-# 🤝 Contributing
+```js
+const Access = new arcanaInstance.getAccess();
+```
 
-We appreciate your feedback and contribution to Arcana Storage component. Open a GitHub issue and discuss your RFP with Arcana Network developers. We plan to come up with a detailed contributing guide soon. Stay tuned!
+#### Share a file
 
-# ℹ️ License
+```js
+// did: DID of file to be shared
+// address: recipients address
+// validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds
+Access.share([did], [address]);
+```
 
-Arcana Storage is distributed under the [Uniswap Business Source License 1.1](https://github.com/Uniswap/v3-core/blob/main/LICENSE).
+#### Revoke access
 
-For details see [Arcana License](https://github.com/arcana-network/license/blob/main/LICENSE.md).
+```js
+// did: DID of file from which access is removed
+// address: Address of the user who's access is getting revoked
+Access.revoke(did, address);
+```
+
+#### Change File owner
+
+```js
+// address: new owner's address
+Access.changeFileOwner(did, address);
+```
+
+#### Delete File
+
+```js
+Access.deleteFile(did);
+```
+
+#### Usage
+
+```js
+//Get consumed and total storage of the current user
+let [consumed, total] = await Access.getUploadLimit();
+```
+
+```js
+//Get consumed and total bandwidth of the current user
+let [consumed, total] = await Access.getDownloadLimit();
+```
+
+#### File shared with current user
+
+```js
+let files = await arcanaInstance.sharedFiles();
+```
+
+#### List of files uploaded by the user
+
+```js
+let files = await arcanaInstance.myFiles();
+```
+
+### Download DID without any app id
+
+```js
+// Pass the provider if required otherwise it will choose window.ethereum by default
+let arcanaInstance = new arcana.storage.StorageProvider();
+await arcanaInstance.downloadDID('<did of the file>');
+```
+
+### FallBack Functions
+
+#### 1. Upload
+
+##### 1.1 On Success
+
+```
+Uploader.onSuccess = () => {
+  console.log('Completed file upload');
+};
+```
+
+##### 1.2 On Error
+
+```
+Uploader.onError = (err) => {
+  console.log('Error', err);
+};
+```
+
+##### 1.3 On Progress
+
+```
+Uploader.onProgress = (bytesUploaded, bytesTotal) => {
+  console.log("Percentage completed", (100*bytesUploaded)/bytesTotal)
+};
+```
+
+#### 2. Download
+
+##### 2.1 On Success
+
+```
+Downloader.onSuccess = () => {
+  console.log('Completed file download');
+};
+```
+
+##### 2.2 On Progress
+
+```
+Downloader.onProgress = (bytesDownloaded, bytesTotal) => {
+  console.log("Percentage completed", (100*bytesDownloaded)/bytesTotal)
+};
+```
+
+## Error List
+
+| Code         | Message                                                  | Reason                                                                                                     |
+| ------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
+| UNAUTHORIZED | You can't download this file                             | Trying to download a file which is neither owned by you nor shared with you                                |
+| TRANSACTION  | This function can only be called by file owner           | Only owner of the file have access to the function i.e, either to delete, revoke or transfer file          |
+| TRANSACTION  | User is not active                                       | Your account is either disabled or deleted                                                                 |
+| TRANSACTION  | User not registered for the app                          | Your account is not registered for the app                                                                 |
+| TRANSACTION  | Only factory contract can call this function             | Only factory contract can set the app level limit i.e, storage and bandwidth                               |
+| TRANSACTION  | No space left for app                                    | Your current app's storage or bandwidth limit has been consumed                                            |
+| TRANSACTION  | No space left for user                                   | You have already consumed your storage or bandwidth limit                                                  |
+| TRANSACTION  | Not a trusted forwarder nor factory contract             | For meta transaction, transaction should happen from valid factory or farwarder contract                   |
+| TRANSACTION  | Owner already exist for this file                        | You cannot upload a file that is already uploaded by different user address                                |
+| TRANSACTION  | Should not be 0                                          | Your file size must not be null while uploading                                                            |
+| TRANSACTION  | Function can only be called by the assigned storage node | Only assigned storage node has access to the function                                                      |
+| TRANSACTION  | Not file owner                                           | You are not the file owner thus action cannot be done. Kindly verify your account address                  |
+| TRANSACTION  | Validity must be non zero                                | Validity is the access specifier and cannot be zero while sharing a file                                   |
+| TRANSACTION  | User was not deleted to reactivate                       | Your account was not deleted to reactivate                                                                 |
+| TRANSACTION  | An app already created with this Id                      | Use a valid app ID. Try configuring the app at https://dashboard.arcana.network/ to get app ID             |
+| TRANSACTION  | App calling the function is not registered               | configure the app at https://dashboard.arcana.network/                                                     |
+| TRANSACTION  | Please add some nodes to authenticate user               |
+| TRANSACTION  | Function can only called by nodes                        |
+| TRANSACTION  | Already voted                                            |
+| TRANSACTION  | Only gateway node can call this function                 | Only gateway node has access to the function                                                               |
+| TRANSACTION  | File must be uploaded before downloading it              | File not found                                                                                             |
+| TRANSACTION  | MinimalForwarder: signature does not match request       | Meta transaction failed. The function you are trying to call does not exists. check the function signature |
