@@ -81,6 +81,37 @@ export class StorageProvider {
     return new Downloader(this.appAddress, this.provider, this.api);
   };
 
+  makeMetadataURL = async (title: string, description: string, did: string, file: File) => {
+    await this.login();
+		// throw error if any input is empty
+		if (title === '' || description === '' || did === '' || file === null) {
+			throw new Error('Please fill in all the fields');
+		}
+    // get signer from provider
+    let signer = this.provider.getSigner();
+    let signature = await signer.signMessage(`Sign this message to attach NFT metadata with your did ${did}`);
+    let node = await this.api.get('/get-node-address/');
+    let api = axios.create({
+      baseURL: node.data['host'],
+      headers: {
+        Authorization: `Bearer ${did}-${signature}`,
+      },
+    });
+    let form = new FormData();
+    form.append('file', file);
+    let res = await api.post(`api/v1/nft`, form);
+    if (!res.data.success) {
+      throw new Error('Error uploading image');
+    }
+    let res2 = await api.post('/api/v1/metadata', {
+      title,
+      description,
+      did,
+      image: res.request.responseURL + '/' + did,
+    });
+    return res2.request.responseURL + '/' + did;
+  };
+
   login = async () => {
     // Already login hence return null response as no need to login again
     if (this.api) {
