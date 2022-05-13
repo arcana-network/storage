@@ -115,6 +115,20 @@ let arcanaInstance = new arcana.storage.StorageProvider();
 await arcanaInstance.downloadDID('<did of the file>');
 ```
 
+### Add Metdata URL for NFT use case
+
+```js
+let metadata = await nftArcana.makeMetadataURL(
+  title,
+  description,
+  did,
+  file,
+);
+console.log(metadata)
+// https://test-storage.arcana.network:9000/api/v1/metadata/0x129d1438ff3bf014e9b9094b3a5d410f691c208ed5305b0844307b761c0e295e
+```
+You can use this URL to mint your NFT
+
 ### FallBack Functions
 
 #### 1. Upload
