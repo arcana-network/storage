@@ -1,14 +1,22 @@
-<br/>
+<p align="center">
+<a href="#start"><img height="30rem" src="https://raw.githubusercontent.com/arcana-network/branding/main/an_logo_light_temp.png"></a>
+<h2 align="center"> <a href="https://arcana.network/">Arcana Network Storage SDK </a></h2>
+</p>
+<br>
+<p id="banner" align="center">
+<br>
+<a title="License BSL 1.1" href="https://github.com/arcana-network/license/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-BSL%201.1-purple"></a>
+<a title="Beta release" href="https://github.com/arcana-network/storage/releases"><img src="https://img.shields.io/github/v/release/arcana-network/storage?style=flat-square&color=28A745"></a>
+<a title="Twitter" href="https://twitter.com/ArcanaNetwork"><img alt="Twitter URL" src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FArcanaNetwork"></a>
+</p><p id="start" align="center">
+<a href="https://docs.arcana.network/"><img src="https://raw.githubusercontent.com/arcana-network/branding/main/an_banner_temp.png" alt="Arcana Storage SDK"></a>
+</p>
 
-<h1 align="center"><img src="./images/arcana_logo.png" height="24px"> </h1>
+# What is Storage SDK?
 
-<h3 align="center">
+The Arcana Storage SDK enables you to configure dApp and allow users to store files in a region enabled by the application, share it with other users, revoke access or transfer file ownership to another user.
 
-[Arcana Network](https://arcana.network/) Storage SDK
-
-<br/>
-
-<div align="center"><img src="./images/arcana_storage.png"  width="100%"/></div>
+In the beta release, the storage nodes are operated by Arcana Networks. In the future, the storage subsystem will be fully decentralized and third party storage nodes can be plugged into the Arcana Network storage subsystem once they meet the Arcana storage QoS criteria.
 
 # 💪 Key Features
 
@@ -57,7 +65,7 @@ Refer to the [sample app code](https://docs.arcana.network/demo-app) or the [How
 
 # 💡 Support
 
-For any support or integration related queries, contact [Arcana support team](mailto:https://support@newfang.io).
+For any support or integration related queries, contact [Arcana support team](mailto:support@arcana.network).
 
 # 🤝 Contributing
 
@@ -65,6 +73,6 @@ We appreciate your feedback and contribution to Arcana Storage component. Open a
 
 # ℹ️ License
 
-Arcana Storage is distributed under the [Uniswap Business Source License 1.1](https://github.com/Uniswap/v3-core/blob/main/LICENSE).
+Arcana Storage is distributed under the [Business Source License 1.1](https://mariadb.com/bsl11/).
 
 For details see [Arcana License](https://github.com/arcana-network/license/blob/main/LICENSE.md).
