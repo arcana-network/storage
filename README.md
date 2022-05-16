@@ -118,7 +118,7 @@ await arcanaInstance.downloadDID('<did of the file>');
 ### Add Metdata URL for NFT use case
 
 ```js
-let metadata = await nftArcana.makeMetadataURL(
+let metadata = await arcanaInstance.makeMetadataURL(
   title,
   description,
   did,
@@ -135,7 +135,7 @@ You can use this URL to mint your NFT
 
 ##### 1.1 On Success
 
-```
+```js
 Uploader.onSuccess = () => {
   console.log('Completed file upload');
 };
@@ -143,7 +143,7 @@ Uploader.onSuccess = () => {
 
 ##### 1.2 On Error
 
-```
+```js
 Uploader.onError = (err) => {
   console.log('Error', err);
 };
@@ -151,7 +151,7 @@ Uploader.onError = (err) => {
 
 ##### 1.3 On Progress
 
-```
+```js
 Uploader.onProgress = (bytesUploaded, bytesTotal) => {
   console.log("Percentage completed", (100*bytesUploaded)/bytesTotal)
 };
@@ -161,7 +161,7 @@ Uploader.onProgress = (bytesUploaded, bytesTotal) => {
 
 ##### 2.1 On Success
 
-```
+```js
 Downloader.onSuccess = () => {
   console.log('Completed file download');
 };
@@ -169,7 +169,7 @@ Downloader.onSuccess = () => {
 
 ##### 2.2 On Progress
 
-```
+```js
 Downloader.onProgress = (bytesDownloaded, bytesTotal) => {
   console.log("Percentage completed", (100*bytesDownloaded)/bytesTotal)
 };
