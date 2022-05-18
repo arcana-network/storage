@@ -37,7 +37,7 @@ export class StorageProvider {
     if (!config.gateway) {
       this.gateway = 'https://gateway-testnet.arcana.network/api/v1/';
     } else {
-      this.gateway = config.gateway + "/api/v1/";
+      this.gateway = new URL("/api/v1/",config.gateway).href;
     }
     if (!this.chainId) {
       this.chainId = 40404;
