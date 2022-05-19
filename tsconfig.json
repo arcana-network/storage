@@ -5,6 +5,7 @@
     "outDir": "dist",
     "declaration": true,
     "declarationDir": "types",
+    "importHelpers": true,
     "allowJs": true,
     "alwaysStrict": true,
     "sourceMap": true,

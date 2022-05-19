@@ -76,6 +76,7 @@
     "eth-sig-util": "^3.0.1",
     "ethers": "^5.6.1",
     "shamir": "^0.7.1",
+    "tslib": "^2.4.0",
     "tus-js-client": "^2.3.1",
     "tweetnacl": "^1.0.3"
   },
