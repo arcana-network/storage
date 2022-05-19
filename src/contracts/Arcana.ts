@@ -211,6 +211,32 @@ export default {
       "type": "event"
     },
     {
+      "inputs": [],
+      "name": "DID",
+      "outputs": [
+        {
+          "internalType": "contract IDID",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "NFTHandler",
+      "outputs": [
+        {
+          "internalType": "contract IArcanaNFTHandler",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
       "inputs": [
         {
           "internalType": "bytes32",
@@ -232,7 +258,12 @@ export default {
       "outputs": [
         {
           "internalType": "uint256",
-          "name": "",
+          "name": "version",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "time",
           "type": "uint256"
         }
       ],
@@ -282,7 +313,7 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_file",
+          "name": "_did",
           "type": "bytes32"
         },
         {
@@ -324,7 +355,7 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_file",
+          "name": "_did",
           "type": "bytes32"
         },
         {
@@ -421,7 +452,7 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_file",
+          "name": "_did",
           "type": "bytes32"
         }
       ],
@@ -447,46 +478,7 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "",
-          "type": "bytes32"
-        }
-      ],
-      "name": "files",
-      "outputs": [
-        {
-          "internalType": "address",
-          "name": "owner",
-          "type": "address"
-        },
-        {
-          "internalType": "uint256",
-          "name": "fileSize",
-          "type": "uint256"
-        },
-        {
-          "internalType": "bool",
-          "name": "uploaded",
-          "type": "bool"
-        },
-        {
-          "internalType": "bytes",
-          "name": "encryptedMetaData",
-          "type": "bytes"
-        },
-        {
-          "internalType": "address",
-          "name": "storageNode",
-          "type": "address"
-        }
-      ],
-      "stateMutability": "view",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "bytes32",
-          "name": "_file",
+          "name": "_did",
           "type": "bytes32"
         },
         {
@@ -528,7 +520,7 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_file",
+          "name": "_did",
           "type": "bytes32"
         },
         {
@@ -565,9 +557,19 @@ export default {
               "internalType": "address",
               "name": "storageNode",
               "type": "address"
+            },
+            {
+              "internalType": "address",
+              "name": "app",
+              "type": "address"
+            },
+            {
+              "internalType": "uint256",
+              "name": "version",
+              "type": "uint256"
             }
           ],
-          "internalType": "struct Arcana.File",
+          "internalType": "struct IDID.File",
           "name": "",
           "type": "tuple"
         }
@@ -647,6 +649,16 @@ export default {
           "internalType": "string[]",
           "name": "_clientId",
           "type": "string[]"
+        },
+        {
+          "internalType": "address",
+          "name": "_handlerContract",
+          "type": "address"
+        },
+        {
+          "internalType": "address",
+          "name": "_did",
+          "type": "address"
         }
       ],
       "name": "initialize",
@@ -698,6 +710,34 @@ export default {
       "type": "function"
     },
     {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "_did",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_tokenId",
+          "type": "uint256"
+        },
+        {
+          "internalType": "address",
+          "name": "_nftContract",
+          "type": "address"
+        },
+        {
+          "internalType": "uint256",
+          "name": "_chainId",
+          "type": "uint256"
+        }
+      ],
+      "name": "linkNFT",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
       "inputs": [],
       "name": "owner",
       "outputs": [
@@ -728,7 +768,7 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_file",
+          "name": "_did",
           "type": "bytes32"
         },
         {
@@ -774,24 +814,6 @@ export default {
         }
       ],
       "name": "setAppName",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
-          "internalType": "string",
-          "name": "_client",
-          "type": "string"
-        },
-        {
-          "internalType": "string",
-          "name": "_clientId",
-          "type": "string"
-        }
-      ],
-      "name": "setClientId",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -886,34 +908,6 @@ export default {
     {
       "inputs": [
         {
-          "internalType": "bytes32[]",
-          "name": "_files",
-          "type": "bytes32[]"
-        },
-        {
-          "internalType": "address[]",
-          "name": "_user",
-          "type": "address[]"
-        },
-        {
-          "internalType": "bytes32[]",
-          "name": "_accessType",
-          "type": "bytes32[]"
-        },
-        {
-          "internalType": "uint256[]",
-          "name": "_validity",
-          "type": "uint256[]"
-        }
-      ],
-      "name": "shareUser",
-      "outputs": [],
-      "stateMutability": "nonpayable",
-      "type": "function"
-    },
-    {
-      "inputs": [
-        {
           "internalType": "address",
           "name": "",
           "type": "address"
@@ -978,7 +972,7 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_file",
+          "name": "_did",
           "type": "bytes32"
         }
       ],
@@ -991,7 +985,7 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_file",
+          "name": "_did",
           "type": "bytes32"
         },
         {

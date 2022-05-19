@@ -1,14 +1,16 @@
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { Access } from './Access';
-import { Config, getProvider, customError } from './Utils';
-import { providers } from 'ethers';
+import { Config, getProvider, customError,makeTx, parseHex } from './Utils';
+import { ethers, providers,utils } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
 
+
 export class StorageProvider {
-  private provider: providers.Web3Provider;
+  // private provider: providers.Web3Provider;
+  private provider: any;
   private email: string;
   private api: AxiosInstance;
   private appAddress: string;
@@ -115,4 +117,13 @@ export class StorageProvider {
     if (res.data) data = res.data;
     return data;
   };
-}
+
+  linkNft = async (fileId:string, tokenId:Number, nftContract:string, chainId:Number) => {
+    fileId = parseHex(fileId);
+    nftContract = parseHex(nftContract);
+    return await makeTx(this.appAddress, this.api, this.provider  , 'linkNFT', [fileId, tokenId, nftContract,chainId]);
+  }
+
+  }
+
+

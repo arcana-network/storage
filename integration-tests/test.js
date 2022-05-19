@@ -1,7 +1,9 @@
+const { expect } = require("chai");
+
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-const gateway = 'http://localhost:9010/api/v1/';
-// const gateway = 'https://gateway-dev.arcana.network/api/v1/';
+// const gateway = 'http://localhost:9010/api/v1/';
+const gateway = 'https://gateway-dev.arcana.network/api/v1/';
 const appId = 1;
 const debug = false;
 const generateString = (length) => {
@@ -98,6 +100,16 @@ describe('Upload File', () => {
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
   });
+
+  it("Should link nft", async ()=> {
+    let 
+      chainId = 80001,
+        tokenId  = 3,
+        nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
+
+    let tx = await arcanaInstance.linkNft(did, tokenId, nftContract, chainId);
+    expect(true).to.be.true;
+  })
 
   // it('Fail download tranaction', async () => {
   //   receiverWallet = await arcana.storage.utils.getRandomWallet();
