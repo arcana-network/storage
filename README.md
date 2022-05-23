@@ -50,7 +50,7 @@ Downloader.download(did);
 ### Access
 
 ```js
-const Access = new arcanaInstance.getAccess();
+const Access = arcanaInstance.getAccess();
 ```
 
 #### Share a file
@@ -175,6 +175,23 @@ Downloader.onProgress = (bytesDownloaded, bytesTotal) => {
 };
 ```
 
+### On Change methods
+
+##### Network change
+```js
+// Below is default function, which can be modified by the developers
+arcanaInstance.onNetworkChange = (oldNetwork, newNetwork) => {
+  window.location.reload()
+}
+```
+##### Account change
+```js
+// Below is default function, which can be modified by the developers
+arcanaInstance.onAccountChange = (accounts) => {
+  window.location.reload()
+}
+```
+
 ## Error List
 
 | Code         | Message                                                  | Reason                                                                                                     |
@@ -201,3 +218,4 @@ Downloader.onProgress = (bytesDownloaded, bytesTotal) => {
 | TRANSACTION  | Only gateway node can call this function                 | Only gateway node has access to the function                                                               |
 | TRANSACTION  | File must be uploaded before downloading it              | File not found                                                                                             |
 | TRANSACTION  | MinimalForwarder: signature does not match request       | Meta transaction failed. The function you are trying to call does not exists. check the function signature |
+| WRONG_NETWORK  | Wrong Network       | You need to change the network/RPC url in your wallet |
