@@ -82,6 +82,14 @@ export const fromHexString = (hexString: string): Uint8Array =>
 export const toHexString = (bytes: ArrayBuffer): string =>
   new Uint8Array(bytes).reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
 
+export function ensureArray<T>(input: T[] | T): T[] {
+  if (!Array.isArray(input)) {
+    return [input]
+  } else {
+    return input
+  }
+}
+
 interface encryptedI {
   ciphertext: string;
   ephemPublicKey: string;
