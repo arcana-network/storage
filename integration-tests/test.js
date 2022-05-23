@@ -108,7 +108,7 @@ describe('Upload File', () => {
         nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
 
     let tx = await arcanaInstance.linkNft(did, tokenId, nftContract, chainId);
-    expect(true).to.be.true;
+    chai.expect(true).to.be.true;
   })
 
   // it('Fail download tranaction', async () => {
