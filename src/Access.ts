@@ -19,13 +19,11 @@ export class Access {
     const address = ensureArray(_address).map(parseHex)
 
     const accessType = [];
-    await Promise.all(
-      fileId.map(async () => {
-        address.forEach(() => {
-          accessType.push(readHash);
-        })
-      }),
-    );
+    fileId.forEach(() => {
+      address.forEach(() => {
+        accessType.push(readHash);
+      })
+    })
 
     let actualValidity
     if (Array.isArray(validity)) {
