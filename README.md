@@ -56,10 +56,10 @@ const Access = new arcanaInstance.getAccess();
 #### Share a file
 
 ```js
-// did: DID of file to be shared
-// address: recipients address
-// validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds
-Access.share([did], [address]);
+// did: DID of file to be shared, can be a hexadecimal string or an array of such strings
+// address: recipients address, similar type as "did"
+// validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds.
+Access.share(did, address);
 ```
 
 #### Revoke access
