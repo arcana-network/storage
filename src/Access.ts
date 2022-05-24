@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import { readHash } from './constant';
-import { makeTx, parseHex, Arcana, customError } from './Utils';
+import { makeTx, parseHex, Arcana, customError, ensureArray } from './Utils';
 
 export class Access {
   private provider: any;
@@ -14,31 +14,29 @@ export class Access {
     this.appAddress = appAddress;
   }
 
-  share = async (fileId: string[], address: string[], validity: number[]): Promise<string> => {
-    let accessType = [];
-    await Promise.all(
-      fileId.map(async (f) => {
-        f = parseHex(f)
-        await Promise.all(
-          address.map(async (p) => {
-            accessType.push(readHash);
-          }),
-        );
-      }),
-    );
+  share = async (fileId: string[] | string, _address: string[] | string, validity: number[] | number | null): Promise<string> => {
+    fileId = ensureArray(fileId).map(parseHex)
+    const address = ensureArray(_address).map(parseHex)
+
+    const accessType = [];
+    fileId.forEach(() => {
+      address.forEach(() => {
+        accessType.push(readHash);
+      })
+    })
 
     let actualValidity
     if (Array.isArray(validity)) {
       if (!validity.every(x => BigNumber.isBigNumber(x) || Number.isFinite(x))) {
         throw customError('TRANSACTION', 'Invalid argument passed to validity. Values must be a Number or a BigNumber')
       }
+    } else if (Number.isFinite(validity)) {
+      actualValidity = [validity]
     } else if (validity == null) {
       actualValidity = [ethers.constants.MaxUint256]
     } else {
       throw customError('TRANSACTION', 'Validity must be undefined or an array.')
     }
-
-    address = address.map(a => parseHex(a))
 
     return await makeTx(this.appAddress, this.api, this.provider, 'share', [
       fileId,
