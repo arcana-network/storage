@@ -19,9 +19,9 @@ You can use the standalone module which includes the polyfills.
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```
 
-## Usage
+## Storage SDK Usage
 
-### Create an Arcana instance
+### Initialize
 
 ```js
 // address: Smart contract address of app
@@ -31,7 +31,7 @@ import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 const arcanaInstance = new arcana.storage.StorageProvider({ appId, provider, email });
 ```
 
-### Uploader
+### Get Uploader
 
 ```js
 const Uploader = arcanaInstance.getUploader();
@@ -39,7 +39,7 @@ const Uploader = arcanaInstance.getUploader();
 Uploader.upload(file);
 ```
 
-### Downloader
+### Get Downloader
 
 ```js
 const Downloader = arcanaInstance.getDownloader();
@@ -47,13 +47,13 @@ const Downloader = arcanaInstance.getDownloader();
 Downloader.download(did);
 ```
 
-### Access
+### Get Access
 
 ```js
 const Access = arcanaInstance.getAccess();
 ```
 
-#### Share a file
+#### Share a File
 
 ```js
 // did: DID of file to be shared, can be a hexadecimal string or an array of such strings
@@ -62,7 +62,7 @@ const Access = arcanaInstance.getAccess();
 Access.share(did, address);
 ```
 
-#### Revoke access
+#### Revoke File Sharing
 
 ```js
 // did: DID of file from which access is removed
@@ -70,44 +70,51 @@ Access.share(did, address);
 Access.revoke(did, address);
 ```
 
-#### Change File owner
+#### Transfer File Ownership
 
 ```js
 // address: new owner's address
 Access.changeFileOwner(did, address);
 ```
 
-#### Delete File
+#### Delete a File
 
 ```js
 Access.deleteFile(did);
 ```
 
-#### Usage
+### Storage Usage Metrics
+
+#### Get Upload Limit
 
 ```js
 //Get consumed and total storage of the current user
 let [consumed, total] = await Access.getUploadLimit();
 ```
+#### Get Download Limit
 
 ```js
 //Get consumed and total bandwidth of the current user
 let [consumed, total] = await Access.getDownloadLimit();
 ```
 
-#### File shared with current user
+#### List Shared Files
+List files that are shared with the current user.
 
 ```js
 let files = await arcanaInstance.sharedFiles();
 ```
 
-#### List of files uploaded by the user
+#### List Uploaded files
+List files that are uploaded by the current user.
 
 ```js
 let files = await arcanaInstance.myFiles();
 ```
 
-### Download DID without any app id
+### Download File by DID
+
+**Note:** No appID is required to download a file using the file DID. The file DID is returned at the time of file upload and uniquely identifies the file.
 
 ```js
 // Pass the provider if required otherwise it will choose window.ethereum by default
@@ -115,7 +122,9 @@ let arcanaInstance = new arcana.storage.StorageProvider();
 await arcanaInstance.downloadDID('<did of the file>');
 ```
 
-### Add Metdata URL for NFT use case
+### Add Metdata URL
+
+**Note:** This is typically used for NFT use case.
 
 ```js
 let metadata = await arcanaInstance.makeMetadataURL(
@@ -133,9 +142,7 @@ You can use this URL to mint your NFT
 
 #### 1. Upload
 
-##### Basic
-
-###### 1.1 On Success
+##### 1.1 On Success
 
 ```js
 Uploader.onSuccess = () => {
@@ -143,7 +150,7 @@ Uploader.onSuccess = () => {
 };
 ```
 
-###### 1.2 On Progress
+##### 1.2 On Progress
 
 ```js
 Uploader.onProgress = (bytesUploaded, bytesTotal) => {
@@ -151,18 +158,27 @@ Uploader.onProgress = (bytesUploaded, bytesTotal) => {
 };
 ```
 
-##### Advanced: Error Handling
+#### 2. Download
 
-For every user action to upload a file, the Storage SDK splits the file into multiple parts and uploads them to the Arcana Store. If any of the file segment fails to transmit, it is automatically retried until all file segments are transferred. The automatic retry counter is hard coded to '5' in the beta release and the dApp developer cannot change this configuration.
+##### 2.1 On Success
 
-During file upload operation, if there are any uploading errors, dApp developers can address those by the following error handling options provided by the Storage SDK:
+```js
+Downloader.onSuccess = () => {
+  console.log('Completed file download');
+};
+```
 
-* Exception handling: Catch
-* onError()
+##### 2.2 On Progress
 
-It is **recommended** that dApp developers using *Exception handling - catch* for handling file upload errors.
+```js
+Downloader.onProgress = (bytesDownloaded, bytesTotal) => {
+  console.log("Percentage completed", (100*bytesDownloaded)/bytesTotal)
+};
+```
 
-###### Exception Handling: Catch
+#### Basic Error Handling
+
+During file upload or file download operations, if there are any errors, dApp developers can address those by catching the exception raised by the Storage SDK:
 
 ```javascript
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
@@ -187,10 +203,13 @@ uploader.upload(fileToUpload)
   });
 ```
 
-###### onError()
+#### Advanced Error Handling
 
-The onError option is available only for advanced usage by dApp developers. The Storage SDK typically handles file upload errors internally for 4 retries, automatically, in case of segment upload failure. If it fails for the fifth time, then it invokes `onError()` callback to enable dApp developer to take appropriate action or delay file transfer to deal with intermittent network failures.
+This advanced error handling section is only meant for file upload to address special dApp use cases. It is **recommended** that dApp developers using *Exception handling - catch* mechanism, for handling file upload errors.
 
+Every user action to upload a file internally results in the Storage SDK splitting the file into multiple parts according to the [tus](https://tus.io/) protocol. These parts are uploaded to the Arcana Store. If any of the file segment fails to transmit, it is automatically retried until all file segments are transferred. The automatic retry counter is hard coded to '5' in the beta release and the dApp developer cannot change this configuration.
+
+If the dApp developer is required to handle file upload error in case the retries fail, use `onError()` mechanism. After retrying for four times, in case of any segment upload fails for the fifth time, the Storage SDK invokes `onError()` callback to enable dApp developer to take appropriate action or delay file transfer to deal with intermittent network failures.
 
 ```js
 Uploader.onError = (err) => {
@@ -198,35 +217,16 @@ Uploader.onError = (err) => {
 };
 ```
 
+### Changing Network and Wallet Account
 
-#### 2. Download
-
-##### 2.1 On Success
-
-```js
-Downloader.onSuccess = () => {
-  console.log('Completed file download');
-};
-```
-
-##### 2.2 On Progress
-
-```js
-Downloader.onProgress = (bytesDownloaded, bytesTotal) => {
-  console.log("Percentage completed", (100*bytesDownloaded)/bytesTotal)
-};
-```
-
-### On Change methods
-
-##### Network change
+##### Change Network
 ```js
 // Below is default function, which can be modified by the developers
 arcanaInstance.onNetworkChange = (oldNetwork, newNetwork) => {
   window.location.reload()
 }
 ```
-##### Account change
+##### Change Account
 ```js
 // Below is default function, which can be modified by the developers
 arcanaInstance.onAccountChange = (accounts) => {
@@ -234,7 +234,7 @@ arcanaInstance.onAccountChange = (accounts) => {
 }
 ```
 
-## Error List
+## Storage SDK Error Messages
 
 | Code         | Message                                                  | Reason                                                                                                     |
 | ------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
@@ -245,7 +245,7 @@ arcanaInstance.onAccountChange = (accounts) => {
 | TRANSACTION  | Only factory contract can call this function             | Only factory contract can set the app level limit i.e, storage and bandwidth                               |
 | TRANSACTION  | No space left for app                                    | Your current app's storage or bandwidth limit has been consumed                                            |
 | TRANSACTION  | No space left for user                                   | You have already consumed your storage or bandwidth limit                                                  |
-| TRANSACTION  | Not a trusted forwarder nor factory contract             | For meta transaction, transaction should happen from valid factory or farwarder contract                   |
+| TRANSACTION  | Not a trusted forwarder nor factory contract             | For meta transaction, transaction should happen from valid factory or forwarder contract                   |
 | TRANSACTION  | Owner already exist for this file                        | You cannot upload a file that is already uploaded by different user address                                |
 | TRANSACTION  | Should not be 0                                          | Your file size must not be null while uploading                                                            |
 | TRANSACTION  | Function can only be called by the assigned storage node | Only assigned storage node has access to the function                                                      |
@@ -260,4 +260,4 @@ arcanaInstance.onAccountChange = (accounts) => {
 | TRANSACTION  | Only gateway node can call this function                 | Only gateway node has access to the function                                                               |
 | TRANSACTION  | File must be uploaded before downloading it              | File not found                                                                                             |
 | TRANSACTION  | MinimalForwarder: signature does not match request       | Meta transaction failed. The function you are trying to call does not exists. check the function signature |
-| WRONG_NETWORK  | Wrong Network       | You need to change the network/RPC url in your wallet |
+| WRONG_NETWORK  | Wrong Network       | You need to change the network/RPC URL in your wallet |
