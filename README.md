@@ -129,11 +129,13 @@ console.log(metadata)
 ```
 You can use this URL to mint your NFT
 
-### FallBack Functions
+### CallBack Functions
 
 #### 1. Upload
 
-##### 1.1 On Success
+##### Basic
+
+###### 1.1 On Success
 
 ```js
 Uploader.onSuccess = () => {
@@ -141,7 +143,54 @@ Uploader.onSuccess = () => {
 };
 ```
 
-##### 1.2 On Error
+###### 1.2 On Progress
+
+```js
+Uploader.onProgress = (bytesUploaded, bytesTotal) => {
+  console.log("Percentage completed", (100*bytesUploaded)/bytesTotal)
+};
+```
+
+##### Advanced: Error Handling
+
+For every user action to upload a file, the Storage SDK splits the file into multiple parts and uploads them to the Arcana Store. If any of the file segment fails to transmit, it is automatically retried until all file segments are transferred. The automatic retry counter is hard coded to '5' in the beta release and the dApp developer cannot change this configuration.
+
+During file upload operation, if there are any uploading errors, dApp developers can address those by the following error handling options provided by the Storage SDK:
+
+* Exception handling: Catch
+* onError()
+
+It is **recommended** that dApp developers using *Exception handling - catch* for handling file upload errors.
+
+###### Exception Handling: Catch
+
+```javascript
+import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
+
+dAppStorageProvider = new StorageProvider({
+        appId: ARCANA_APP_ID,
+        provider: window.ethereum,
+        email: user_email_string,
+      });
+
+const uploader = await dAppStorageProvider.getUploader();
+
+uploader.upload(fileToUpload)
+  .catch((error) => {
+    if (error.message === NO_SPACE) {
+      ...
+    } else if (error.code === UNAUTHORIZED) {
+      ...
+    } else {
+      ...
+    }
+  });
+```
+
+###### onError()
+
+The onError option is available only for advanced usage by dApp developers. The Storage SDK typically handles file upload errors internally for 4 retries, automatically, in case of segment upload failure. If it fails for the fifth time, then it invokes `onError()` callback to enable dApp developer to take appropriate action or delay file transfer to deal with intermittent network failures.
+
 
 ```js
 Uploader.onError = (err) => {
@@ -149,13 +198,6 @@ Uploader.onError = (err) => {
 };
 ```
 
-##### 1.3 On Progress
-
-```js
-Uploader.onProgress = (bytesUploaded, bytesTotal) => {
-  console.log("Percentage completed", (100*bytesUploaded)/bytesTotal)
-};
-```
 
 #### 2. Download
 
