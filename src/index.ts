@@ -7,6 +7,8 @@ import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
 import DID from './contracts/DID';
+import { constants } from 'buffer';
+import { chainId } from './constant';
 
 
 export class StorageProvider {
@@ -57,6 +59,27 @@ export class StorageProvider {
         tracesSampleRate: 1.0,
       });
     }
+        
+    this.provider.on("network", (newNetwork, oldNetwork) => {
+      if (oldNetwork) {
+        this.onNetworkChange(newNetwork, oldNetwork);
+      }
+    });
+
+    // call onAccountChange when the account changes
+    // @ts-ignore
+    this.provider.provider.on("accountsChanged", (accounts) => {
+      this.onAccountChange(accounts);
+    })
+  }
+
+  onNetworkChange = (newNetwork, oldNetwork) => {
+    window.location.reload();
+  }
+
+  // Reload on account changed
+  onAccountChange = (accounts) => {
+    window.location.reload();
   }
 
   downloadDID = async (did: string) => {
@@ -124,6 +147,15 @@ export class StorageProvider {
       if (window.ethereum) {
         throw customError;
       }
+    }
+
+    // Fetch chain id from provider
+    let network = await this.provider.getNetwork();
+    this.chainId = network.chainId;
+
+    // throw error if chain id is not equal to the chain id of the app
+    if (this.chainId !== chainId) {
+      throw new Error('Wrong network, please change the network to the arcana');
     }
     let res = (await axios.get(this.gateway + 'get-config/')).data;
     localStorage.setItem('forwarder', res['Forwarder']);

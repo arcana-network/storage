@@ -98,7 +98,7 @@ interface encryptedI {
 }
 
 export const getProvider = (provider: any) => {
-  return new providers.Web3Provider(provider);
+  return new providers.Web3Provider(provider, "any");
 };
 
 export const Arcana = (address: string, provider): ArcanaT => {
