@@ -1,5 +1,5 @@
 import Decryptor from './decrypt';
-import { Arcana, hasher2Hex, AESDecrypt, makeTx, customError, getDKGNodes } from './Utils';
+import { Arcana, hasher2Hex, AESDecrypt, makeTx, customError, getDKGNodes, getFile } from './Utils';
 import { utils, Wallet } from 'ethers';
 import FileWriter from './FileWriter';
 import { readHash } from './constant';
@@ -59,7 +59,7 @@ export class Downloader {
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
 
     try {
-      file = await arcana.getFile(did, readHash, { from: await this.provider.getSigner().getAddress() });
+      file = await getFile(did, this.provider);
     } catch (e) {
       throw customError('UNAUTHORIZED', "You can't download this file");
     }
