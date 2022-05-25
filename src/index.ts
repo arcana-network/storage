@@ -1,13 +1,12 @@
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { Access } from './Access';
-import { Config, getProvider, customError,makeTx, parseHex } from './Utils';
+import { Config, getProvider, customError,makeTx, parseHex, getFile } from './Utils';
 import { Contract } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
 import DID from './contracts/DID';
-import { constants } from 'buffer';
 import { chainId } from './constant';
 
 
@@ -84,8 +83,7 @@ export class StorageProvider {
 
   downloadDID = async (did: string) => {
     await this.login();
-    let contract = new Contract(localStorage.getItem('did'), DID.abi, this.provider);
-    let file = await contract.getFile(parseHex(did));
+    const file = await getFile(did, this.provider);
     this.appAddress = file.app;
     let downloader = new Downloader(this.appAddress, this.provider, this.api);
     await downloader.download(did);
@@ -209,7 +207,4 @@ export class StorageProvider {
     nftContract = parseHex(nftContract);
     return await makeTx(this.appAddress, this.api, this.provider  , 'linkNFT', [fileId, tokenId, nftContract,chainId]);
   }
-
-  }
-
-
+}

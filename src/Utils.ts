@@ -7,6 +7,8 @@ import forwarder from './contracts/Forwarder';
 import { sign } from './signer';
 import { Arcana as ArcanaT, Forwarder as ForwarderT, NodeList as NodeListT } from './typechain';
 import { AxiosInstance } from 'axios';
+import DID from './contracts/DID';
+import { Web3Provider } from '@ethersproject/providers';
 
 export type Config = {
   appId: number;
@@ -221,3 +223,9 @@ export const getDKGNodes = async (provider): Promise<any[]> => {
   const nodes = await dkg.getCurrentEpochDetails();
   return nodes;
 };
+
+export const getFile = async (did: string, provider: Web3Provider): Promise<any> => {
+  let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
+  let file = await contract.getFile(parseHex(did));
+  return file
+}
