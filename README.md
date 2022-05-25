@@ -122,7 +122,9 @@ let arcanaInstance = new arcana.storage.StorageProvider();
 await arcanaInstance.downloadDID('<did of the file>');
 ```
 
-### Add Metdata URL
+## NFT
+
+#### Create Metdata URL
 
 **Note:** This is typically used for NFT use case.
 
@@ -137,6 +139,14 @@ console.log(metadata)
 // https://test-storage.arcana.network:9000/api/v1/metadata/0x129d1438ff3bf014e9b9094b3a5d410f691c208ed5305b0844307b761c0e295e
 ```
 You can use this URL to mint your NFT
+
+#### Link NFT with did
+**Note:** After minting NFT inorder to use this NFT as a private NFT you need to link it with did
+```js
+let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
+    await arcanaInstance.linkNft(did, tokenId, nftContract, chainId); 
+```
+
 
 ### CallBack Functions
 
