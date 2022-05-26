@@ -1,4 +1,4 @@
-[Storage SDK Reference Guide](../README.md) / [Modules](../modules.md) / index
+[Storage SDK Reference Guide - v0.1.4](../README.md) / [Modules](../modules.md) / index
 
 # Module: index
 

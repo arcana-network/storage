@@ -1,6 +1,6 @@
-[Storage SDK Reference Guide](README.md) / Modules
+[Storage SDK Reference Guide - v0.1.4](README.md) / Modules
 
-# Storage SDK Reference Guide
+# Storage SDK Reference Guide - v0.1.4
 
 ## Table of contents
 

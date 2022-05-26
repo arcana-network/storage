@@ -1,4 +1,4 @@
-[Storage SDK Reference Guide](../README.md) / [Modules](../modules.md) / Downloader
+[Storage SDK Reference Guide - v0.1.4](../README.md) / [Modules](../modules.md) / Downloader
 
 # Module: Downloader
 
@@ -31,4 +31,4 @@
 
 #### Defined in
 
-[Downloader.ts:34](https://github.com/arcana-network/storage/blob/75e1c9e/src/Downloader.ts#L34)
+[Downloader.ts:34](https://github.com/arcana-network/storage/blob/663885f/src/Downloader.ts#L34)

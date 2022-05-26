@@ -1,4 +1,4 @@
-[Storage SDK Reference Guide](../README.md) / [Modules](../modules.md) / [Access](../modules/Access.md) / Access
+[Storage SDK Reference Guide - v0.1.4](../README.md) / [Modules](../modules.md) / [Access](../modules/Access.md) / Access
 
 # Class: Access
 
@@ -38,7 +38,7 @@
 
 #### Defined in
 
-[Access.ts:11](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L11)
+[Access.ts:11](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L11)
 
 ## Methods
 
@@ -59,7 +59,7 @@
 
 #### Defined in
 
-[Access.ts:55](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L55)
+[Access.ts:55](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L55)
 
 ___
 
@@ -73,7 +73,7 @@ ___
 
 #### Defined in
 
-[Access.ts:66](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L66)
+[Access.ts:66](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L66)
 
 ___
 
@@ -93,7 +93,7 @@ ___
 
 #### Defined in
 
-[Access.ts:61](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L61)
+[Access.ts:61](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L61)
 
 ___
 
@@ -107,7 +107,7 @@ ___
 
 #### Defined in
 
-[Access.ts:70](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L70)
+[Access.ts:70](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L70)
 
 ___
 
@@ -121,7 +121,7 @@ ___
 
 #### Defined in
 
-[Access.ts:81](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L81)
+[Access.ts:81](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L81)
 
 ___
 
@@ -141,7 +141,7 @@ ___
 
 #### Defined in
 
-[Access.ts:87](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L87)
+[Access.ts:87](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L87)
 
 ___
 
@@ -155,7 +155,7 @@ ___
 
 #### Defined in
 
-[Access.ts:75](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L75)
+[Access.ts:75](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L75)
 
 ___
 
@@ -176,7 +176,7 @@ ___
 
 #### Defined in
 
-[Access.ts:49](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L49)
+[Access.ts:49](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L49)
 
 ___
 
@@ -198,4 +198,4 @@ ___
 
 #### Defined in
 
-[Access.ts:17](https://github.com/arcana-network/storage/blob/75e1c9e/src/Access.ts#L17)
+[Access.ts:17](https://github.com/arcana-network/storage/blob/663885f/src/Access.ts#L17)

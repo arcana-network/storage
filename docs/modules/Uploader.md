@@ -1,4 +1,4 @@
-[Storage SDK Reference Guide](../README.md) / [Modules](../modules.md) / Uploader
+[Storage SDK Reference Guide - v0.1.4](../README.md) / [Modules](../modules.md) / Uploader
 
 # Module: Uploader
 
