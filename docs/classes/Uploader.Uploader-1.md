@@ -34,7 +34,7 @@
 
 #### Defined in
 
-[Uploader.ts:26](https://github.com/arcana-network/storage/blob/663885f/src/Uploader.ts#L26)
+[Uploader.ts:26](https://github.com/arcana-network/storage/blob/47fb00e/src/Uploader.ts#L26)
 
 ## Methods
 
@@ -54,7 +54,7 @@
 
 #### Defined in
 
-[Uploader.ts:36](https://github.com/arcana-network/storage/blob/663885f/src/Uploader.ts#L36)
+[Uploader.ts:36](https://github.com/arcana-network/storage/blob/47fb00e/src/Uploader.ts#L36)
 
 ___
 
@@ -75,7 +75,7 @@ ___
 
 #### Defined in
 
-[Uploader.ts:34](https://github.com/arcana-network/storage/blob/663885f/src/Uploader.ts#L34)
+[Uploader.ts:34](https://github.com/arcana-network/storage/blob/47fb00e/src/Uploader.ts#L34)
 
 ___
 
@@ -89,7 +89,7 @@ ___
 
 #### Defined in
 
-[Uploader.ts:32](https://github.com/arcana-network/storage/blob/663885f/src/Uploader.ts#L32)
+[Uploader.ts:32](https://github.com/arcana-network/storage/blob/47fb00e/src/Uploader.ts#L32)
 
 ___
 
@@ -111,7 +111,7 @@ ___
 
 #### Defined in
 
-[Uploader.ts:40](https://github.com/arcana-network/storage/blob/663885f/src/Uploader.ts#L40)
+[Uploader.ts:40](https://github.com/arcana-network/storage/blob/47fb00e/src/Uploader.ts#L40)
 
 ___
 
@@ -132,4 +132,4 @@ ___
 
 #### Defined in
 
-[Uploader.ts:72](https://github.com/arcana-network/storage/blob/663885f/src/Uploader.ts#L72)
+[Uploader.ts:72](https://github.com/arcana-network/storage/blob/47fb00e/src/Uploader.ts#L72)
