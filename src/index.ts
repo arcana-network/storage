@@ -8,7 +8,7 @@ import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
 import DID from './contracts/DID';
 import { chainId } from './constant';
-
+import { wrapInstance } from "./sentry";
 
 export class StorageProvider {
   // private provider: providers.Web3Provider;
@@ -19,6 +19,7 @@ export class StorageProvider {
   private appId: number;
   private gateway: string;
   private chainId: number;
+  private debug: boolean;
 
   constructor(cfg: Config) {
     let config;
@@ -47,18 +48,23 @@ export class StorageProvider {
     } else {
       this.chainId = config.chainId;
     }
+
     if (config.debug) {
       SentryInit({
-        dsn: 'https://1a411b6bfed244de8f6a7d64bb432bd4@o1011868.ingest.sentry.io/6081085',
+        dsn: 'https://6fbd3c0536b543ecbacbf6ba4320ec11@o394338.ingest.sentry.io/5244311',
         integrations: [
           new Integrations.BrowserTracing({
             tracingOrigins: [this.gateway],
           }),
         ],
-        tracesSampleRate: 1.0,
+        tracesSampleRate: 0,
       });
+      wrapInstance(this)
+      this.debug = true
+    } else {
+      this.debug = false
     }
-        
+
     this.provider.on("network", (newNetwork, oldNetwork) => {
       if (oldNetwork) {
         this.onNetworkChange(newNetwork, oldNetwork);
@@ -85,23 +91,23 @@ export class StorageProvider {
     await this.login();
     const file = await getFile(did, this.provider);
     this.appAddress = file.app;
-    let downloader = new Downloader(this.appAddress, this.provider, this.api);
+    const downloader = new Downloader(this.appAddress, this.provider, this.api, this.debug);
     await downloader.download(did);
   };
 
   getUploader = async () => {
     await this.login();
-    return new Uploader(this.appAddress, this.provider, this.api);
+    return new Uploader(this.appAddress, this.provider, this.api, this.debug);
   };
 
   getAccess = async () => {
     await this.login();
-    return new Access(this.appAddress, this.provider, this.api);
+    return new Access(this.appAddress, this.provider, this.api, this.debug);
   };
 
   getDownloader = async () => {
     await this.login();
-    return new Downloader(this.appAddress, this.provider, this.api);
+    return new Downloader(this.appAddress, this.provider, this.api, this.debug);
   };
 
   makeMetadataURL = async (title: string, description: string, did: string, file: File) => {

@@ -9,6 +9,7 @@ import { join } from 'shamir';
 import { id } from 'ethers/lib/utils';
 import { decodeHex } from 'eciesjs/dist/utils';
 import { decrypt } from 'eciesjs';
+import {wrapInstance} from "./sentry";
 
 const downloadBlob = (blob, fileName) => {
   // @ts-ignore
@@ -42,11 +43,15 @@ export class Downloader {
   private api: AxiosInstance;
   private appAddress: string;
 
-  constructor(appAddress: string, provider: any, api: AxiosInstance) {
+  constructor(appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
     this.provider = provider;
     this.hasher = new Sha256();
     this.api = api;
     this.appAddress = appAddress;
+
+    if (debug) {
+      wrapInstance(this)
+    }
   }
 
   onSuccess = async () => {};
