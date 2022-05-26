@@ -229,3 +229,9 @@ export const getFile = async (did: string, provider: Web3Provider): Promise<any>
   let file = await contract.getFile(parseHex(did));
   return file
 }
+
+export const getAppAddress = async (did: string, provider: Web3Provider): Promise<string> => {
+  let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
+  let appAddress = (await contract.getFile(parseHex(did))).app;
+  return appAddress
+}
