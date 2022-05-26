@@ -1,6 +1,7 @@
 const path = require('path');
 const webpack = require('webpack');
 const { merge } = require('webpack-merge');
+const { docs } = require("@nomiclabs/hardhat-ethers");
 
 const commonConfig = {
   entry: path.resolve(__dirname, 'src', 'index.ts'),

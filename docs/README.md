@@ -1,3 +1,5 @@
+Storage SDK Reference Guide / [Modules](modules.md)
+
 # Arcana Storage
 
 ## Installation
@@ -147,7 +149,6 @@ let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a7608
     await arcanaInstance.linkNft(did, tokenId, nftContract, chainId); 
 ```
 
-
 ### CallBack Functions
 
 #### 1. Upload
@@ -271,19 +272,3 @@ arcanaInstance.onAccountChange = (accounts) => {
 | TRANSACTION  | File must be uploaded before downloading it              | File not found                                                                                             |
 | TRANSACTION  | MinimalForwarder: signature does not match request       | Meta transaction failed. The function you are trying to call does not exists. check the function signature |
 | WRONG_NETWORK  | Wrong Network       | You need to change the network/RPC URL in your wallet |
-
-## Storage SDK Reference Docs
-
-You can auto-generate markdown and html documentation containing Storage SDK Reference Guide. Follow teh steps listed below:
-
-### Markdown Documentation
-
-```
-npm run docs
-```
-
-### HTML Documentation
-
-```
-npm run htmldocs
-```
