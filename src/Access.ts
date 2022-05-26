@@ -2,16 +2,21 @@ import { AxiosInstance } from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import { readHash } from './constant';
 import { makeTx, parseHex, Arcana, customError, ensureArray } from './Utils';
+import { wrapInstance } from "./sentry";
 
 export class Access {
   private provider: any;
   private api: AxiosInstance;
   private appAddress: string;
 
-  constructor(appAddress: string, provider: any, api: AxiosInstance) {
+  constructor(appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
     this.provider = provider;
     this.api = api;
     this.appAddress = appAddress;
+
+    if (debug) {
+      wrapInstance(this)
+    }
   }
 
   share = async (fileId: string[] | string, _address: string[] | string, validity: number[] | number | null): Promise<string> => {
@@ -87,6 +92,6 @@ export class Access {
   getSharedUsers = async (fileId: string): Promise<string[]> => {
     const arcana = Arcana(this.appAddress, this.provider);
     let users = await arcana.getAllUsers(fileId, readHash);
-    return users.filter((d) => d != ethers.constants.AddressZero);
+    return users.filter((d) => d !== ethers.constants.AddressZero);
   };
 }
