@@ -3,7 +3,6 @@ import { captureException } from "@sentry/browser";
 const reportedErrors = new Set()
 
 export function wrapMethod (ctx, fn) {
-  // tslint:disable-next-line:only-arrow-functions
   return async (...args) => {
     try {
       return await fn.apply(ctx, args)
@@ -23,7 +22,13 @@ export function wrapInstance (ins) {
   for (const insKey in ins) {
     const v = ins[insKey]
     if (typeof v === 'function') {
-      ins[insKey] = wrapMethod(ins, v)
+      const wrapped = wrapMethod(ins, v)
+      ins[insKey] = wrapped
+
+      // If v has any other properties, carry them over, no need to wrap
+      for (const [l2key, val] of Object.entries(v)) {
+        wrapped[l2key] = val
+      }
     }
   }
 }
