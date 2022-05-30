@@ -17,16 +17,21 @@ import { encrypt } from 'eciesjs';
 
 import { randomBytes } from 'crypto-browserify';
 import { id } from 'ethers/lib/utils';
+import {wrapInstance} from "./sentry";
 
 export class Uploader {
   private provider: any;
   private api: AxiosInstance;
   private appAddress: string;
 
-  constructor(appAddress: string, provider: any, api: AxiosInstance) {
+  constructor(appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
     this.provider = provider;
     this.api = api;
     this.appAddress = appAddress;
+
+    if (debug) {
+      wrapInstance(this)
+    }
   }
 
   onSuccess = () => {};

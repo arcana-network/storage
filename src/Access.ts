@@ -2,16 +2,21 @@ import { AxiosInstance } from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import { readHash } from './constant';
 import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress } from './Utils';
+import { wrapInstance } from "./sentry";
 
 export class Access {
   private provider: any;
   private api: AxiosInstance;
   private appAddress: string;
 
-  constructor(appAddress: string | undefined, provider: any, api: AxiosInstance) {
+  constructor(appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
     this.provider = provider;
     this.api = api;
     this.appAddress = appAddress;
+
+    if (debug) {
+      wrapInstance(this)
+    }
   }
 
   setAppAddress = async (did: string) => {
@@ -99,6 +104,6 @@ export class Access {
     await this.setAppAddress(did);
     const arcana = Arcana(this.appAddress, this.provider);
     let users = await arcana.getAllUsers(did, readHash);
-    return users.filter((d) => d != ethers.constants.AddressZero);
+    return users.filter((d) => d !== ethers.constants.AddressZero);
   };
 }
