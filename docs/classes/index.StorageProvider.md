@@ -38,7 +38,7 @@
 
 #### Defined in
 
-[index.ts:23](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L23)
+[index.ts:23](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L23)
 
 ## Methods
 
@@ -58,7 +58,7 @@
 
 #### Defined in
 
-[index.ts:84](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L84)
+[index.ts:84](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L84)
 
 ___
 
@@ -72,7 +72,7 @@ ___
 
 #### Defined in
 
-[index.ts:97](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L97)
+[index.ts:97](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L97)
 
 ___
 
@@ -86,7 +86,7 @@ ___
 
 #### Defined in
 
-[index.ts:102](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L102)
+[index.ts:102](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L102)
 
 ___
 
@@ -100,7 +100,7 @@ ___
 
 #### Defined in
 
-[index.ts:92](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L92)
+[index.ts:92](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L92)
 
 ___
 
@@ -123,7 +123,7 @@ ___
 
 #### Defined in
 
-[index.ts:205](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L205)
+[index.ts:205](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L205)
 
 ___
 
@@ -137,7 +137,7 @@ ___
 
 #### Defined in
 
-[index.ts:138](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L138)
+[index.ts:138](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L138)
 
 ___
 
@@ -160,7 +160,7 @@ ___
 
 #### Defined in
 
-[index.ts:107](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L107)
+[index.ts:107](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L107)
 
 ___
 
@@ -174,7 +174,7 @@ ___
 
 #### Defined in
 
-[index.ts:189](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L189)
+[index.ts:189](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L189)
 
 ___
 
@@ -194,7 +194,7 @@ ___
 
 #### Defined in
 
-[index.ts:80](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L80)
+[index.ts:80](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L80)
 
 ___
 
@@ -215,7 +215,7 @@ ___
 
 #### Defined in
 
-[index.ts:75](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L75)
+[index.ts:75](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L75)
 
 ___
 
@@ -229,4 +229,4 @@ ___
 
 #### Defined in
 
-[index.ts:197](https://github.com/arcana-network/storage/blob/47fb00e/src/index.ts#L197)
+[index.ts:197](https://github.com/arcana-network/storage/blob/9d9da6f/src/index.ts#L197)

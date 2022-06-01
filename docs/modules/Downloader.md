@@ -31,4 +31,4 @@
 
 #### Defined in
 
-[Downloader.ts:34](https://github.com/arcana-network/storage/blob/47fb00e/src/Downloader.ts#L34)
+[Downloader.ts:34](https://github.com/arcana-network/storage/blob/9d9da6f/src/Downloader.ts#L34)

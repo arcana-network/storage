@@ -32,7 +32,7 @@
 
 #### Defined in
 
-[Downloader.ts:45](https://github.com/arcana-network/storage/blob/47fb00e/src/Downloader.ts#L45)
+[Downloader.ts:45](https://github.com/arcana-network/storage/blob/9d9da6f/src/Downloader.ts#L45)
 
 ## Methods
 
@@ -52,7 +52,7 @@
 
 #### Defined in
 
-[Downloader.ts:55](https://github.com/arcana-network/storage/blob/47fb00e/src/Downloader.ts#L55)
+[Downloader.ts:55](https://github.com/arcana-network/storage/blob/9d9da6f/src/Downloader.ts#L55)
 
 ___
 
@@ -73,7 +73,7 @@ ___
 
 #### Defined in
 
-[Downloader.ts:53](https://github.com/arcana-network/storage/blob/47fb00e/src/Downloader.ts#L53)
+[Downloader.ts:53](https://github.com/arcana-network/storage/blob/9d9da6f/src/Downloader.ts#L53)
 
 ___
 
@@ -87,4 +87,4 @@ ___
 
 #### Defined in
 
-[Downloader.ts:52](https://github.com/arcana-network/storage/blob/47fb00e/src/Downloader.ts#L52)
+[Downloader.ts:52](https://github.com/arcana-network/storage/blob/9d9da6f/src/Downloader.ts#L52)
