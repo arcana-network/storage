@@ -1,12 +1,9 @@
-[Storage SDK Reference Guide - v0.1.4](README.md) / Modules
+[Storage SDK Reference Guide - v0.1.6](README.md) / Exports
 
-# Storage SDK Reference Guide - v0.1.4
+# Storage SDK Reference Guide - v0.1.6
 
 ## Table of contents
 
-### Modules
+### Classes
 
-- [Access](modules/Access.md)
-- [Downloader](modules/Downloader.md)
-- [Uploader](modules/Uploader.md)
-- [index](modules/index.md)
+- [StorageProvider](classes/StorageProvider.md)

@@ -1,5 +1,5 @@
 {
-  "entryPoints": ["src/index.ts","src/Access.ts", "src/Downloader.ts","src/Uploader.ts"],
+  "entryPoints": ["src/index.ts"],
   "name": "Storage SDK Reference Guide",
   "out": "htmldocs",
   "excludePrivate": true,

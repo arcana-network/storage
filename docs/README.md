@@ -1,4 +1,4 @@
-Storage SDK Reference Guide - v0.1.4 / [Modules](modules.md)
+Storage SDK Reference Guide - v0.1.6 / [Exports](modules.md)
 
 # Arcana Storage
 
