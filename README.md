@@ -83,6 +83,11 @@ Access.changeFileOwner(did, address);
 Access.deleteFile(did);
 ```
 
+### Get Listed of users who are having access to the file
+```js
+Access.getSharedUsers(did)
+```
+
 ### Storage Usage Metrics
 
 #### Get Upload Limit
