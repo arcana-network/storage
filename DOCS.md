@@ -63,6 +63,22 @@ Check out [Arcana Network documentation](https://docs.arcana.network/) for [Stor
 
 Refer to the [sample app code](https://docs.arcana.network/demo-app) or the [How To Guides](https://docs.arcana.network/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
 
+## Storage SDK Reference Docs
+
+If you fork or modify the Storage SDK, you can auto generate the SDK Reference Guide using the following commands:
+
+### Markdown Documentation
+
+```
+npm run docs
+```
+
+### HTML Documentation
+
+```
+npm run htmldocs
+```
+
 # 💡 Support
 
 For any support or integration related queries, contact [Arcana support team](mailto:support@arcana.network).

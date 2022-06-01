@@ -1,3 +1,5 @@
+Storage SDK Reference Guide - v0.1.6 / [Exports](modules.md)
+
 # Arcana Storage
 
 ## Installation
@@ -146,7 +148,6 @@ You can use this URL to mint your NFT
 let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
     await arcanaInstance.linkNft(did, tokenId, nftContract, chainId); 
 ```
-
 
 ### CallBack Functions
 
