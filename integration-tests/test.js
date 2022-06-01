@@ -1,7 +1,7 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-// const gateway = 'http://localhost:9010/api/v1/';
-const gateway = 'https://gateway-dev.arcana.network/';
+const gateway = 'http://localhost:9010/api/v1/';
+// const gateway = 'https://gateway-dev.arcana.network/';
 const appId = 1;
 const debug = false;
 const generateString = (length) => {
@@ -186,16 +186,16 @@ describe('Upload File', () => {
   //   chai.expect(files[0]['size']).equal(file.size);
   // });
 
-  it('Should download a file', async () => {
-    let download = await arcanaInstance.getDownloader();
-    download.onSuccess = () => {
-      console.log('Download completed');
-    };
-    download.onProgress = (a, b) => {
-      console.log(a, b);
-    };
-    await download.download(did);
-  });
+  // it('Should download a file', async () => {
+  //   let download = await arcanaInstance.getDownloader();
+  //   download.onSuccess = () => {
+  //     console.log('Download completed');
+  //   };
+  //   download.onProgress = (a, b) => {
+  //     console.log(a, b);
+  //   };
+  //   await download.download(did);
+  // });
 
   // it('Share file', async () => {
   //   access = await arcanaInstance.getAccess();

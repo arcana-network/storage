@@ -2,11 +2,9 @@ import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { Access } from './Access';
 import { Config, getProvider, customError,makeTx, parseHex, getFile } from './Utils';
-import { Contract } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
-import DID from './contracts/DID';
 import { chainId } from './constant';
 import { wrapInstance } from "./sentry";
 

@@ -35,14 +35,20 @@ export class Access {
       if (!validity.every(x => BigNumber.isBigNumber(x) || Number.isFinite(x))) {
         throw customError('TRANSACTION', 'Invalid argument passed to validity. Values must be a Number or a BigNumber')
       }
+      actualValidity = validity;
     } else if (Number.isFinite(validity)) {
       actualValidity = [validity]
     } else if (validity == null) {
-      actualValidity = [ethers.constants.MaxUint256]
+      // subtracting current time from max time with 1000 seconds as buffer, becuase in smart contract we are adding validity with current timestamp
+      actualValidity = [
+        ethers.constants.MaxUint256.sub(
+          BigNumber.from(
+            Math.floor(new Date().getTime()/1000)+1000)
+            )
+          ]
     } else {
       throw customError('TRANSACTION', 'Validity must be undefined or an array.')
     }
-
     return await makeTx(this.appAddress, this.api, this.provider, 'share', [
       fileId,
       address,
