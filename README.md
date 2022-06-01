@@ -83,7 +83,7 @@ Access.changeFileOwner(did, address);
 Access.deleteFile(did);
 ```
 
-### Get Listed of users who are having access to the file
+#### Get Listed of users who are having access to the file
 ```js
 Access.getSharedUsers(did)
 ```
