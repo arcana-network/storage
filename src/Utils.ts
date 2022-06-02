@@ -9,6 +9,7 @@ import { Arcana as ArcanaT, Forwarder as ForwarderT, NodeList as NodeListT } fro
 import { AxiosInstance } from 'axios';
 import DID from './contracts/DID';
 import { Web3Provider } from '@ethersproject/providers';
+import { errorCodes } from './errors';
 
 export type Config = {
   appId: number;
@@ -137,7 +138,12 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('meta-tx/', req);
   if (res.data.err) {
-    throw customError('TRANSACTION', cleanMessage(res.data.err));
+    const error = cleanMessage(res.data.err);
+    if(errorCodes[error] != "undefined"){
+      throw customError(error + ":", errorCodes[error]);
+    } else {
+      customError('', error);
+    }
   }
   //Decoupled checking txns
   await checkTxnStatus(wallet, res.data.txHash);
@@ -155,8 +161,13 @@ export const checkTxnStatus = async (provider, txHash: string) => {
     let reason = hex_to_ascii(code.substr(138));
 
     if (reason) {
-      throw customError('TRANSACTION', cleanMessage(reason));
-    } else {
+      const error = cleanMessage(reason);
+      if(errorCodes[error] != "undefined"){
+        throw customError(error + ":", errorCodes[error]);
+      } else {
+        customError('', error);
+      }
+     } else {
       throw customError('', e.error);
     }
   }
