@@ -1,7 +1,7 @@
 import { AxiosInstance } from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import { readHash } from './constant';
-import { makeTx, parseHex, Arcana, customError, ensureArray } from './Utils';
+import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress } from './Utils';
 import { wrapInstance } from "./sentry";
 
 export class Access {
@@ -19,12 +19,20 @@ export class Access {
     }
   }
 
-  share = async (fileId: string[] | string, _address: string[] | string, validity: number[] | number | null): Promise<string> => {
-    fileId = ensureArray(fileId).map(parseHex)
-    const address = ensureArray(_address).map(parseHex)
+  setAppAddress = async (did: string) => {
+    // if app address is not set then fetch it from the did and set it
+    if (!this.appAddress) {
+      this.appAddress = await getAppAddress(parseHex(did), this.provider);
+    }
+  }
 
+
+  share = async (did: string[] | string, _address: string[] | string, validity: number[] | number | null): Promise<string> => {
+    did = ensureArray(did).map(parseHex)
+    await this.setAppAddress(did[0]);
+    const address = ensureArray(_address).map(parseHex)
     const accessType = [];
-    fileId.forEach(() => {
+    did.forEach(() => {
       address.forEach(() => {
         accessType.push(readHash);
       })
@@ -50,28 +58,31 @@ export class Access {
       throw customError('TRANSACTION', 'Validity must be undefined or an array.')
     }
     return await makeTx(this.appAddress, this.api, this.provider, 'share', [
-      fileId,
+      did,
       address,
       accessType,
       actualValidity,
     ]);
   };
 
-  revoke = async (fileId: string, address: string): Promise<string> => {
-    fileId = parseHex(fileId);
+  revoke = async (did: string, address: string): Promise<string> => {
+    did = parseHex(did);
+    await this.setAppAddress(did);
     address = parseHex(address)
-    return await makeTx(this.appAddress, this.api, this.provider, 'revoke', [fileId, address, readHash]);
+    return await makeTx(this.appAddress, this.api, this.provider, 'revoke', [did, address, readHash]);
   };
 
-  changeFileOwner = async (fileId: string, newOwnerAddress: string): Promise<string> => {
-    fileId = parseHex(fileId);
+  changeFileOwner = async (did: string, newOwnerAddress: string): Promise<string> => {
+    did = parseHex(did);
+    await this.setAppAddress(did);
     newOwnerAddress = parseHex(newOwnerAddress)
-    return await makeTx(this.appAddress, this.api, this.provider, 'changeFileOwner', [fileId, newOwnerAddress]);
+    return await makeTx(this.appAddress, this.api, this.provider, 'changeFileOwner', [did, newOwnerAddress]);
   };
 
-  deleteFile = async (fileId: string): Promise<string> => {
-    fileId = parseHex(fileId);
-    return await makeTx(this.appAddress, this.api, this.provider, 'deleteFile', [fileId]);
+  deleteFile = async (did: string): Promise<string> => {
+    await this.setAppAddress(did);
+    did = parseHex(did);
+    return await makeTx(this.appAddress, this.api, this.provider, 'deleteFile', [did]);
   };
 
   deleteAccount = async () => {
@@ -95,9 +106,10 @@ export class Access {
     return [con[0].toNumber(), con[1].toNumber()];
   };
 
-  getSharedUsers = async (fileId: string): Promise<string[]> => {
+  getSharedUsers = async (did: string): Promise<string[]> => {
+    await this.setAppAddress(did);
     const arcana = Arcana(this.appAddress, this.provider);
-    let users = await arcana.getAllUsers(fileId, readHash);
+    let users = await arcana.getAllUsers(did, readHash);
     return users.filter((d) => d !== ethers.constants.AddressZero);
   };
 }

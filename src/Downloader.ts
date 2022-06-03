@@ -62,7 +62,6 @@ export class Downloader {
     const arcana = Arcana(this.appAddress, this.provider);
     let file, txHash;
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
-
     try {
       file = await getFile(did, this.provider);
     } catch (e) {
