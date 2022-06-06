@@ -157,7 +157,7 @@ export class StorageProvider {
 
     // throw error if chain id is not equal to the chain id of the app
     if (this.chainId !== chainId) {
-      throw new Error('Wrong network, please change the network to the arcana');
+      throw new Error('wrong_network, please change the network to the arcana');
     }
     let res = (await axios.get(this.gateway + 'get-config/')).data;
     localStorage.setItem('forwarder', res['Forwarder']);
@@ -185,7 +185,7 @@ export class StorageProvider {
       if (res.data.address) {
         this.appAddress = res.data.address.length === 40 ? '0x' + res.data.address : res.data.address;
       } else {
-        throw new Error('App not found');
+        throw new Error('app_not_found');
       }
     }
   };

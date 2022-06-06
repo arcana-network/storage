@@ -62,7 +62,7 @@ export class Uploader {
         await this.onSuccess();
       } catch (e) {
         if (e.reason) {
-          if (e.reason.includes('Owner already exist for this file')) {
+          if (e.reason.includes('file_already_uploaded')) {
             throw customError('TRANSACTION', `File already exist. DID: ${did}`);
           } else {
             throw customError('TRANSACTION', e.reason);

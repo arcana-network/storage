@@ -251,31 +251,32 @@ arcanaInstance.onAccountChange = (accounts) => {
 
 ## Storage SDK Error Messages
 
-| Code         | Message                                                  | Reason                                                                                                     |
-| ------------ | -------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------- |
-| UNAUTHORIZED | You can't download this file                             | Trying to download a file which is neither owned by you nor shared with you                                |
-| TRANSACTION  | This function can only be called by file owner           | Only owner of the file have access to the function i.e, either to delete, revoke or transfer file          |
-| TRANSACTION  | User is not active                                       | Your account is either disabled or deleted                                                                 |
-| TRANSACTION  | User not registered for the app                          | Your account is not registered for the app                                                                 |
-| TRANSACTION  | Only factory contract can call this function             | Only factory contract can set the app level limit i.e, storage and bandwidth                               |
-| TRANSACTION  | No space left for app                                    | Your current app's storage or bandwidth limit has been consumed                                            |
-| TRANSACTION  | No space left for user                                   | You have already consumed your storage or bandwidth limit                                                  |
-| TRANSACTION  | Not a trusted forwarder nor factory contract             | For meta transaction, transaction should happen from valid factory or forwarder contract                   |
-| TRANSACTION  | Owner already exist for this file                        | You cannot upload a file that is already uploaded by different user address                                |
-| TRANSACTION  | Should not be 0                                          | Your file size must not be null while uploading                                                            |
-| TRANSACTION  | Function can only be called by the assigned storage node | Only assigned storage node has access to the function                                                      |
-| TRANSACTION  | Not file owner                                           | You are not the file owner thus action cannot be done. Kindly verify your account address                  |
-| TRANSACTION  | Validity must be non zero                                | Validity is the access specifier and cannot be zero while sharing a file                                   |
-| TRANSACTION  | User was not deleted to reactivate                       | Your account was not deleted to reactivate                                                                 |
-| TRANSACTION  | An app already created with this Id                      | Use a valid app ID. Try configuring the app at https://dashboard.arcana.network/ to get app ID             |
-| TRANSACTION  | App calling the function is not registered               | configure the app at https://dashboard.arcana.network/                                                     |
-| TRANSACTION  | Please add some nodes to authenticate user               |
-| TRANSACTION  | Function can only called by nodes                        |
-| TRANSACTION  | Already voted                                            |
-| TRANSACTION  | Only gateway node can call this function                 | Only gateway node has access to the function                                                               |
-| TRANSACTION  | File must be uploaded before downloading it              | File not found                                                                                             |
-| TRANSACTION  | MinimalForwarder: signature does not match request       | Meta transaction failed. The function you are trying to call does not exists. check the function signature |
-| WRONG_NETWORK  | Wrong Network       | You need to change the network/RPC URL in your wallet |
+| Error	| Description |
+| ----  | ------ |
+| unauthorized_user	| Trying to download a file which is neither owned by you nor shared with you. |
+| only_file_owner	|	Only the owner of the file have access to the function i.e, either to delete, revoke or transfer file etc. |
+| non_registered_user	|	Your account is not registered for the app. |
+| only_factory_contract	|	Only factory contract has access. The access can be to add new app or setup app level limit i.e, storage and bandwidth |
+| no_app_space	|	Your current app's storage or bandwidth limit has been consumed. |
+| no_user_space	|	You have already consumed your storage or bandwidth limit. |
+| non_trusted_forwarder_or_factory	|	For meta-transaction, transaction should happen from valid factory or forwarder contract. |
+| file_already_uploaded	|	You cannot upload a file that is already uploaded by a different user address. |
+| zero_file_size	|	Your file size must not be null while uploading. |
+| zero_validity	|	Validity must be a non-zero value as it is the access specifier of the duration for which file sharing is enabled. |
+| avoid_sharing_file_themselves | Avoid sharing file to themselves. |
+| already_shared | file is already shared with the user. |
+| file_not_found	|	File with the specified DID does not exist in the Arcana Store. |
+| no_file_access | Access not granted by current user. |
+| invalid_address | address provided is not valid or zero address. |
+| file_ownership_transfer_to_same_address | New owner cannot be same as old owner while changing file owner. |
+| only_gateway_node	|	Only gateway node has access to the function. |
+| invalid_function_signature	|	Meta-transaction failed. The function you are trying to call does not exist. Check the function signature. |
+| DID_NFT_linked | DID is linked with NFT.Hence, ownership transfer of file cannot be done. |
+| DID_NFT_linked_and_cannot_be_deleted | DID is linked with NFT. Hence, file cannot be deleted. |
+| DID_NFT_are_already_linked | DID and NFT are already linked. No need to link again. |
+| NFT_owner_DID_owner_mismatch | NFT owner and DID owner are not matching. |
+| already_in_UI_mode | Already in UI mode. No need to set again. |
+| wrong_network  | You need to change the network/RPC URL in your wallet |
 
 ## Storage SDK Reference Docs
 
