@@ -107,9 +107,10 @@ export class Access {
   };
 
   getSharedUsers = async (did: string): Promise<string[]> => {
-    await this.setAppAddress(did);
+    const realDID = parseHex(did)
+    await this.setAppAddress(realDID);
     const arcana = Arcana(this.appAddress, this.provider);
-    let users = await arcana.getAllUsers(did, readHash);
+    const users = await arcana.getAllUsers(realDID, readHash);
     return users.filter((d) => d !== ethers.constants.AddressZero);
   };
 }
