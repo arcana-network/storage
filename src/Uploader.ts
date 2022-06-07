@@ -47,7 +47,7 @@ export class Uploader {
       let res;
       for (let i = 0; i < 8; i++) {
         try {
-          res = await this.api.get(`${host}hash`, { headers: { Authorization: `Bearer ${token}` } });
+          res = await this.api.get(`${host}api/v1/hash`, { headers: { Authorization: `Bearer ${token}` } });
           break;
         } catch {
           await new Promise((r) => setTimeout(r, 500));
@@ -157,7 +157,7 @@ export class Uploader {
       localStorage.setItem(`${walletAddress}::key::${hash}`, hexString);
       localStorage.setItem(`${walletAddress}::token::${hash}`, token);
     }
-    let endpoint = host + 'files/';
+    let endpoint = host + 'api/v1/files/';
     let upload = new tus.Upload(file, {
       endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
