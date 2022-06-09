@@ -18,6 +18,7 @@ export class StorageProvider {
   private gateway: string;
   private chainId: number;
   private debug: boolean;
+  private initialisedPromise: Promise<void>;
 
   constructor(cfg: Config) {
     let config;
@@ -139,11 +140,15 @@ export class StorageProvider {
     return res2.request.responseURL + '/' + did;
   };
 
-  login = async () => {
-    // Already login hence return null response as no need to login again
-    if (this.api) {
-      return;
+  login = () => {
+    // Already initialised or initialisation in progress
+    if (!this.initialisedPromise) {
+      this.initialisedPromise = this._login()
     }
+    return this.initialisedPromise;
+  }
+
+  _login = async () => {
     if (!this.provider) {
       // @ts-ignore
       if (window.ethereum) {
