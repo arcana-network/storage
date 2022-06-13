@@ -1,11 +1,43 @@
-# Arcana Storage
+<p align="center">
+<a href="#start"><img height="30rem" src="https://raw.githubusercontent.com/arcana-network/branding/main/an_logo_light_temp.png"></a>
+<h2 align="center"> <a href="https://arcana.network/">Arcana Network Storage SDK </a></h2>
+</p>
+<br>
+<p id="banner" align="center">
+<br>
+<a title="License BSL 1.1" href="https://github.com/arcana-network/license/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/License-BSL%201.1-purple"></a>
+<a title="Beta release" href="https://github.com/arcana-network/storage/releases"><img src="https://img.shields.io/github/v/release/arcana-network/storage?style=flat-square&color=28A745"></a>
+<a title="Twitter" href="https://twitter.com/ArcanaNetwork"><img alt="Twitter URL" src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FArcanaNetwork"></a>
+</p><p id="start" align="center">
+<a href="https://docs.arcana.network/"><img src="https://raw.githubusercontent.com/arcana-network/branding/main/an_banner_temp.png" alt="Arcana Storage SDK"></a>
+</p>
 
-## Installation
+# What is Storage SDK?
 
-### Using npm/yarn
+The Arcana Storage SDK enables you to configure dApp and allow users to store files in a region enabled by the application, share it with other users, revoke access or transfer file ownership to another user.
+
+In the beta release, the storage nodes are operated by Arcana Networks. In the future, the storage subsystem will be fully decentralized and third party storage nodes can be plugged into the Arcana Network storage subsystem once they meet the Arcana storage QoS criteria.
+
+# 💪 Key Features
+
+<p>🗄️ &nbsp; Save dApp user data in Arcana data store</p>
+<p>🧩 &nbsp; Encrypt / Decrypt File data and metadata</p>
+<p>📂 &nbsp; Share data with other dApp users</p>
+<p>🔒 &nbsp; Revoke access to shared data</p>
+<p>🖼️ &nbsp; Change data ownership</p>
+<p>📈 &nbsp; Track data accesses via public blockchain browsers</p>
+
+# 🏗️ Installation
+
+## npm
 
 ```shell
 npm i @arcana/storage
+```
+
+## yarn
+
+```shell
 yarn add @arcana/storage
 ```
 
@@ -19,277 +51,28 @@ You can use the standalone module which includes the polyfills.
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```
 
-## Storage SDK Usage
+# 📋 Prerequisites
 
-### Initialize
+Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.arcana.network/).
 
-```js
-// address: Smart contract address of app
-// provider: Web3provider (Eg: If you have installed metamask then window.ethereum will work)
-//           Default value of provider is window.ethereum
-// appId: This field is optional. If you want to download a file with just did then you won't require this field
-const arcanaInstance = new arcana.storage.StorageProvider({ appId, provider, email });
-```
+A unique **AppId** will be assigned to your dApp and you need to provide this to Arcana Storage SDK in order to use the SDK functionality.
 
-### Get Uploader
+# 📚 Documentation
 
-```js
-const Uploader = arcanaInstance.getUploader();
-// file: Blob format
-Uploader.upload(file);
-```
+Check out [Arcana Network documentation](https://docs.arcana.network/) for [Storage SDK Quick Start Guide](https://docs.arcana.network/stgsdk_qs), [Usage Guide](https://docs.arcana.network/stgsdk_usage) and [API reference Guide](https://docs.arcana.network/stg_ref).
 
-### Get Downloader
+Refer to the [sample app code](https://docs.arcana.network/demo-app) or the [How To Guides](https://docs.arcana.network/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
 
-```js
-const Downloader = arcanaInstance.getDownloader();
-// did: DID of file which you want to download
-Downloader.download(did);
-```
+# 💡 Support
 
-### Get Access
+For any support or integration related queries, contact [Arcana support team](mailto:support@arcana.network).
 
-```js
-const Access = arcanaInstance.getAccess();
-```
+# 🤝 Contributing
 
-#### Share a File
+We appreciate your feedback and contribution to Arcana Storage component. Open a GitHub issue and discuss your RFP with Arcana Network developers. We plan to come up with a detailed contributing guide soon. Stay tuned!
 
-```js
-// did: DID of file to be shared, can be a hexadecimal string or an array of such strings
-// address: recipients address, similar type as "did"
-// validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds.
-Access.share(did, address);
-```
+# ℹ️ License
 
-#### Revoke File Sharing
+Arcana Storage is distributed under the [Business Source License 1.1](https://mariadb.com/bsl11/).
 
-```js
-// did: DID of file from which access is removed
-// address: Address of the user who's access is getting revoked
-Access.revoke(did, address);
-```
-
-#### Transfer File Ownership
-
-```js
-// address: new owner's address
-Access.changeFileOwner(did, address);
-```
-
-#### Delete a File
-
-```js
-Access.deleteFile(did);
-```
-
-#### Get Listed of users who are having access to the file
-```js
-Access.getSharedUsers(did)
-```
-
-### Storage Usage Metrics
-
-#### Get Upload Limit
-
-```js
-//Get consumed and total storage of the current user
-let [consumed, total] = await Access.getUploadLimit();
-```
-#### Get Download Limit
-
-```js
-//Get consumed and total bandwidth of the current user
-let [consumed, total] = await Access.getDownloadLimit();
-```
-
-#### List Shared Files
-List files that are shared with the current user.
-
-```js
-let files = await arcanaInstance.sharedFiles();
-```
-
-#### List Uploaded files
-List files that are uploaded by the current user.
-
-```js
-let files = await arcanaInstance.myFiles();
-```
-
-### Download File by DID
-
-**Note:** No appID is required to download a file using the file DID. The file DID is returned at the time of file upload and uniquely identifies the file.
-
-```js
-// Pass the provider if required otherwise it will choose window.ethereum by default
-let arcanaInstance = new arcana.storage.StorageProvider();
-await arcanaInstance.downloadDID('<did of the file>');
-```
-
-## NFT
-
-#### Create Metdata URL
-
-**Note:** This is typically used for NFT use case.
-
-```js
-let metadata = await arcanaInstance.makeMetadataURL(
-  title,
-  description,
-  did,
-  file,
-);
-console.log(metadata)
-// https://test-storage.arcana.network:9000/api/v1/metadata/0x129d1438ff3bf014e9b9094b3a5d410f691c208ed5305b0844307b761c0e295e
-```
-You can use this URL to mint your NFT
-
-#### Link NFT with did
-**Note:** After minting NFT inorder to use this NFT as a private NFT you need to link it with did
-```js
-let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
-    await arcanaInstance.linkNft(did, tokenId, nftContract, chainId); 
-```
-
-
-### CallBack Functions
-
-#### 1. Upload
-
-##### 1.1 On Success
-
-```js
-Uploader.onSuccess = () => {
-  console.log('Completed file upload');
-};
-```
-
-##### 1.2 On Progress
-
-```js
-Uploader.onProgress = (bytesUploaded, bytesTotal) => {
-  console.log("Percentage completed", (100*bytesUploaded)/bytesTotal)
-};
-```
-
-#### 2. Download
-
-##### 2.1 On Success
-
-```js
-Downloader.onSuccess = () => {
-  console.log('Completed file download');
-};
-```
-
-##### 2.2 On Progress
-
-```js
-Downloader.onProgress = (bytesDownloaded, bytesTotal) => {
-  console.log("Percentage completed", (100*bytesDownloaded)/bytesTotal)
-};
-```
-
-#### Basic Error Handling
-
-During file upload or file download operations, if there are any errors, dApp developers can address those by catching the exception raised by the Storage SDK:
-
-```javascript
-import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
-
-dAppStorageProvider = new StorageProvider({
-        appId: ARCANA_APP_ID,
-        provider: window.ethereum,
-        email: user_email_string,
-      });
-
-const uploader = await dAppStorageProvider.getUploader();
-
-uploader.upload(fileToUpload)
-  .catch((error) => {
-    if (error.message === NO_SPACE) {
-      ...
-    } else if (error.code === UNAUTHORIZED) {
-      ...
-    } else {
-      ...
-    }
-  });
-```
-
-#### Advanced Error Handling
-
-This advanced error handling section is only meant for file upload to address special dApp use cases. It is **recommended** that dApp developers using *Exception handling - catch* mechanism, for handling file upload errors.
-
-Every user action to upload a file internally results in the Storage SDK splitting the file into multiple parts according to the [tus](https://tus.io/) protocol. These parts are uploaded to the Arcana Store. If any of the file segment fails to transmit, it is automatically retried until all file segments are transferred. The automatic retry counter is hard coded to '5' in the beta release and the dApp developer cannot change this configuration.
-
-If the dApp developer is required to handle file upload error in case the retries fail, use `onError()` mechanism. After retrying for four times, in case of any segment upload fails for the fifth time, the Storage SDK invokes `onError()` callback to enable dApp developer to take appropriate action or delay file transfer to deal with intermittent network failures.
-
-```js
-Uploader.onError = (err) => {
-  console.log('Error', err);
-};
-```
-
-### Changing Network and Wallet Account
-
-##### Change Network
-```js
-// Below is default function, which can be modified by the developers
-arcanaInstance.onNetworkChange = (oldNetwork, newNetwork) => {
-  window.location.reload()
-}
-```
-##### Change Account
-```js
-// Below is default function, which can be modified by the developers
-arcanaInstance.onAccountChange = (accounts) => {
-  window.location.reload()
-}
-```
-
-## Storage SDK Error Messages
-
-| Error	| Description |
-| ----  | ------ |
-| unauthorized_user	| Trying to download a file which is neither owned by you nor shared with you. |
-| only_file_owner	|	Only the owner of the file have access to the function i.e, either to delete, revoke or transfer file etc. |
-| non_registered_user	|	Your account is not registered for the app. |
-| only_factory_contract	|	Only factory contract has access. The access can be to add new app or setup app level limit i.e, storage and bandwidth |
-| no_app_space	|	Your current app's storage or bandwidth limit has been consumed. |
-| no_user_space	|	You have already consumed your storage or bandwidth limit. |
-| non_trusted_forwarder_or_factory	|	For meta-transaction, transaction should happen from valid factory or forwarder contract. |
-| file_already_uploaded	|	You cannot upload a file that is already uploaded by a different user address. |
-| zero_file_size	|	Your file size must not be null while uploading. |
-| zero_validity	|	Validity must be a non-zero value as it is the access specifier of the duration for which file sharing is enabled. |
-| avoid_sharing_file_themselves | Avoid sharing file to themselves. |
-| already_shared | file is already shared with the user. |
-| file_not_found	|	File with the specified DID does not exist in the Arcana Store. |
-| no_file_access | Access not granted by current user. |
-| invalid_address | address provided is not valid or zero address. |
-| file_ownership_transfer_to_same_address | New owner cannot be same as old owner while changing file owner. |
-| only_gateway_node	|	Only gateway node has access to the function. |
-| invalid_function_signature	|	Meta-transaction failed. The function you are trying to call does not exist. Check the function signature. |
-| DID_NFT_linked | DID is linked with NFT.Hence, ownership transfer of file cannot be done. |
-| DID_NFT_linked_and_cannot_be_deleted | DID is linked with NFT. Hence, file cannot be deleted. |
-| DID_NFT_are_already_linked | DID and NFT are already linked. No need to link again. |
-| NFT_owner_DID_owner_mismatch | NFT owner and DID owner are not matching. |
-| already_in_UI_mode | Already in UI mode. No need to set again. |
-| wrong_network  | You need to change the network/RPC URL in your wallet |
-
-## Storage SDK Reference Docs
-
-You can auto-generate markdown and html documentation containing Storage SDK Reference Guide. Follow teh steps listed below:
-
-### Markdown Documentation
-
-```
-npm run docs
-```
-
-### HTML Documentation
-
-```
-npm run htmldocs
-```
+For details see [Arcana License](https://github.com/arcana-network/license/blob/main/LICENSE.md).
