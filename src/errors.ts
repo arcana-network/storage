@@ -1,4 +1,4 @@
-export interface IHash {
+interface IHash {
     [details: string] : string;
 }
 

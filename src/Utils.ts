@@ -139,10 +139,11 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   let res = await api.post('meta-tx/', req);
   if (res.data.err) {
     const error = cleanMessage(res.data.err);
-    if(errorCodes[error] != "undefined"){
-      throw customError(error + ":", errorCodes[error]);
+    if(errorCodes[error] != undefined){
+      throw customError(error, errorCodes[error]);
     } else {
-      customError('', error);
+      //If error is not present in the errorCodes then error code and message will be same.
+      throw customError(error, error);
     }
   }
   //Decoupled checking txns
@@ -162,13 +163,13 @@ export const checkTxnStatus = async (provider, txHash: string) => {
 
     if (reason) {
       const error = cleanMessage(reason);
-      if(errorCodes[error] != "undefined"){
-        throw customError(error + ":", errorCodes[error]);
+      if(errorCodes[error] != undefined){
+        throw customError(error, errorCodes[error]);
       } else {
-        customError('', error);
+        customError(error, error);
       }
      } else {
-      throw customError('', e.error);
+      throw customError(e.error, e.error);
     }
   }
 };
