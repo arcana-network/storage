@@ -1,10 +1,10 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
 // const gateway = 'http://localhost:9010/';
-//const gateway = 'https://gateway001-testnet.arcana.network/';
-const gateway = 'https://gateway-dev.arcana.network/';
-const chainId = 40404;
-const appId = 351;
+const gateway = 'https://gateway001-testnet.arcana.network/';
+// const gateway = 'https://gateway-dev.arcana.network/';
+const chainId = 40405;
+const appId = 1;
 const debug = false;
 const generateString = (length) => {
   let result = '';
@@ -177,17 +177,17 @@ describe('Upload File', () => {
   //   }
   // });
 
-  it('Fail revoke transaction', async () => {
-    let access = await sharedInstance.getAccess();
-    try {
-      await access.revoke(did, "0xA49DE8de9412620965A7F8126EF5a5A4D71E9Ff8");
-      throw Error('should throw an error');
-    } catch (err) {
-      chai.expect(err.code).equal('TRANSACTION');
-      console.log(err.message);
-      // chai.expect(err.message).equal('This function can only be called by file owner');
-    }
-  });
+  // it('Fail revoke transaction', async () => {
+  //   let access = await sharedInstance.getAccess();
+  //   try {
+  //     await access.revoke(did, "0xA49DE8de9412620965A7F8126EF5a5A4D71E9Ff8");
+  //     throw Error('should throw an error');
+  //   } catch (err) {
+  //     chai.expect(err.code).equal('TRANSACTION');
+  //     console.log(err.message);
+  //     // chai.expect(err.message).equal('This function can only be called by file owner');
+  //   }
+  // });
 
   // it('Should skip uploading same file', async () => {
   //   let upload = await arcanaInstance.getUploader();
