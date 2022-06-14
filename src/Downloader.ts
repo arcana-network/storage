@@ -86,7 +86,10 @@ export class Downloader {
           signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash: txHash }))),
         },
       });
-
+      if(res.data.error) {
+        console.log(res.data.error.message, "\n", res.data.error.data);
+        continue
+      }
       let sh = res.data.result.share;
       shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh));
     }
