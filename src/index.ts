@@ -41,8 +41,8 @@ export class StorageProvider {
     } else {
       this.gateway = new URL("/api/v1/",config.gateway).href;
     }
-    if (!this.chainId) {
-      this.chainId = 40404;
+    if (!config.chainId) {
+      this.chainId = chainId;
     } else {
       this.chainId = config.chainId;
     }
@@ -153,10 +153,9 @@ export class StorageProvider {
 
     // Fetch chain id from provider
     let network = await this.provider.getNetwork();
-    this.chainId = network.chainId;
 
     // throw error if chain id is not equal to the chain id of the app
-    if (this.chainId !== chainId) {
+    if (this.chainId !== network.chainId) {
       throw new Error('wrong_network, please change the network to the arcana');
     }
     let res = (await axios.get(this.gateway + 'get-config/')).data;

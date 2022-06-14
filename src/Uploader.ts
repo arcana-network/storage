@@ -137,7 +137,11 @@ export class Uploader {
       const quorum = nodes.length - Math.floor(nodes.length / 3);
       const shares = split(randomBytes, parts, quorum, new Uint8Array(aes_raw));
       for (let i = 0; i < parts; i++) {
-        const publicKey = nodes[i].pubKx._hex.replace('0x', '') + nodes[i].pubKy._hex.replace('0x', '');
+        const publicKey = nodes[i].pubKx._hex.replace('0x', '').padStart(64, '0') + nodes[i].pubKy._hex.replace('0x', '').padStart(64, '0');
+        if (publicKey.length < 128) {
+          console.log('public key is too short');
+          continue;
+        }
         let ciphertext_raw = encrypt(publicKey, shares[i + 1]);
         let ciphertext = ciphertext_raw.toString('hex');
         localStorage.setItem('pk', ephemeralWallet.privateKey);
