@@ -23,10 +23,12 @@ export class Uploader {
   private provider: any;
   private api: AxiosInstance;
   private appAddress: string;
+  private appId: number;
 
-  constructor(appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
+  constructor(appId: number, appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
     this.provider = provider;
     this.api = api;
+    this.appId = appId;
     this.appAddress = appAddress;
 
     if (debug) {
@@ -116,7 +118,7 @@ export class Uploader {
         }),
       );
 
-      let node = (await this.api.get('/get-node-address/')).data;
+      let node = (await this.api.get(`/get-node-address/?appid=${this.appId}`)).data;
       host = node.host;
       let ephemeralWallet = await Wallet.createRandom();
       let res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
