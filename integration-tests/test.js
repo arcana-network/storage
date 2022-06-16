@@ -1,10 +1,10 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-// const gateway = 'http://localhost:9010/';
-const gateway = 'https://gateway001-testnet.arcana.network/';
+const gateway = 'http://localhost:9010/';
+// const gateway = 'https://gateway01-testnet.arcana.network/';
 // const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40405;
-const appId = 1;
+const appId = 21;
 const debug = false;
 const generateString = (length) => {
   let result = '';

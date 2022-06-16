@@ -96,7 +96,7 @@ export class StorageProvider {
 
   getUploader = async () => {
     await this.login();
-    return new Uploader(this.appAddress, this.provider, this.api, this.debug);
+    return new Uploader(this.appId, this.appAddress, this.provider, this.api, this.debug);
   };
 
   getAccess = async () => {
