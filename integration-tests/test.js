@@ -109,16 +109,6 @@ describe('Upload File', () => {
     }
   });
 
-  it('Should not be able share file themselves', async () => {
-    let access = await arcanaInstance.getAccess();
-  try{
-    await access.share([did], ["0xA49DE8de9412620965A7F8126EF5a5A4D71E9Ff8"] , [200]);
-    await access.share([did], ["0x032925AE3d8bC9d0E174ae5f9D27dDE85f21AE5E"] , [200]);
-   } catch(err) {
-      chai.expect(err.code).includes("avoid_sharing_file_themselves");
-    }
-  });
-
   it('Sharing again with the same user', async () => {
     let access = await arcanaInstance.getAccess();
   try{
