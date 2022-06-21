@@ -120,7 +120,8 @@ const cleanMessage = (message: string): string => {
   if (!message) return '';
   return message
     .replace(/[^\w\s:]/gi, '')
-    .replace('Error: VM Exception while processing transaction: reverted with reason string y ', '');
+    .replace('Error: VM Exception while processing transaction: reverted with reason string y ', '')
+    .trim();
 };
 
 function hex_to_ascii(str1) {
