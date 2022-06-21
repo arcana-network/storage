@@ -118,7 +118,7 @@ export class StorageProvider {
     // get signer from provider
     let signer = this.provider.getSigner();
     let signature = await signer.signMessage(`Sign this message to attach NFT metadata with your did ${did}`);
-    let node = await this.api.get('/get-node-address/');
+    let node = await this.api.get('/get-node-address/?appid=' + this.appId);
     let api = axios.create({
       baseURL: node.data['host'],
       headers: {
