@@ -96,12 +96,14 @@ export class Access {
 
   getUploadLimit = async (): Promise<[number, number]> => {
     const arcana = Arcana(this.appAddress, this.provider);
+    console.log("account",(await this.provider.listAccounts())[0])
     let con = await arcana.getUploadLimit({from: (await this.provider.listAccounts())[0]});
     return [con[0].toNumber(), con[1].toNumber()];
   };
 
   getDownloadLimit = async (): Promise<[number, number]> => {
     const arcana = Arcana(this.appAddress, this.provider);
+    console.log("account",(await this.provider.listAccounts())[0])
     let con = await arcana.getDownloadLimit({from: (await this.provider.listAccounts())[0]});
     return [con[0].toNumber(), con[1].toNumber()];
   };
