@@ -110,6 +110,16 @@ describe('Upload File', () => {
     }
   });
 
+  it('Sharing again with the same user', async () => {
+    let access = await arcanaInstance.getAccess();
+  try{
+    await access.share([did], ["0xA49DE8de9412620965A7F8126EF5a5A4D71E9Ff8"] , [200]);
+    await access.share([did], ["0xA49DE8de9412620965A7F8126EF5a5A4D71E9Ff8"] , [200]);
+   } catch(err) {
+      chai.expect(err.code).includes("already_shared");
+    }
+  });
+
   // it('Make metadata URL', async () => {
   //   let nftArcana = new arcana.storage.StorageProvider({
   //     gateway,
@@ -161,7 +171,7 @@ describe('Upload File', () => {
   // it('Fail revoke transaction', async () => {
   //   let access = await sharedInstance.getAccess();
   //   try {
-  //     await access.revoke(did, receiverWallet.address);
+  //     await access.revoke(did, "0xA49DE8de9412620965A7F8126EF5a5A4D71E9Ff8");
   //     throw Error('should throw an error');
   //   } catch (err) {
   //     chai.expect(err.code).equal('TRANSACTION');
