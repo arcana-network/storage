@@ -131,10 +131,24 @@ export class StorageProvider {
     if (!res.data.success) {
       throw new Error('Error uploading image');
     }
+    
+    let subDomain = ".";
+    switch ( this.chainId ) {
+      case 40405 :
+        subDomain += "beta";
+        break;
+      case 40404 :
+        subDomain += "dev";
+        break;
+    }
+
+    let external_url = `https://nftviewer${subDomain}.arcana.network/asset/${did}`;
+
     let res2 = await api.post('/api/v1/metadata', {
       title,
       description,
       did,
+      external_url,
       image: res.request.responseURL + '/' + did,
     });
     return res2.request.responseURL + '/' + did;
