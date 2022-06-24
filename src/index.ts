@@ -5,7 +5,7 @@ import { Config, getProvider, customError,makeTx, parseHex, getFile } from './Ut
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
-import { chainId } from './constant';
+import { chainId, gateway } from './constant';
 import { wrapInstance } from "./sentry";
 
 export class StorageProvider {
@@ -38,7 +38,7 @@ export class StorageProvider {
     this.email = config.email;
     this.appId = config.appId;
     if (!config.gateway) {
-      this.gateway = 'https://gateway-testnet.arcana.network/api/v1/';
+      this.gateway = gateway;
     } else {
       this.gateway = new URL("/api/v1/",config.gateway).href;
     }
