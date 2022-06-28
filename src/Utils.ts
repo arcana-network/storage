@@ -15,7 +15,7 @@ export type Config = {
   appId: number;
   provider: any;
   email: string;
-//  gateway: any;
+  gateway: any;
   debug: any;
   chainId: any;
 };

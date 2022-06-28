@@ -3,7 +3,7 @@
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
 // const gateway = 'http://localhost:9010/';
-// const gateway = 'https://gateway01-testnet.arcana.network/';
+const gateway = 'https://gateway01-testnet.arcana.network/';
 // const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40405;
 const appId = 28;
@@ -67,6 +67,7 @@ describe('Upload File', () => {
     file = new File([file], file.name, { type: file.type });
     arcanaInstance = new arcana.storage.StorageProvider({
       appId,
+      gateway,
       provider: window.ethereum,
       email: makeEmail(),
       chainId,

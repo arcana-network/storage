@@ -5,7 +5,7 @@ import { Config, getProvider, customError,makeTx, parseHex, getFile } from './Ut
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
-import { chainId, gateway, chainIdToGateway } from './constant';
+import { chainId, chainIdToGateway } from './constant';
 import { wrapInstance } from "./sentry";
 
 export class StorageProvider {
@@ -42,7 +42,11 @@ export class StorageProvider {
     } else {
       this.chainId = config.chainId;
     }
-    this.gateway = chainIdToGateway.get(this.chainId);
+    if (!config.gateway) {
+      this.gateway = chainIdToGateway.get(this.chainId)
+    } else {
+      this.gateway = new URL("/api/v1/",config.gateway).href;
+    }
 
     if (config.debug) {
       SentryInit({
