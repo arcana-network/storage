@@ -1,0 +1,68 @@
+name: test
+on: [push]
+
+jobs:
+  check:
+    name: Unit test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: install screen
+        run: sudo apt-get update && sudo apt-get install -y screen && sudo apt-get install -y lsof
+
+      # Replace it with Polygon docker image.
+      # Port should be 8545 and chain Id 31337
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: check_folder
+        run: pwd
+
+      - name: Run anvil
+        run: screen -d -m anvil --chain-id 31337
+
+      - name: Run Uploader tusc
+        run: |
+            wget https://github.com/jackhftang/tusc/releases/download/0.4.7/tusc_linux_amd64
+            chmod u+x tusc_linux_amd64
+            screen -d -m tusc_linux_amd64 -p 3000 --files-endpoint '/api/v1/files/'
+
+      # - name: check port
+      #   run: sudo lsof -i -P -n | grep LISTEN 
+
+      - name: Clone Arcana Repo
+        uses: GuillaumeFalourd/clone-github-repo-action@v2
+        env:
+        # TODO VERY IMPORTANT: Need a way to store github secret access token, remove token
+          Token : put_token_value_here
+        with:
+          owner: 'arcana-network'
+          repository: 'arcana-smart-contract'
+          access-token: $Token
+
+      - name: Deploy contracts
+        env: 
+            CONTRACT_OWNER: ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+            ARCANADEV_CONTRACT_OWNER : ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+            INFURA_API_KEY: dummy
+            MNEMONIC: "test test test test test test test test test test test junk"
+            DEPLOYER: ac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80
+            PUBLIC_KEYS : "[\"0x04ba5734d8f7091719471e7f7ed6b9df170dc70cc661ca05e688601ad984f068b0d67351e5f06073092499336ab0839ef8a521afd334e53807205fa2f08eec74f4\"]"
+            STORAGE_NODE: "[\"0x3c44cdddb6a900fa2b585dd299e03d12fa4293bc\"]"
+            ARCANA_BRIDGE_ADDRESS : 0x90f79bf6eb2c4f870365e785982e1f101e93b906
+            CI_DEPLOY: true
+        run: |
+            cd arcana-smart-contract
+            git checkout himank/AR-3217_export_contract_address_for_ci && npm i && npm run deploy:network hardhat
+
+      # - name: Run unit tests
+      #   run:  npm i && npm test
+
+
+
+
