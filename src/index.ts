@@ -50,7 +50,7 @@ export class StorageProvider {
 
     if (config.debug) {
       SentryInit({
-        dsn: 'https://6fbd3c0536b543ecbacbf6ba4320ec11@o394338.ingest.sentry.io/5244311',
+        dsn: 'https://1a411b6bfed244de8f6a7d64bb432bd4@o1011868.ingest.sentry.io/6081085',
         integrations: [
           new Integrations.BrowserTracing({
             tracingOrigins: [this.gateway],
@@ -131,7 +131,7 @@ export class StorageProvider {
     if (!res.data.success) {
       throw new Error('Error uploading image');
     }
-    
+
     let subDomain = ".";
     switch ( this.chainId ) {
       case 40405 :
