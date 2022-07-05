@@ -162,7 +162,7 @@ export class StorageProvider {
     return this.initialisedPromise;
   }
 
-  _login = async () => {
+  private _login = async () => {
     if (!this.provider) {
       // @ts-ignore
       if (window.ethereum) {
