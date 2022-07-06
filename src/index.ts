@@ -225,6 +225,7 @@ export class StorageProvider {
   };
 
   linkNft = async (fileId:string, tokenId:Number, nftContract:string, chainId:Number) => {
+    await this.login();
     fileId = parseHex(fileId);
     nftContract = parseHex(nftContract);
     return await makeTx(this.appAddress, this.api, this.provider  , 'linkNFT', [fileId, tokenId, nftContract,chainId]);

@@ -2,11 +2,12 @@
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-// const gateway = 'http://localhost:9010/';
-const gateway = 'https://gateway01-testnet.arcana.network/';
+const gateway = 'http://localhost:9010/';
+// const gateway = 'https://gateway01-testnet.arcana.network/';
 // const gateway = 'https://gateway-dev.arcana.network/';
-const chainId = 40405;
-const appId = 28;
+const chainId = 40404;
+const appId = 338;
+// const appId = 28;
 
 const debug = false;
 const generateString = (length) => {
@@ -93,6 +94,12 @@ describe('Upload File', () => {
   //   await downloadArcana.downloadDID('0x03dcef07ceeb3c4bbb554a568b3a33d58df3bb7e9c527f9e1204a124ea5d1ee0');
   // });
 
+  
+  it('My files', async () => {
+    let files = await arcanaInstance.sharedFiles();
+    console.log({files})
+  });
+
   it('Should upload a file', async () => {
     let upload = await arcanaInstance.getUploader();
     let complete = false;
@@ -111,6 +118,20 @@ describe('Upload File', () => {
       await new Promise((resolve) => setTimeout(resolve, 800));
     }
   });
+
+  it('Share file', async () => {
+    access = await arcanaInstance.getAccess();
+    let tx = await access.share([did], ["0x9CC14A288BB5cb9Ec0e85b606Cb6585BB7ca6a8E"], [150]);
+    chai.expect(tx).not.null;
+  });
+
+  
+  // it('Change File Owner', async () => {
+  //   let newOwner = '0x04efC2A7E86cBaD7e5e65fc60eedfa92A413890e';
+  //   let tx = await access.changeFileOwner(did, newOwner);
+  //   chai.expect(tx).not.null;
+  // });
+
 
   // it('Make metadata URL', async () => {
   //   let nftArcana = new arcana.storage.StorageProvider({
@@ -234,12 +255,7 @@ describe('Upload File', () => {
   //   chai.expect(files[0]['size']).equal(file.size);
   // });
 
-  // it('Share file', async () => {
-  //   access = await arcanaInstance.getAccess();
-  //   let tx = await access.share([did], ["0xd018E133CeF28AE3F4F27b16F1AB43BBdd53BDcb"], [150]);
-  //   chai.expect(tx).not.null;
-  // });
-
+  
 
   // it('Should download a file', async () => {
   //   let download = await arcanaInstance.getDownloader();
@@ -310,29 +326,29 @@ describe('Upload File', () => {
   //   chai.expect(consumed).equal(file.size);
   // });
 
-  it('Delete File', async () => {
-    let files = await arcanaInstance.myFiles();
-    console.log({files});
-    let old_length = files.length
-    access = await arcanaInstance.getAccess();
-    // chai.expect(files[0].did).equal(did.replace('0x', ''));
-    let tx = await access.deleteFile(did);
-    files = await arcanaInstance.myFiles();
-    // chai.expect(old_length - files.lenglh).equal(0);
-    chai.expect(tx).not.null;
-  });
+  // it('Delete File', async () => {
+  //   let files = await arcanaInstance.myFiles();
+  //   console.log({files});
+  //   let old_length = files.length
+  //   access = await arcanaInstance.getAccess();
+  //   // chai.expect(files[0].did).equal(did.replace('0x', ''));
+  //   let tx = await access.deleteFile(did);
+  //   files = await arcanaInstance.myFiles();
+  //   // chai.expect(old_length - files.lenglh).equal(0);
+  //   chai.expect(tx).not.null;
+  // });
 
-  it('Upload file again', async () => {
-    let upload = await arcanaInstance.getUploader();
-    upload.onSuccess = () => {
-      console.log('File uploaded');
-    };
-    upload.onProgress = (a, b) => {
-      console.log(a, b);
-    };
-    let tx = await upload.upload(file);
-    chai.expect(tx).not.null;
-  })
+  // it('Upload file again', async () => {
+  //   let upload = await arcanaInstance.getUploader();
+  //   upload.onSuccess = () => {
+  //     console.log('File uploaded');
+  //   };
+  //   upload.onProgress = (a, b) => {
+  //     console.log(a, b);
+  //   };
+  //   let tx = await upload.upload(file);
+  //   chai.expect(tx).not.null;
+  // })
 
   // it('Get consumed and total download limit', async () => {
   //   const Access = await sharedInstance.getAccess();
