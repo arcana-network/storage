@@ -1,11 +1,43 @@
-# Arcana Storage
+<p align="center">
+<a href="#start"><img height="30rem" src="https://raw.githubusercontent.com/arcana-network/branding/main/an_logo_light_temp.png"/></a>
+<h2 align="center"> <a href="https://arcana.network/">Arcana Network Storage SDK </a></h2>
+</p>
+<br>
+<p id="banner" align="center">
+<br>
+<a title="MIT License" href="https://github.com/arcana-network/license/blob/main/LICENSE.md"><img src="https://img.shields.io/badge/license-MIT-blue"/></a>
+<a title="Beta release" href="https://github.com/arcana-network/storage/releases"><img src="https://img.shields.io/github/v/release/arcana-network/storage?style=flat-square&color=28A745"/></a>
+<a title="Twitter" href="https://twitter.com/ArcanaNetwork"><img alt="Twitter URL" src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FArcanaNetwork"/></a>
+</p><p id="start" align="center">
+<a href="https://docs.dev.arcana.network/"><img src="https://raw.githubusercontent.com/arcana-network/branding/main/an_banner_temp.png" alt="Arcana Storage SDK"/></a>
+</p>
 
-## Installation
+# What is Storage SDK?
 
-### Using npm/yarn
+The Arcana Storage SDK enables you to configure dApp and allow users to store files in a region enabled by the application, share it with other users, revoke access or transfer file ownership to another user.
+
+In the beta release, the storage nodes are operated by Arcana Networks. In the future, the storage subsystem will be fully decentralized and third party storage nodes can be plugged into the Arcana Network storage subsystem once they meet the Arcana storage QoS criteria.
+
+# 💪 Key Features
+
+<p>🗄️ &nbsp; Save dApp user data in Arcana data store</p>
+<p>🧩 &nbsp; Encrypt / Decrypt File data and metadata</p>
+<p>📂 &nbsp; Share data with other dApp users</p>
+<p>🔒 &nbsp; Revoke access to shared data</p>
+<p>🖼️ &nbsp; Change data ownership</p>
+<p>📈 &nbsp; Track data accesses via public blockchain browsers</p>
+
+# 🏗️ Installation
+
+## npm
 
 ```shell
 npm i @arcana/storage
+```
+
+## yarn
+
+```shell
 yarn add @arcana/storage
 ```
 
@@ -19,142 +51,28 @@ You can use the standalone module which includes the polyfills.
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```
 
-## Usage
+# 📋 Prerequisites
 
-### Create an Arcana instance
+Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.arcana.network/).
 
-```js
-// address: Smart contract address of app
-// private key: Secp256K private key
-const arcanaInstance = new arcana.storage.StorageProvider({ appId, privateKey, email });
-```
+A unique **AppId** will be assigned to your dApp and you need to provide this to Arcana Storage SDK in order to use the SDK functionality.
 
-### Uploader
+# 📚 Documentation
 
-```js
-const Uploader = arcanaInstance.getUploader();
-// file: Blob format
-Uploader.upload(file);
-```
+Check out [Arcana Network documentation](https://docs.dev.arcana.network/) for [Storage SDK Quick Start Guide](https://docs.dev.arcana.network/docs/stgsdk_qs), [Usage Guide](https://docs.dev.arcana.network/docs/stgsdk_usage) and [API reference Guide](https://docs.dev.arcana.network/docs/stg_ref).
 
-### Downloader
+Refer to the [sample app code](https://docs.dev.arcana.network/docs/demo-app) or the [How To Guides](https://docs.dev.arcana.network/docs/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
 
-```js
-const Downloader = arcanaInstance.getDownloader();
-// did: DID of file which you want to download
-Downloader.download(did);
-```
+# 💡 Support
 
-### Access
+For any support or integration related queries, contact [Arcana support team](mailto:support@arcana.network).
 
-```js
-const Access = new arcanaInstance.getAccess();
-```
+# 🤝 Contributing
 
-#### Share a file
+We appreciate your feedback and contribution to Arcana Storage component. Open a GitHub issue and discuss your RFP with Arcana Network developers. We plan to come up with a detailed contributing guide soon. Stay tuned!
 
-```js
-// did: DID of file to be shared
-// publicKey: recipients public key
-// validity: For how long will be the user able to download the file
-Access.share([did], [publicKey], [validity]);
-```
+# ℹ️ License
 
-#### Revoke access
+Arcana Storage is distributed under the [MIT License](https://fossa.com/blog/open-source-licenses-101-mit-license/).
 
-```js
-// did: DID of file from which access is removed
-// address: Address of the user who's access is getting revoked
-Access.revoke(did, address);
-```
-
-<!-- #### Change File owner -->
-
-<!-- ```js -->
-<!-- // address: new owner's address
-Access.changeFileOwner(did, address);
-``` -->
-
-#### Delete File
-
-```js
-Access.deleteFile(did);
-```
-
-#### Usage
-
-```js
-//Get consumed and total storage of the current user
-let [consumed, total] = await Access.getUploadLimit();
-```
-
-```js
-//Get consumed and total bandwidth of the current user
-let [consumed, total] = await Access.getDownloadLimit();
-```
-
-#### File shared with current user
-
-```js
-let files = await arcanaInstance.sharedFiles();
-```
-
-#### List of files uploaded by the user
-
-```js
-let files = await arcanaInstance.myFiles();
-```
-
-### FallBack Functions
-
-#### 1. Upload
-
-##### 1.1 On Success
-
-```
-uploader.onSuccess = () => {
-  console.log('Completed file upload');
-};
-```
-
-##### 1.2 On Error
-
-```
-uploader.onError = (err) => {
-  console.log('Error', err);
-};
-```
-
-##### 1.3 On Progress
-
-```
-uploader.onProgress = (bytesUploaded: number, bytesTotal: number) => {
-  console.log("Completed", bytesUploaded, "out of", bytesTotal)
-};
-```
-
-#### 2. Download
-
-##### 2.1 On Success
-
-```
-downloader.onSuccess = () => {
-  console.log('Completed file download');
-};
-```
-
-##### 2.2 On Progress
-
-```
-downloader.onProgress = (bytesDownloaded: number, bytesTotal: number) => {
-  console.log("Completed", bytesDownloaded, "out of", bytesTotal)
-};
-```
-
-## Error List
-
-| Code         | Message                      | Reason                                                                      |
-| ------------ | ---------------------------- | --------------------------------------------------------------------------- |
-| UNAUTHORIZED | You can't download this file | Trying to download a file which is neither owned by you nor shared with you |
-| TRANSACTION  | \*                           | Smart contract Errors                                                       |
-| TRANSACTION  | No space left for user       | You have already consumed your storage or bandwidht limit                   |
+For details see [Arcana License](https://github.com/arcana-network/license/blob/main/LICENSE.md).

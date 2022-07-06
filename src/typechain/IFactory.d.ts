@@ -17,11 +17,12 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface IFactoryInterface extends ethers.utils.Interface {
   functions: {
-    "createNewApp(string,address,bool,bool,uint128)": FunctionFragment;
+    "createNewApp(string,address,uint256,uint256,address,bool,bool,uint128,uint8,string[],string[])": FunctionFragment;
+    "gateway(address)": FunctionFragment;
     "idToAddress(uint128)": FunctionFragment;
     "isRegisteredUser(address,address)": FunctionFragment;
     "modifyNode(address,bool)": FunctionFragment;
@@ -33,8 +34,21 @@ interface IFactoryInterface extends ethers.utils.Interface {
 
   encodeFunctionData(
     functionFragment: "createNewApp",
-    values: [string, string, boolean, boolean, BigNumberish]
+    values: [
+      string,
+      string,
+      BigNumberish,
+      BigNumberish,
+      string,
+      boolean,
+      boolean,
+      BigNumberish,
+      BigNumberish,
+      string[],
+      string[]
+    ]
   ): string;
+  encodeFunctionData(functionFragment: "gateway", values: [string]): string;
   encodeFunctionData(
     functionFragment: "idToAddress",
     values: [BigNumberish]
@@ -68,6 +82,7 @@ interface IFactoryInterface extends ethers.utils.Interface {
     functionFragment: "createNewApp",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "gateway", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "idToAddress",
     data: BytesLike
@@ -140,12 +155,23 @@ export class IFactory extends BaseContract {
   functions: {
     createNewApp(
       _appName: string,
+      _owner: string,
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
       _relayer: string,
       _onlyDKGAddress: boolean,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _walletMode: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    gateway(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<[[string, string] & { x: string; y: string }]>;
 
     idToAddress(
       _id: BigNumberish,
@@ -192,12 +218,23 @@ export class IFactory extends BaseContract {
 
   createNewApp(
     _appName: string,
+    _owner: string,
+    _store: BigNumberish,
+    _bandwidth: BigNumberish,
     _relayer: string,
     _onlyDKGAddress: boolean,
     _aggregateLogin: boolean,
     _appId: BigNumberish,
+    _walletMode: BigNumberish,
+    _client: string[],
+    _clientId: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  gateway(
+    _address: string,
+    overrides?: CallOverrides
+  ): Promise<[string, string] & { x: string; y: string }>;
 
   idToAddress(_id: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
@@ -241,12 +278,23 @@ export class IFactory extends BaseContract {
   callStatic: {
     createNewApp(
       _appName: string,
+      _owner: string,
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
       _relayer: string,
       _onlyDKGAddress: boolean,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _walletMode: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    gateway(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { x: string; y: string }>;
 
     idToAddress(_id: BigNumberish, overrides?: CallOverrides): Promise<string>;
 
@@ -293,12 +341,20 @@ export class IFactory extends BaseContract {
   estimateGas: {
     createNewApp(
       _appName: string,
+      _owner: string,
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
       _relayer: string,
       _onlyDKGAddress: boolean,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _walletMode: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    gateway(_address: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     idToAddress(
       _id: BigNumberish,
@@ -346,11 +402,22 @@ export class IFactory extends BaseContract {
   populateTransaction: {
     createNewApp(
       _appName: string,
+      _owner: string,
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
       _relayer: string,
       _onlyDKGAddress: boolean,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _walletMode: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    gateway(
+      _address: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     idToAddress(

@@ -2,18 +2,22 @@ import './SHA256';
 import Sha256 from './SHA256';
 import { Contract, providers, Wallet, utils, Bytes } from 'ethers';
 import arcana from './contracts/Arcana';
+import dkg from './contracts/DKG';
 import forwarder from './contracts/Forwarder';
-import { encryptWithPublicKey, decryptWithPrivateKey } from 'eth-crypto';
 import { sign } from './signer';
-import { Arcana as ArcanaT, Forwarder as ForwarderT } from './typechain';
+import { Arcana as ArcanaT, Forwarder as ForwarderT, NodeList as NodeListT } from './typechain';
 import { AxiosInstance } from 'axios';
+import DID from './contracts/DID';
+import { Web3Provider } from '@ethersproject/providers';
+import { errorCodes } from './errors';
 
 export type Config = {
   appId: number;
-  privateKey: string;
+  provider: any;
   email: string;
   gateway: any;
   debug: any;
+  chainId: any;
 };
 
 export class KeyGen {
@@ -31,7 +35,7 @@ export class KeyGen {
     return new Promise((resolve, reject) => {
       this._chunk_reader(position, length, binary, (evt: any) => {
         if (evt.target.error == null) {
-          resolve({ data: evt.target.result, length: evt.total });
+          resolve({ data: evt.target.result, length: evt.target.result.byteLength });
         } else {
           reject(evt.target.error);
         }
@@ -81,6 +85,14 @@ export const fromHexString = (hexString: string): Uint8Array =>
 export const toHexString = (bytes: ArrayBuffer): string =>
   new Uint8Array(bytes).reduce((str, byte) => str + byte.toString(16).padStart(2, '0'), '');
 
+export function ensureArray<T>(input: T[] | T): T[] {
+  if (!Array.isArray(input)) {
+    return [input]
+  } else {
+    return input
+  }
+}
+
 interface encryptedI {
   ciphertext: string;
   ephemPublicKey: string;
@@ -88,20 +100,28 @@ interface encryptedI {
   mac: string;
 }
 
-export const getProvider = () => {
-  return new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
+export const getProvider = (provider: any) => {
+  return new providers.Web3Provider(provider, "any");
 };
 
-export const Arcana = (address: string, wallet?: Wallet): ArcanaT => {
-  const provider = getProvider();
-  return new Contract(address, arcana.abi, wallet ? wallet : provider) as ArcanaT;
+export const Arcana = (address: string, provider): ArcanaT => {
+  return new Contract(address, arcana.abi, provider) as ArcanaT;
+};
+
+export const DKG = (address: string, provider): NodeListT => {
+  return new Contract(address, dkg.abi, provider) as NodeListT;
+};
+
+export const Forwarder = (address: string, provider): ForwarderT => {
+  return new Contract(address, forwarder.abi, provider) as ForwarderT;
 };
 
 const cleanMessage = (message: string): string => {
   if (!message) return '';
   return message
     .replace(/[^\w\s:]/gi, '')
-    .replace('Error: VM Exception while processing transaction: reverted with reason string y ', '');
+    .replace('Error: VM Exception while processing transaction: reverted with reason string y ', '')
+    .trim();
 };
 
 function hex_to_ascii(str1) {
@@ -115,32 +135,44 @@ function hex_to_ascii(str1) {
 
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
   const arcana: ArcanaT = Arcana(address, wallet);
-  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
-  const forwarderContract: ForwarderT = new Contract(
-    localStorage.getItem('forwarder'),
-    forwarder.abi,
-    provider,
-  ) as ForwarderT;
+  const forwarderContract: ForwarderT = Forwarder(localStorage.getItem('forwarder'), wallet);
   let req = await sign(wallet, arcana, forwarderContract, method, params);
-  let res = await api.post('api/meta-tx/', req);
+  let res = await api.post('meta-tx/', req);
   if (res.data.err) {
-    throw customError('TRANSACTION', cleanMessage(res.data.err.message));
+    const error = cleanMessage(res.data.err);
+    if(errorCodes[error] != undefined){
+      throw customError(error, errorCodes[error]);
+    } else {
+      //If error is not present in the errorCodes then error code and message will be same.
+      throw customError(error, error);
+    }
   }
-  // await new Promise((r) => setTimeout(r, 1000));
-  let tx = await wallet.provider.getTransaction(res.data.txHash);
+  //Decoupled checking txns
+  await checkTxnStatus(wallet, res.data.txHash);
+
+  return res.data;
+};
+
+export const checkTxnStatus = async (provider, txHash: string) => {
+  await new Promise((r) => setTimeout(r, 1000));
+  let tx = await provider.getTransaction(txHash);
   try {
     await tx.wait();
   } catch (e) {
     let code = await provider.call(tx, tx.blockNumber);
     let reason = hex_to_ascii(code.substr(138));
-    console.log('revert reason', reason);
+
     if (reason) {
-      throw customError('TRANSACTION', cleanMessage(reason));
-    } else {
-      throw customError('', e.error);
+      const error = cleanMessage(reason);
+      if(errorCodes[error] != undefined){
+        throw customError(error, errorCodes[error]);
+      } else {
+        customError(error, error);
+      }
+     } else {
+      throw customError(e.error, e.error);
     }
   }
-  return res.data;
 };
 
 export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
@@ -174,56 +206,22 @@ export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
   return str;
 };
 
-export const createChildKey = async (privateKey: string, index: number) => {
-  const enc = new TextEncoder();
-  const key = await window.crypto.subtle.importKey(
-    'raw', // raw format of the key - should be Uint8Array
-    fromHexString(privateKey),
-    {
-      // algorithm details
-      name: 'HMAC',
-      hash: { name: 'SHA-256' },
-    },
-    false, // export = false
-    ['sign', 'verify'], // what this key can do
-  );
-  const signature = await window.crypto.subtle.sign('HMAC', key, enc.encode(String(index)));
-  return getWallet(toHexString(signature));
-};
-
 export const encryptKey = async (publicKey: string, key: string): Promise<any> => {
-  const encrypted = await encryptWithPublicKey(publicKey.substring(publicKey.length - 128), key);
-  return JSON.stringify(encrypted);
+  return 'key';
 };
 
 export const decryptKey = async (privateKey: string, encryptedKey: string): Promise<string> => {
-  return await decryptWithPrivateKey(privateKey, JSON.parse(encryptedKey));
+  return 'key';
 };
 
-export const getEncryptedKey = async (address: string, fileId: string): Promise<string> => {
-  const arcana = Arcana(address);
-  const file = await arcana.files(fileId);
-  return utils.toUtf8String(file.encryptedKey);
-};
-
-export const isFileUploaded = async (address: string, fileId: string): Promise<boolean> => {
-  const arcana = Arcana(address);
+export const isFileUploaded = async (address: string, fileId: string, provider: any): Promise<boolean> => {
+  const arcana = Arcana(address, provider);
   const file = await arcana.files(fileId);
   return file.uploaded;
 };
 
-export const getWallet = (privateKey: string) => {
-  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
-  return new Wallet(privateKey, provider);
-};
-
-export const getRandomWallet = () => {
-  const provider = new providers.JsonRpcProvider(localStorage.getItem('rpc_url'));
-  return Wallet.createRandom().connect(provider);
-};
-
 export const parseHex = (hex) => {
-  return hex.substring(0, 2) != '0x' ? '0x' + hex : hex;
+  return hex.substring(0, 2) !== '0x' ? '0x' + hex : hex;
 };
 
 export const customError = (code: string, message: string): Error => {
@@ -231,3 +229,22 @@ export const customError = (code: string, message: string): Error => {
   error.code = code;
   return error;
 };
+
+export const getDKGNodes = async (provider): Promise<any[]> => {
+  // Fetch DKG Node Details from dkg contract
+  const dkg = DKG(localStorage.getItem('dkg'), provider);
+  const nodes = await dkg.getCurrentEpochDetails();
+  return nodes;
+};
+
+export const getFile = async (did: string, provider: Web3Provider): Promise<any> => {
+  let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
+  let file = await contract.getFile(parseHex(did));
+  return file
+}
+
+export const getAppAddress = async (did: string, provider: Web3Provider): Promise<string> => {
+  let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
+  let appAddress = (await contract.getFile(parseHex(did))).app;
+  return appAddress
+}

@@ -35,9 +35,8 @@ function getMetaTxTypeData(chainId: number, verifyingContract: string) {
 }
 
 async function signTypedData(signer: any, from: string, data: any) {
-  // If signer is a private key, use it to sign
-  const privateKey = Buffer.from(signer.privateKey.replace(/^0x/, ''), 'hex');
-  return ethSigUtil.signTypedMessage(privateKey, { data });
+  const [method, argData] = ['eth_signTypedData_v4', JSON.stringify(data)];
+  return await signer.provider.send(method, [from, argData]);
 }
 
 async function buildRequest(forwarder: any, input: any) {
@@ -58,9 +57,10 @@ export async function signMetaTxRequest(signer: any, forwarder: Forwarder, input
   return { signature, request };
 }
 
-export async function sign(signer: any, arcana: Arcana, forwarder: Forwarder, method: any, params: any) {
+export async function sign(provider: any, arcana: Arcana, forwarder: Forwarder, method: any, params: any) {
+	const signer = provider.getSigner();
   const { request, signature } = await signMetaTxRequest(signer, forwarder, {
-    from: signer.address,
+    from: await signer.getAddress(),
     to: arcana.address,
     data: arcana.interface.encodeFunctionData(method, params),
   });
