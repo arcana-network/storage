@@ -18,6 +18,9 @@ The Arcana Storage SDK enables you to configure dApp and allow users to store fi
 
 In the beta release, the storage nodes are operated by Arcana Networks. In the future, the storage subsystem will be fully decentralized and third party storage nodes can be plugged into the Arcana Network storage subsystem once they meet the Arcana storage QoS criteria.
 
+| :warning: Caution: Arcana Network SDKs and apps (Beta Release), not recommended for production usage.|
+| --- |
+
 # 💪 Key Features
 
 <p>🗄️ &nbsp; Save dApp user data in Arcana data store</p>
