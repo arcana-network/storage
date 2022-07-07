@@ -1,11 +1,15 @@
 import Decryptor from './decrypt';
-import { decryptWithPrivateKey } from 'eth-crypto';
-import { Arcana, hasher2Hex, fromHexString, AESDecrypt, makeTx, customError } from './Utils';
-import { utils } from 'ethers';
+import { Arcana, hasher2Hex, AESDecrypt, makeTx, customError, getDKGNodes, getFile } from './Utils';
+import { utils, Wallet } from 'ethers';
 import FileWriter from './FileWriter';
 import { readHash } from './constant';
 import Sha256 from './SHA256';
-import { AxiosInstance } from 'axios';
+import axios, { AxiosInstance } from 'axios';
+import { join } from 'shamir';
+import { id } from 'ethers/lib/utils';
+import { decodeHex } from 'eciesjs/dist/utils';
+import { decrypt } from 'eciesjs';
+import {wrapInstance} from "./sentry";
 
 const downloadBlob = (blob, fileName) => {
   // @ts-ignore
@@ -34,18 +38,20 @@ export function createAndDownloadBlobFile(body, filename) {
 }
 
 export class Downloader {
-  private wallet: any;
-  private convergence: string;
+  private provider: any;
   private hasher;
   private api: AxiosInstance;
   private appAddress: string;
 
-  constructor(appAddress: string, wallet: any, convergence: string, api: AxiosInstance) {
-    this.wallet = wallet;
-    this.convergence = convergence;
+  constructor(appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
+    this.provider = provider;
     this.hasher = new Sha256();
     this.api = api;
     this.appAddress = appAddress;
+
+    if (debug) {
+      wrapInstance(this)
+    }
   }
 
   onSuccess = async () => {};
@@ -53,22 +59,43 @@ export class Downloader {
 
   download = async (did) => {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
-    const arcana = Arcana(this.appAddress, this.wallet);
-    let file;
+    const arcana = Arcana(this.appAddress, this.provider);
+    let file, txHash;
+    const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     try {
-      file = await arcana.getFile(did, readHash);
+      file = await getFile(did, this.provider);
     } catch (e) {
       throw customError('UNAUTHORIZED', "You can't download this file");
     }
-    let res = await makeTx(this.appAddress, this.api, this.wallet, 'checkPermission', [did, readHash]);
-    const decryptedKey = await decryptWithPrivateKey(
-      this.wallet.privateKey,
-      JSON.parse(utils.toUtf8String(file.encryptedKey)),
-    );
-    const key = await window.crypto.subtle.importKey('raw', fromHexString(decryptedKey), 'AES-CTR', false, [
-      'encrypt',
-      'decrypt',
+    let ephemeralWallet = await Wallet.createRandom();
+    let res = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [
+      did,
+      readHash,
+      ephemeralWallet.address,
     ]);
+    txHash = res.txHash;
+    let shares = {};
+    const nodes = await getDKGNodes(this.provider);
+    for (let i = 0; i < nodes.length; i++) {
+      let res = await axios.post('https://' + nodes[i].declaredIp + '/rpc', {
+        jsonrpc: '2.0',
+        method: 'RetrieveKeyShare',
+        id: 10,
+        params: {
+          tx_hash: txHash,
+          signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash: txHash }))),
+        },
+      });
+      if(res.data.error) {
+        console.log(res.data.error.message, "\n", res.data.error.data);
+        continue
+      }
+      let sh = res.data.result.share;
+      shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh));
+    }
+    let decryptedKey = join(shares);
+
+    const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt']);
 
     const fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)));
 

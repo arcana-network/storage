@@ -18,20 +18,29 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface UUPSUpgradeableInterface extends ethers.utils.Interface {
   functions: {
+    "proxiableUUID()": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
   };
 
+  encodeFunctionData(
+    functionFragment: "proxiableUUID",
+    values?: undefined
+  ): string;
   encodeFunctionData(functionFragment: "upgradeTo", values: [string]): string;
   encodeFunctionData(
     functionFragment: "upgradeToAndCall",
     values: [string, BytesLike]
   ): string;
 
+  decodeFunctionResult(
+    functionFragment: "proxiableUUID",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "upgradeToAndCall",
@@ -48,6 +57,14 @@ interface UUPSUpgradeableInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
+
+export type AdminChangedEvent = TypedEvent<
+  [string, string] & { previousAdmin: string; newAdmin: string }
+>;
+
+export type BeaconUpgradedEvent = TypedEvent<[string] & { beacon: string }>;
+
+export type UpgradedEvent = TypedEvent<[string] & { implementation: string }>;
 
 export class UUPSUpgradeable extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -93,6 +110,8 @@ export class UUPSUpgradeable extends BaseContract {
   interface: UUPSUpgradeableInterface;
 
   functions: {
+    proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
+
     upgradeTo(
       newImplementation: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -104,6 +123,8 @@ export class UUPSUpgradeable extends BaseContract {
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
+
+  proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
   upgradeTo(
     newImplementation: string,
@@ -117,6 +138,8 @@ export class UUPSUpgradeable extends BaseContract {
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    proxiableUUID(overrides?: CallOverrides): Promise<string>;
+
     upgradeTo(
       newImplementation: string,
       overrides?: CallOverrides
@@ -130,6 +153,14 @@ export class UUPSUpgradeable extends BaseContract {
   };
 
   filters: {
+    "AdminChanged(address,address)"(
+      previousAdmin?: null,
+      newAdmin?: null
+    ): TypedEventFilter<
+      [string, string],
+      { previousAdmin: string; newAdmin: string }
+    >;
+
     AdminChanged(
       previousAdmin?: null,
       newAdmin?: null
@@ -138,9 +169,17 @@ export class UUPSUpgradeable extends BaseContract {
       { previousAdmin: string; newAdmin: string }
     >;
 
+    "BeaconUpgraded(address)"(
+      beacon?: string | null
+    ): TypedEventFilter<[string], { beacon: string }>;
+
     BeaconUpgraded(
       beacon?: string | null
     ): TypedEventFilter<[string], { beacon: string }>;
+
+    "Upgraded(address)"(
+      implementation?: string | null
+    ): TypedEventFilter<[string], { implementation: string }>;
 
     Upgraded(
       implementation?: string | null
@@ -148,6 +187,8 @@ export class UUPSUpgradeable extends BaseContract {
   };
 
   estimateGas: {
+    proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
+
     upgradeTo(
       newImplementation: string,
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -161,6 +202,8 @@ export class UUPSUpgradeable extends BaseContract {
   };
 
   populateTransaction: {
+    proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     upgradeTo(
       newImplementation: string,
       overrides?: Overrides & { from?: string | Promise<string> }

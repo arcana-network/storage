@@ -12,35 +12,44 @@ import {
   BaseContract,
   ContractTransaction,
   Overrides,
+  PayableOverrides,
   CallOverrides,
 } from "ethers";
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface FactoryInterface extends ethers.utils.Interface {
   functions: {
     "app(address)": FunctionFragment;
-    "createNewApp(string,address,bool,bool,uint128)": FunctionFragment;
+    "createNewApp(string,address,uint256,uint256,address,bool,bool,uint128,uint8,string[],string[])": FunctionFragment;
     "defaultBandwidth()": FunctionFragment;
     "defaultStorage()": FunctionFragment;
+    "gateway(address)": FunctionFragment;
+    "getBeacon()": FunctionFragment;
+    "getImplementation()": FunctionFragment;
     "idToAddress(uint128)": FunctionFragment;
+    "initialize(address)": FunctionFragment;
     "isNode(address)": FunctionFragment;
     "isRegisteredUser(address,address)": FunctionFragment;
-    "logic()": FunctionFragment;
+    "modifyGateway(address,bytes32,bytes32)": FunctionFragment;
     "modifyNode(address,bool)": FunctionFragment;
+    "nodesIp(address)": FunctionFragment;
     "onlyDKGAdress(address)": FunctionFragment;
     "owner()": FunctionFragment;
+    "proxiableUUID()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "setAppLevelLimit(address,uint256,uint256)": FunctionFragment;
     "setDefaultLimit(uint256,uint256)": FunctionFragment;
-    "setLogic(address)": FunctionFragment;
     "setTreshold(uint256)": FunctionFragment;
     "thresholdVoting()": FunctionFragment;
     "totalNodes()": FunctionFragment;
     "totalVotes(address,address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "updateNodeIp(address,string)": FunctionFragment;
+    "upgradeTo(address)": FunctionFragment;
+    "upgradeToAndCall(address,bytes)": FunctionFragment;
     "voteUser(address,address,bool)": FunctionFragment;
     "voteUserRegistration(address,address,address)": FunctionFragment;
   };
@@ -48,7 +57,19 @@ interface FactoryInterface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "app", values: [string]): string;
   encodeFunctionData(
     functionFragment: "createNewApp",
-    values: [string, string, boolean, boolean, BigNumberish]
+    values: [
+      string,
+      string,
+      BigNumberish,
+      BigNumberish,
+      string,
+      boolean,
+      boolean,
+      BigNumberish,
+      BigNumberish,
+      string[],
+      string[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "defaultBandwidth",
@@ -58,25 +79,40 @@ interface FactoryInterface extends ethers.utils.Interface {
     functionFragment: "defaultStorage",
     values?: undefined
   ): string;
+  encodeFunctionData(functionFragment: "gateway", values: [string]): string;
+  encodeFunctionData(functionFragment: "getBeacon", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "getImplementation",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "idToAddress",
     values: [BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "initialize", values: [string]): string;
   encodeFunctionData(functionFragment: "isNode", values: [string]): string;
   encodeFunctionData(
     functionFragment: "isRegisteredUser",
     values: [string, string]
   ): string;
-  encodeFunctionData(functionFragment: "logic", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "modifyGateway",
+    values: [string, BytesLike, BytesLike]
+  ): string;
   encodeFunctionData(
     functionFragment: "modifyNode",
     values: [string, boolean]
   ): string;
+  encodeFunctionData(functionFragment: "nodesIp", values: [string]): string;
   encodeFunctionData(
     functionFragment: "onlyDKGAdress",
     values: [string]
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "proxiableUUID",
+    values?: undefined
+  ): string;
   encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
@@ -89,7 +125,6 @@ interface FactoryInterface extends ethers.utils.Interface {
     functionFragment: "setDefaultLimit",
     values: [BigNumberish, BigNumberish]
   ): string;
-  encodeFunctionData(functionFragment: "setLogic", values: [string]): string;
   encodeFunctionData(
     functionFragment: "setTreshold",
     values: [BigNumberish]
@@ -109,6 +144,15 @@ interface FactoryInterface extends ethers.utils.Interface {
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "updateNodeIp",
+    values: [string, string]
+  ): string;
+  encodeFunctionData(functionFragment: "upgradeTo", values: [string]): string;
+  encodeFunctionData(
+    functionFragment: "upgradeToAndCall",
+    values: [string, BytesLike]
   ): string;
   encodeFunctionData(
     functionFragment: "voteUser",
@@ -132,22 +176,37 @@ interface FactoryInterface extends ethers.utils.Interface {
     functionFragment: "defaultStorage",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "gateway", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "getBeacon", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "getImplementation",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "idToAddress",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "isNode", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "isRegisteredUser",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "logic", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "modifyGateway",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "modifyNode", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "nodesIp", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "onlyDKGAdress",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "proxiableUUID",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "renounceOwnership",
     data: BytesLike
@@ -160,7 +219,6 @@ interface FactoryInterface extends ethers.utils.Interface {
     functionFragment: "setDefaultLimit",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "setLogic", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "setTreshold",
     data: BytesLike
@@ -175,6 +233,15 @@ interface FactoryInterface extends ethers.utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(
+    functionFragment: "updateNodeIp",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "upgradeToAndCall",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(functionFragment: "voteUser", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "voteUserRegistration",
@@ -182,13 +249,35 @@ interface FactoryInterface extends ethers.utils.Interface {
   ): Result;
 
   events: {
+    "AdminChanged(address,address)": EventFragment;
+    "BeaconUpgraded(address)": EventFragment;
     "NewApp(address,address)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
+    "Upgraded(address)": EventFragment;
   };
 
+  getEvent(nameOrSignatureOrTopic: "AdminChanged"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "BeaconUpgraded"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewApp"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
+
+export type AdminChangedEvent = TypedEvent<
+  [string, string] & { previousAdmin: string; newAdmin: string }
+>;
+
+export type BeaconUpgradedEvent = TypedEvent<[string] & { beacon: string }>;
+
+export type NewAppEvent = TypedEvent<
+  [string, string] & { owner: string; appProxy: string }
+>;
+
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string] & { previousOwner: string; newOwner: string }
+>;
+
+export type UpgradedEvent = TypedEvent<[string] & { implementation: string }>;
 
 export class Factory extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -238,10 +327,16 @@ export class Factory extends BaseContract {
 
     createNewApp(
       _appName: string,
+      _owner: string,
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
       _relayer: string,
       _onlyDKGAddress: boolean,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _walletMode: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -249,10 +344,26 @@ export class Factory extends BaseContract {
 
     defaultStorage(overrides?: CallOverrides): Promise<[BigNumber]>;
 
+    gateway(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<[[string, string] & { x: string; y: string }]>;
+
+    getBeacon(overrides?: CallOverrides): Promise<[string] & { _b: string }>;
+
+    getImplementation(
+      overrides?: CallOverrides
+    ): Promise<[string] & { _i: string }>;
+
     idToAddress(
       arg0: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
+
+    initialize(
+      _initBluePrint: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     isNode(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -262,7 +373,12 @@ export class Factory extends BaseContract {
       overrides?: CallOverrides
     ): Promise<[boolean]>;
 
-    logic(overrides?: CallOverrides): Promise<[string]>;
+    modifyGateway(
+      node: string,
+      x: BytesLike,
+      y: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     modifyNode(
       _node: string,
@@ -270,9 +386,13 @@ export class Factory extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    nodesIp(arg0: string, overrides?: CallOverrides): Promise<[string]>;
+
     onlyDKGAdress(arg0: string, overrides?: CallOverrides): Promise<[boolean]>;
 
     owner(overrides?: CallOverrides): Promise<[string]>;
+
+    proxiableUUID(overrides?: CallOverrides): Promise<[string]>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -288,11 +408,6 @@ export class Factory extends BaseContract {
     setDefaultLimit(
       _storage: BigNumberish,
       _bandwidth: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setLogic(
-      _logic: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -316,6 +431,23 @@ export class Factory extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    updateNodeIp(
+      _node: string,
+      _ip: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    upgradeTo(
+      newImplementation: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    upgradeToAndCall(
+      newImplementation: string,
+      data: BytesLike,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     voteUser(
       _app: string,
       _user: string,
@@ -335,10 +467,16 @@ export class Factory extends BaseContract {
 
   createNewApp(
     _appName: string,
+    _owner: string,
+    _store: BigNumberish,
+    _bandwidth: BigNumberish,
     _relayer: string,
     _onlyDKGAddress: boolean,
     _aggregateLogin: boolean,
     _appId: BigNumberish,
+    _walletMode: BigNumberish,
+    _client: string[],
+    _clientId: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -346,7 +484,21 @@ export class Factory extends BaseContract {
 
   defaultStorage(overrides?: CallOverrides): Promise<BigNumber>;
 
+  gateway(
+    _address: string,
+    overrides?: CallOverrides
+  ): Promise<[string, string] & { x: string; y: string }>;
+
+  getBeacon(overrides?: CallOverrides): Promise<string>;
+
+  getImplementation(overrides?: CallOverrides): Promise<string>;
+
   idToAddress(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+  initialize(
+    _initBluePrint: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   isNode(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
@@ -356,7 +508,12 @@ export class Factory extends BaseContract {
     overrides?: CallOverrides
   ): Promise<boolean>;
 
-  logic(overrides?: CallOverrides): Promise<string>;
+  modifyGateway(
+    node: string,
+    x: BytesLike,
+    y: BytesLike,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   modifyNode(
     _node: string,
@@ -364,9 +521,13 @@ export class Factory extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  nodesIp(arg0: string, overrides?: CallOverrides): Promise<string>;
+
   onlyDKGAdress(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
   owner(overrides?: CallOverrides): Promise<string>;
+
+  proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -382,11 +543,6 @@ export class Factory extends BaseContract {
   setDefaultLimit(
     _storage: BigNumberish,
     _bandwidth: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setLogic(
-    _logic: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -410,6 +566,23 @@ export class Factory extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  updateNodeIp(
+    _node: string,
+    _ip: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  upgradeTo(
+    newImplementation: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  upgradeToAndCall(
+    newImplementation: string,
+    data: BytesLike,
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   voteUser(
     _app: string,
     _user: string,
@@ -429,10 +602,16 @@ export class Factory extends BaseContract {
 
     createNewApp(
       _appName: string,
+      _owner: string,
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
       _relayer: string,
       _onlyDKGAddress: boolean,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _walletMode: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -440,7 +619,21 @@ export class Factory extends BaseContract {
 
     defaultStorage(overrides?: CallOverrides): Promise<BigNumber>;
 
+    gateway(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<[string, string] & { x: string; y: string }>;
+
+    getBeacon(overrides?: CallOverrides): Promise<string>;
+
+    getImplementation(overrides?: CallOverrides): Promise<string>;
+
     idToAddress(arg0: BigNumberish, overrides?: CallOverrides): Promise<string>;
+
+    initialize(
+      _initBluePrint: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     isNode(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
@@ -450,7 +643,12 @@ export class Factory extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
-    logic(overrides?: CallOverrides): Promise<string>;
+    modifyGateway(
+      node: string,
+      x: BytesLike,
+      y: BytesLike,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     modifyNode(
       _node: string,
@@ -458,9 +656,13 @@ export class Factory extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    nodesIp(arg0: string, overrides?: CallOverrides): Promise<string>;
+
     onlyDKGAdress(arg0: string, overrides?: CallOverrides): Promise<boolean>;
 
     owner(overrides?: CallOverrides): Promise<string>;
+
+    proxiableUUID(overrides?: CallOverrides): Promise<string>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -476,8 +678,6 @@ export class Factory extends BaseContract {
       _bandwidth: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    setLogic(_logic: string, overrides?: CallOverrides): Promise<void>;
 
     setTreshold(
       _newTreshold: BigNumberish,
@@ -496,6 +696,23 @@ export class Factory extends BaseContract {
 
     transferOwnership(
       newOwner: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    updateNodeIp(
+      _node: string,
+      _ip: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    upgradeTo(
+      newImplementation: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    upgradeToAndCall(
+      newImplementation: string,
+      data: BytesLike,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -515,10 +732,47 @@ export class Factory extends BaseContract {
   };
 
   filters: {
+    "AdminChanged(address,address)"(
+      previousAdmin?: null,
+      newAdmin?: null
+    ): TypedEventFilter<
+      [string, string],
+      { previousAdmin: string; newAdmin: string }
+    >;
+
+    AdminChanged(
+      previousAdmin?: null,
+      newAdmin?: null
+    ): TypedEventFilter<
+      [string, string],
+      { previousAdmin: string; newAdmin: string }
+    >;
+
+    "BeaconUpgraded(address)"(
+      beacon?: string | null
+    ): TypedEventFilter<[string], { beacon: string }>;
+
+    BeaconUpgraded(
+      beacon?: string | null
+    ): TypedEventFilter<[string], { beacon: string }>;
+
+    "NewApp(address,address)"(
+      owner?: null,
+      appProxy?: null
+    ): TypedEventFilter<[string, string], { owner: string; appProxy: string }>;
+
     NewApp(
       owner?: null,
       appProxy?: null
     ): TypedEventFilter<[string, string], { owner: string; appProxy: string }>;
+
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): TypedEventFilter<
+      [string, string],
+      { previousOwner: string; newOwner: string }
+    >;
 
     OwnershipTransferred(
       previousOwner?: string | null,
@@ -527,6 +781,14 @@ export class Factory extends BaseContract {
       [string, string],
       { previousOwner: string; newOwner: string }
     >;
+
+    "Upgraded(address)"(
+      implementation?: string | null
+    ): TypedEventFilter<[string], { implementation: string }>;
+
+    Upgraded(
+      implementation?: string | null
+    ): TypedEventFilter<[string], { implementation: string }>;
   };
 
   estimateGas: {
@@ -534,10 +796,16 @@ export class Factory extends BaseContract {
 
     createNewApp(
       _appName: string,
+      _owner: string,
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
       _relayer: string,
       _onlyDKGAddress: boolean,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _walletMode: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -545,9 +813,20 @@ export class Factory extends BaseContract {
 
     defaultStorage(overrides?: CallOverrides): Promise<BigNumber>;
 
+    gateway(_address: string, overrides?: CallOverrides): Promise<BigNumber>;
+
+    getBeacon(overrides?: CallOverrides): Promise<BigNumber>;
+
+    getImplementation(overrides?: CallOverrides): Promise<BigNumber>;
+
     idToAddress(
       arg0: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
+    initialize(
+      _initBluePrint: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     isNode(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
@@ -558,7 +837,12 @@ export class Factory extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
-    logic(overrides?: CallOverrides): Promise<BigNumber>;
+    modifyGateway(
+      node: string,
+      x: BytesLike,
+      y: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     modifyNode(
       _node: string,
@@ -566,9 +850,13 @@ export class Factory extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    nodesIp(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     onlyDKGAdress(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
+
+    proxiableUUID(overrides?: CallOverrides): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -584,11 +872,6 @@ export class Factory extends BaseContract {
     setDefaultLimit(
       _storage: BigNumberish,
       _bandwidth: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setLogic(
-      _logic: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -610,6 +893,23 @@ export class Factory extends BaseContract {
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    updateNodeIp(
+      _node: string,
+      _ip: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    upgradeTo(
+      newImplementation: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    upgradeToAndCall(
+      newImplementation: string,
+      data: BytesLike,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     voteUser(
@@ -632,10 +932,16 @@ export class Factory extends BaseContract {
 
     createNewApp(
       _appName: string,
+      _owner: string,
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
       _relayer: string,
       _onlyDKGAddress: boolean,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _walletMode: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -643,9 +949,23 @@ export class Factory extends BaseContract {
 
     defaultStorage(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    gateway(
+      _address: string,
+      overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    getBeacon(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    getImplementation(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     idToAddress(
       arg0: BigNumberish,
       overrides?: CallOverrides
+    ): Promise<PopulatedTransaction>;
+
+    initialize(
+      _initBluePrint: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     isNode(
@@ -659,12 +979,22 @@ export class Factory extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    logic(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    modifyGateway(
+      node: string,
+      x: BytesLike,
+      y: BytesLike,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     modifyNode(
       _node: string,
       _value: boolean,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    nodesIp(
+      arg0: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     onlyDKGAdress(
@@ -673,6 +1003,8 @@ export class Factory extends BaseContract {
     ): Promise<PopulatedTransaction>;
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    proxiableUUID(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -688,11 +1020,6 @@ export class Factory extends BaseContract {
     setDefaultLimit(
       _storage: BigNumberish,
       _bandwidth: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setLogic(
-      _logic: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -714,6 +1041,23 @@ export class Factory extends BaseContract {
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    updateNodeIp(
+      _node: string,
+      _ip: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    upgradeTo(
+      newImplementation: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    upgradeToAndCall(
+      newImplementation: string,
+      data: BytesLike,
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     voteUser(

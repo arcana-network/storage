@@ -10,42 +10,89 @@ const _abi = [
   {
     inputs: [
       {
-        internalType: "bytes32",
-        name: "_file",
-        type: "bytes32",
-      },
-      {
-        internalType: "uint256",
-        name: "_n",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_k",
-        type: "uint256",
-      },
-      {
-        internalType: "uint256",
-        name: "_fileSize",
-        type: "uint256",
-      },
-      {
-        internalType: "bytes",
-        name: "_encryptedMetaData",
-        type: "bytes",
-      },
-      {
-        internalType: "bytes",
-        name: "_encryptedKey",
-        type: "bytes",
-      },
-      {
-        internalType: "address",
-        name: "_storageNode",
-        type: "address",
+        internalType: "string",
+        name: "_name",
+        type: "string",
       },
     ],
-    name: "uploadInit",
+    name: "setAppName",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string",
+        name: "_client",
+        type: "string",
+      },
+      {
+        internalType: "string",
+        name: "_clientId",
+        type: "string",
+      },
+    ],
+    name: "setClientId",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "string[]",
+        name: "_client",
+        type: "string[]",
+      },
+      {
+        internalType: "string[]",
+        name: "_clientId",
+        type: "string[]",
+      },
+    ],
+    name: "setClientIds",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "uint256",
+        name: "_store",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "_bandwidth",
+        type: "uint256",
+      },
+    ],
+    name: "setDefaultLimit",
+    outputs: [],
+    stateMutability: "nonpayable",
+    type: "function",
+  },
+  {
+    inputs: [
+      {
+        internalType: "address",
+        name: "user",
+        type: "address",
+      },
+      {
+        internalType: "uint256",
+        name: "store",
+        type: "uint256",
+      },
+      {
+        internalType: "uint256",
+        name: "bandwidth",
+        type: "uint256",
+      },
+    ],
+    name: "setUserLevelLimit",
     outputs: [],
     stateMutability: "nonpayable",
     type: "function",

@@ -1,0 +1,11 @@
+{
+  "entryPoints": ["src/index.ts"],
+  "name": "Storage SDK Reference Guide",
+  "out": "htmldocs",
+  "excludePrivate": true,
+  "excludeProtected": true,
+  "excludeInternal": true,
+  "footerDate": true,
+  "footerTime": true,
+  "plugin": ["typedoc-plugin-extras"]
+}

@@ -18,7 +18,7 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface ArcanaInterface extends ethers.utils.Interface {
   functions: {
@@ -27,47 +27,43 @@ interface ArcanaInterface extends ethers.utils.Interface {
     "appId()": FunctionFragment;
     "appName()": FunctionFragment;
     "changeFileOwner(bytes32,address)": FunctionFragment;
-    "checkPermission(bytes32,bytes32)": FunctionFragment;
+    "changeUserStatus(address,uint8)": FunctionFragment;
+    "checkPermission(bytes32,bytes32,address)": FunctionFragment;
+    "clientID(string)": FunctionFragment;
     "consumption(address)": FunctionFragment;
-    "convergence(address)": FunctionFragment;
     "defaultLimit()": FunctionFragment;
+    "deleteAccount()": FunctionFragment;
     "deleteFile(bytes32)": FunctionFragment;
-    "discordClientId()": FunctionFragment;
     "factory()": FunctionFragment;
     "files(bytes32)": FunctionFragment;
     "getAllUsers(bytes32,bytes32)": FunctionFragment;
     "getDownloadLimit()": FunctionFragment;
     "getFile(bytes32,bytes32)": FunctionFragment;
+    "getImplementation()": FunctionFragment;
     "getUploadLimit()": FunctionFragment;
-    "githubClientId()": FunctionFragment;
-    "googleClientId()": FunctionFragment;
-    "initialize(string,address,address,bool,uint128)": FunctionFragment;
+    "initialize(string,address,address,bool,uint128,uint8,string[],string[])": FunctionFragment;
     "isTrustedForwarder(address)": FunctionFragment;
     "limit(address)": FunctionFragment;
     "owner()": FunctionFragment;
-    "redditClientId()": FunctionFragment;
+    "reactivateAccount()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
     "revoke(bytes32,address,bytes32)": FunctionFragment;
     "setAppLevelLimit(uint256,uint256)": FunctionFragment;
-    "setConvergence(string)": FunctionFragment;
+    "setAppName(string)": FunctionFragment;
+    "setClientId(string,string)": FunctionFragment;
+    "setClientIds(string[],string[])": FunctionFragment;
     "setDefaultLimit(uint256,uint256)": FunctionFragment;
-    "setDiscordClientId(string)": FunctionFragment;
-    "setGithubClientId(string)": FunctionFragment;
-    "setGoogleClientId(string)": FunctionFragment;
-    "setRedditClientId(string)": FunctionFragment;
-    "setTwitchClientId(string)": FunctionFragment;
-    "setTwitterClientId(string)": FunctionFragment;
     "setUserLevelLimit(address,uint256,uint256)": FunctionFragment;
-    "share(bytes32[],address[],bytes32[],bytes[],uint256[])": FunctionFragment;
-    "shareUser(bytes32[],address[],bytes32[],bytes[],uint256[])": FunctionFragment;
+    "share(bytes32[],address[],bytes32[],uint256[])": FunctionFragment;
+    "shareUser(bytes32[],address[],bytes32[],uint256[])": FunctionFragment;
+    "status(address)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
-    "twitchClientId()": FunctionFragment;
-    "twitterClientId()": FunctionFragment;
     "upgradeTo(address)": FunctionFragment;
     "upgradeToAndCall(address,bytes)": FunctionFragment;
     "uploadClose(bytes32)": FunctionFragment;
-    "uploadInit(bytes32,uint256,uint256,uint256,bytes,bytes,address)": FunctionFragment;
+    "uploadInit(bytes32,uint256,bytes,address,address)": FunctionFragment;
     "userAccess(bytes32,bytes32,uint256)": FunctionFragment;
+    "walletType()": FunctionFragment;
   };
 
   encodeFunctionData(
@@ -85,22 +81,26 @@ interface ArcanaInterface extends ethers.utils.Interface {
     values: [BytesLike, string]
   ): string;
   encodeFunctionData(
-    functionFragment: "checkPermission",
-    values: [BytesLike, BytesLike]
+    functionFragment: "changeUserStatus",
+    values: [string, BigNumberish]
   ): string;
+  encodeFunctionData(
+    functionFragment: "checkPermission",
+    values: [BytesLike, BytesLike, string]
+  ): string;
+  encodeFunctionData(functionFragment: "clientID", values: [string]): string;
   encodeFunctionData(functionFragment: "consumption", values: [string]): string;
-  encodeFunctionData(functionFragment: "convergence", values: [string]): string;
   encodeFunctionData(
     functionFragment: "defaultLimit",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "deleteFile",
-    values: [BytesLike]
+    functionFragment: "deleteAccount",
+    values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "discordClientId",
-    values?: undefined
+    functionFragment: "deleteFile",
+    values: [BytesLike]
   ): string;
   encodeFunctionData(functionFragment: "factory", values?: undefined): string;
   encodeFunctionData(functionFragment: "files", values: [BytesLike]): string;
@@ -117,20 +117,25 @@ interface ArcanaInterface extends ethers.utils.Interface {
     values: [BytesLike, BytesLike]
   ): string;
   encodeFunctionData(
+    functionFragment: "getImplementation",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "getUploadLimit",
     values?: undefined
   ): string;
   encodeFunctionData(
-    functionFragment: "githubClientId",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "googleClientId",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
     functionFragment: "initialize",
-    values: [string, string, string, boolean, BigNumberish]
+    values: [
+      string,
+      string,
+      string,
+      boolean,
+      BigNumberish,
+      BigNumberish,
+      string[],
+      string[]
+    ]
   ): string;
   encodeFunctionData(
     functionFragment: "isTrustedForwarder",
@@ -139,7 +144,7 @@ interface ArcanaInterface extends ethers.utils.Interface {
   encodeFunctionData(functionFragment: "limit", values: [string]): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
-    functionFragment: "redditClientId",
+    functionFragment: "reactivateAccount",
     values?: undefined
   ): string;
   encodeFunctionData(
@@ -154,37 +159,18 @@ interface ArcanaInterface extends ethers.utils.Interface {
     functionFragment: "setAppLevelLimit",
     values: [BigNumberish, BigNumberish]
   ): string;
+  encodeFunctionData(functionFragment: "setAppName", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "setConvergence",
-    values: [string]
+    functionFragment: "setClientId",
+    values: [string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setClientIds",
+    values: [string[], string[]]
   ): string;
   encodeFunctionData(
     functionFragment: "setDefaultLimit",
     values: [BigNumberish, BigNumberish]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setDiscordClientId",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setGithubClientId",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setGoogleClientId",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setRedditClientId",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setTwitchClientId",
-    values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "setTwitterClientId",
-    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "setUserLevelLimit",
@@ -192,23 +178,16 @@ interface ArcanaInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "share",
-    values: [BytesLike[], string[], BytesLike[], BytesLike[], BigNumberish[]]
+    values: [BytesLike[], string[], BytesLike[], BigNumberish[]]
   ): string;
   encodeFunctionData(
     functionFragment: "shareUser",
-    values: [BytesLike[], string[], BytesLike[], BytesLike[], BigNumberish[]]
+    values: [BytesLike[], string[], BytesLike[], BigNumberish[]]
   ): string;
+  encodeFunctionData(functionFragment: "status", values: [string]): string;
   encodeFunctionData(
     functionFragment: "transferOwnership",
     values: [string]
-  ): string;
-  encodeFunctionData(
-    functionFragment: "twitchClientId",
-    values?: undefined
-  ): string;
-  encodeFunctionData(
-    functionFragment: "twitterClientId",
-    values?: undefined
   ): string;
   encodeFunctionData(functionFragment: "upgradeTo", values: [string]): string;
   encodeFunctionData(
@@ -221,19 +200,15 @@ interface ArcanaInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(
     functionFragment: "uploadInit",
-    values: [
-      BytesLike,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike,
-      string
-    ]
+    values: [BytesLike, BigNumberish, BytesLike, string, string]
   ): string;
   encodeFunctionData(
     functionFragment: "userAccess",
     values: [BytesLike, BytesLike, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "walletType",
+    values?: undefined
   ): string;
 
   decodeFunctionResult(
@@ -251,26 +226,27 @@ interface ArcanaInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "changeUserStatus",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "checkPermission",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "clientID", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "consumption",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "convergence",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "defaultLimit",
     data: BytesLike
   ): Result;
-  decodeFunctionResult(functionFragment: "deleteFile", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "discordClientId",
+    functionFragment: "deleteAccount",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "deleteFile", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "factory", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "files", data: BytesLike): Result;
   decodeFunctionResult(
@@ -283,15 +259,11 @@ interface ArcanaInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "getFile", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "getImplementation",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "getUploadLimit",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "githubClientId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "googleClientId",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "initialize", data: BytesLike): Result;
@@ -302,7 +274,7 @@ interface ArcanaInterface extends ethers.utils.Interface {
   decodeFunctionResult(functionFragment: "limit", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "redditClientId",
+    functionFragment: "reactivateAccount",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -314,36 +286,17 @@ interface ArcanaInterface extends ethers.utils.Interface {
     functionFragment: "setAppLevelLimit",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "setAppName", data: BytesLike): Result;
   decodeFunctionResult(
-    functionFragment: "setConvergence",
+    functionFragment: "setClientId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setClientIds",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
     functionFragment: "setDefaultLimit",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setDiscordClientId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setGithubClientId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setGoogleClientId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setRedditClientId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setTwitchClientId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "setTwitterClientId",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -352,16 +305,9 @@ interface ArcanaInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "share", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "shareUser", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "status", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "transferOwnership",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "twitchClientId",
-    data: BytesLike
-  ): Result;
-  decodeFunctionResult(
-    functionFragment: "twitterClientId",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "upgradeTo", data: BytesLike): Result;
@@ -375,15 +321,16 @@ interface ArcanaInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "uploadInit", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "userAccess", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "walletType", data: BytesLike): Result;
 
   events: {
     "AdminChanged(address,address)": EventFragment;
     "BeaconUpgraded(address)": EventFragment;
     "DeleteFileEvent(address,bytes32)": EventFragment;
-    "NewFileUpdate(address,bytes32,uint256,uint256,uint256)": EventFragment;
+    "NewFileUpdate(address,bytes32,uint256)": EventFragment;
     "NewPermissionCheck(address,bytes32,uint256,bytes32)": EventFragment;
     "NewShare(address,bytes32,address,bytes32,uint256)": EventFragment;
-    "NewUpdateACK(address,bytes32,address,bytes32)": EventFragment;
+    "NewUpdateAccess(address,bytes32,address,bytes32)": EventFragment;
     "OwnershipTransferred(address,address)": EventFragment;
     "Upgraded(address)": EventFragment;
   };
@@ -394,10 +341,62 @@ interface ArcanaInterface extends ethers.utils.Interface {
   getEvent(nameOrSignatureOrTopic: "NewFileUpdate"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewPermissionCheck"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "NewShare"): EventFragment;
-  getEvent(nameOrSignatureOrTopic: "NewUpdateACK"): EventFragment;
+  getEvent(nameOrSignatureOrTopic: "NewUpdateAccess"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "OwnershipTransferred"): EventFragment;
   getEvent(nameOrSignatureOrTopic: "Upgraded"): EventFragment;
 }
+
+export type AdminChangedEvent = TypedEvent<
+  [string, string] & { previousAdmin: string; newAdmin: string }
+>;
+
+export type BeaconUpgradedEvent = TypedEvent<[string] & { beacon: string }>;
+
+export type DeleteFileEventEvent = TypedEvent<
+  [string, string] & { identity: string; file: string }
+>;
+
+export type NewFileUpdateEvent = TypedEvent<
+  [string, string, BigNumber] & {
+    identity: string;
+    file: string;
+    fileSize: BigNumber;
+  }
+>;
+
+export type NewPermissionCheckEvent = TypedEvent<
+  [string, string, BigNumber, string] & {
+    identity: string;
+    file: string;
+    validity: BigNumber;
+    accessType: string;
+  }
+>;
+
+export type NewShareEvent = TypedEvent<
+  [string, string, string, string, BigNumber] & {
+    identity: string;
+    file: string;
+    user: string;
+    accessType: string;
+    validity: BigNumber;
+  }
+>;
+
+export type NewUpdateAccessEvent = TypedEvent<
+  [string, string, string, string] & {
+    identity: string;
+    file: string;
+    user: string;
+    accessType: string;
+  }
+>;
+
+export type OwnershipTransferredEvent = TypedEvent<
+  [string, string] & { previousOwner: string; newOwner: string }
+>;
+
+export type UpgradedEvent = TypedEvent<[string] & { implementation: string }>;
 
 export class Arcana extends BaseContract {
   connect(signerOrProvider: Signer | Provider | string): this;
@@ -448,9 +447,7 @@ export class Arcana extends BaseContract {
       arg1: BytesLike,
       arg2: string,
       overrides?: CallOverrides
-    ): Promise<
-      [string, BigNumber] & { encryptedKey: string; validity: BigNumber }
-    >;
+    ): Promise<[BigNumber]>;
 
     aggregateLogin(overrides?: CallOverrides): Promise<[boolean]>;
 
@@ -464,11 +461,20 @@ export class Arcana extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    changeUserStatus(
+      _user: string,
+      _status: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     checkPermission(
       _file: BytesLike,
       _accessType: BytesLike,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    clientID(arg0: string, overrides?: CallOverrides): Promise<[string]>;
 
     consumption(
       arg0: string,
@@ -477,20 +483,20 @@ export class Arcana extends BaseContract {
       [BigNumber, BigNumber] & { store: BigNumber; bandwidth: BigNumber }
     >;
 
-    convergence(arg0: string, overrides?: CallOverrides): Promise<[string]>;
-
     defaultLimit(
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { store: BigNumber; bandwidth: BigNumber }
     >;
 
+    deleteAccount(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     deleteFile(
       _file: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    discordClientId(overrides?: CallOverrides): Promise<[string]>;
 
     factory(overrides?: CallOverrides): Promise<[string]>;
 
@@ -498,23 +504,11 @@ export class Arcana extends BaseContract {
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<
-      [
-        string,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        boolean,
-        string,
-        string,
-        string
-      ] & {
+      [string, BigNumber, boolean, string, string] & {
         owner: string;
-        n: BigNumber;
-        k: BigNumber;
         fileSize: BigNumber;
         uploaded: boolean;
         encryptedMetaData: string;
-        encryptedKey: string;
         storageNode: string;
       }
     >;
@@ -535,33 +529,19 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<
       [
-        [
-          string,
-          BigNumber,
-          BigNumber,
-          BigNumber,
-          boolean,
-          string,
-          string,
-          string
-        ] & {
+        [string, BigNumber, boolean, string, string] & {
           owner: string;
-          n: BigNumber;
-          k: BigNumber;
           fileSize: BigNumber;
           uploaded: boolean;
           encryptedMetaData: string;
-          encryptedKey: string;
           storageNode: string;
         }
       ]
     >;
 
+    getImplementation(overrides?: CallOverrides): Promise<[string]>;
+
     getUploadLimit(overrides?: CallOverrides): Promise<[BigNumber, BigNumber]>;
-
-    githubClientId(overrides?: CallOverrides): Promise<[string]>;
-
-    googleClientId(overrides?: CallOverrides): Promise<[string]>;
 
     initialize(
       _appName: string,
@@ -569,6 +549,9 @@ export class Arcana extends BaseContract {
       _relayer: string,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _wallet_type: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -586,7 +569,9 @@ export class Arcana extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
-    redditClientId(overrides?: CallOverrides): Promise<[string]>;
+    reactivateAccount(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -605,44 +590,26 @@ export class Arcana extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
-    setConvergence(
-      _convergence: string,
+    setAppName(
+      _name: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setClientId(
+      _client: string,
+      _clientId: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setClientIds(
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     setDefaultLimit(
       _store: BigNumberish,
       _bandwidth: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setDiscordClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setGithubClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setGoogleClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setRedditClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setTwitchClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<ContractTransaction>;
-
-    setTwitterClientId(
-      _id: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -657,7 +624,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
@@ -666,19 +632,16 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    status(arg0: string, overrides?: CallOverrides): Promise<[number]>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
-
-    twitchClientId(overrides?: CallOverrides): Promise<[string]>;
-
-    twitterClientId(overrides?: CallOverrides): Promise<[string]>;
 
     upgradeTo(
       newImplementation: string,
@@ -698,12 +661,10 @@ export class Arcana extends BaseContract {
 
     uploadInit(
       _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
       _fileSize: BigNumberish,
       _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
       _storageNode: string,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -713,6 +674,8 @@ export class Arcana extends BaseContract {
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<[string]>;
+
+    walletType(overrides?: CallOverrides): Promise<[number]>;
   };
 
   accessSpecifier(
@@ -720,9 +683,7 @@ export class Arcana extends BaseContract {
     arg1: BytesLike,
     arg2: string,
     overrides?: CallOverrides
-  ): Promise<
-    [string, BigNumber] & { encryptedKey: string; validity: BigNumber }
-  >;
+  ): Promise<BigNumber>;
 
   aggregateLogin(overrides?: CallOverrides): Promise<boolean>;
 
@@ -736,11 +697,20 @@ export class Arcana extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  changeUserStatus(
+    _user: string,
+    _status: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   checkPermission(
     _file: BytesLike,
     _accessType: BytesLike,
+    _ephemeral_address: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  clientID(arg0: string, overrides?: CallOverrides): Promise<string>;
 
   consumption(
     arg0: string,
@@ -749,20 +719,20 @@ export class Arcana extends BaseContract {
     [BigNumber, BigNumber] & { store: BigNumber; bandwidth: BigNumber }
   >;
 
-  convergence(arg0: string, overrides?: CallOverrides): Promise<string>;
-
   defaultLimit(
     overrides?: CallOverrides
   ): Promise<
     [BigNumber, BigNumber] & { store: BigNumber; bandwidth: BigNumber }
   >;
 
+  deleteAccount(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   deleteFile(
     _file: BytesLike,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  discordClientId(overrides?: CallOverrides): Promise<string>;
 
   factory(overrides?: CallOverrides): Promise<string>;
 
@@ -770,23 +740,11 @@ export class Arcana extends BaseContract {
     arg0: BytesLike,
     overrides?: CallOverrides
   ): Promise<
-    [
-      string,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      boolean,
-      string,
-      string,
-      string
-    ] & {
+    [string, BigNumber, boolean, string, string] & {
       owner: string;
-      n: BigNumber;
-      k: BigNumber;
       fileSize: BigNumber;
       uploaded: boolean;
       encryptedMetaData: string;
-      encryptedKey: string;
       storageNode: string;
     }
   >;
@@ -804,32 +762,18 @@ export class Arcana extends BaseContract {
     _accessType: BytesLike,
     overrides?: CallOverrides
   ): Promise<
-    [
-      string,
-      BigNumber,
-      BigNumber,
-      BigNumber,
-      boolean,
-      string,
-      string,
-      string
-    ] & {
+    [string, BigNumber, boolean, string, string] & {
       owner: string;
-      n: BigNumber;
-      k: BigNumber;
       fileSize: BigNumber;
       uploaded: boolean;
       encryptedMetaData: string;
-      encryptedKey: string;
       storageNode: string;
     }
   >;
 
+  getImplementation(overrides?: CallOverrides): Promise<string>;
+
   getUploadLimit(overrides?: CallOverrides): Promise<[BigNumber, BigNumber]>;
-
-  githubClientId(overrides?: CallOverrides): Promise<string>;
-
-  googleClientId(overrides?: CallOverrides): Promise<string>;
 
   initialize(
     _appName: string,
@@ -837,6 +781,9 @@ export class Arcana extends BaseContract {
     _relayer: string,
     _aggregateLogin: boolean,
     _appId: BigNumberish,
+    _wallet_type: BigNumberish,
+    _client: string[],
+    _clientId: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -854,7 +801,9 @@ export class Arcana extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
-  redditClientId(overrides?: CallOverrides): Promise<string>;
+  reactivateAccount(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
 
   renounceOwnership(
     overrides?: Overrides & { from?: string | Promise<string> }
@@ -873,44 +822,26 @@ export class Arcana extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
-  setConvergence(
-    _convergence: string,
+  setAppName(
+    _name: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setClientId(
+    _client: string,
+    _clientId: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setClientIds(
+    _client: string[],
+    _clientId: string[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   setDefaultLimit(
     _store: BigNumberish,
     _bandwidth: BigNumberish,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setDiscordClientId(
-    _id: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setGithubClientId(
-    _id: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setGoogleClientId(
-    _id: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setRedditClientId(
-    _id: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setTwitchClientId(
-    _id: string,
-    overrides?: Overrides & { from?: string | Promise<string> }
-  ): Promise<ContractTransaction>;
-
-  setTwitterClientId(
-    _id: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -925,7 +856,6 @@ export class Arcana extends BaseContract {
     _files: BytesLike[],
     _user: string[],
     _accessType: BytesLike[],
-    _encryptedKey: BytesLike[],
     _validity: BigNumberish[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
@@ -934,19 +864,16 @@ export class Arcana extends BaseContract {
     _files: BytesLike[],
     _user: string[],
     _accessType: BytesLike[],
-    _encryptedKey: BytesLike[],
     _validity: BigNumberish[],
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  status(arg0: string, overrides?: CallOverrides): Promise<number>;
 
   transferOwnership(
     newOwner: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
-
-  twitchClientId(overrides?: CallOverrides): Promise<string>;
-
-  twitterClientId(overrides?: CallOverrides): Promise<string>;
 
   upgradeTo(
     newImplementation: string,
@@ -966,12 +893,10 @@ export class Arcana extends BaseContract {
 
   uploadInit(
     _file: BytesLike,
-    _n: BigNumberish,
-    _k: BigNumberish,
     _fileSize: BigNumberish,
     _encryptedMetaData: BytesLike,
-    _encryptedKey: BytesLike,
     _storageNode: string,
+    _ephemeral_address: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -982,15 +907,15 @@ export class Arcana extends BaseContract {
     overrides?: CallOverrides
   ): Promise<string>;
 
+  walletType(overrides?: CallOverrides): Promise<number>;
+
   callStatic: {
     accessSpecifier(
       arg0: BytesLike,
       arg1: BytesLike,
       arg2: string,
       overrides?: CallOverrides
-    ): Promise<
-      [string, BigNumber] & { encryptedKey: string; validity: BigNumber }
-    >;
+    ): Promise<BigNumber>;
 
     aggregateLogin(overrides?: CallOverrides): Promise<boolean>;
 
@@ -1004,11 +929,20 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<boolean>;
 
+    changeUserStatus(
+      _user: string,
+      _status: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
     checkPermission(
       _file: BytesLike,
       _accessType: BytesLike,
+      _ephemeral_address: string,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    clientID(arg0: string, overrides?: CallOverrides): Promise<string>;
 
     consumption(
       arg0: string,
@@ -1017,17 +951,15 @@ export class Arcana extends BaseContract {
       [BigNumber, BigNumber] & { store: BigNumber; bandwidth: BigNumber }
     >;
 
-    convergence(arg0: string, overrides?: CallOverrides): Promise<string>;
-
     defaultLimit(
       overrides?: CallOverrides
     ): Promise<
       [BigNumber, BigNumber] & { store: BigNumber; bandwidth: BigNumber }
     >;
 
-    deleteFile(_file: BytesLike, overrides?: CallOverrides): Promise<void>;
+    deleteAccount(overrides?: CallOverrides): Promise<void>;
 
-    discordClientId(overrides?: CallOverrides): Promise<string>;
+    deleteFile(_file: BytesLike, overrides?: CallOverrides): Promise<void>;
 
     factory(overrides?: CallOverrides): Promise<string>;
 
@@ -1035,23 +967,11 @@ export class Arcana extends BaseContract {
       arg0: BytesLike,
       overrides?: CallOverrides
     ): Promise<
-      [
-        string,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        boolean,
-        string,
-        string,
-        string
-      ] & {
+      [string, BigNumber, boolean, string, string] & {
         owner: string;
-        n: BigNumber;
-        k: BigNumber;
         fileSize: BigNumber;
         uploaded: boolean;
         encryptedMetaData: string;
-        encryptedKey: string;
         storageNode: string;
       }
     >;
@@ -1071,32 +991,18 @@ export class Arcana extends BaseContract {
       _accessType: BytesLike,
       overrides?: CallOverrides
     ): Promise<
-      [
-        string,
-        BigNumber,
-        BigNumber,
-        BigNumber,
-        boolean,
-        string,
-        string,
-        string
-      ] & {
+      [string, BigNumber, boolean, string, string] & {
         owner: string;
-        n: BigNumber;
-        k: BigNumber;
         fileSize: BigNumber;
         uploaded: boolean;
         encryptedMetaData: string;
-        encryptedKey: string;
         storageNode: string;
       }
     >;
 
+    getImplementation(overrides?: CallOverrides): Promise<string>;
+
     getUploadLimit(overrides?: CallOverrides): Promise<[BigNumber, BigNumber]>;
-
-    githubClientId(overrides?: CallOverrides): Promise<string>;
-
-    googleClientId(overrides?: CallOverrides): Promise<string>;
 
     initialize(
       _appName: string,
@@ -1104,6 +1010,9 @@ export class Arcana extends BaseContract {
       _relayer: string,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _wallet_type: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1121,7 +1030,7 @@ export class Arcana extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<string>;
 
-    redditClientId(overrides?: CallOverrides): Promise<string>;
+    reactivateAccount(overrides?: CallOverrides): Promise<void>;
 
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
 
@@ -1138,8 +1047,17 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
-    setConvergence(
-      _convergence: string,
+    setAppName(_name: string, overrides?: CallOverrides): Promise<void>;
+
+    setClientId(
+      _client: string,
+      _clientId: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setClientIds(
+      _client: string[],
+      _clientId: string[],
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1148,18 +1066,6 @@ export class Arcana extends BaseContract {
       _bandwidth: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    setDiscordClientId(_id: string, overrides?: CallOverrides): Promise<void>;
-
-    setGithubClientId(_id: string, overrides?: CallOverrides): Promise<void>;
-
-    setGoogleClientId(_id: string, overrides?: CallOverrides): Promise<void>;
-
-    setRedditClientId(_id: string, overrides?: CallOverrides): Promise<void>;
-
-    setTwitchClientId(_id: string, overrides?: CallOverrides): Promise<void>;
-
-    setTwitterClientId(_id: string, overrides?: CallOverrides): Promise<void>;
 
     setUserLevelLimit(
       user: string,
@@ -1172,7 +1078,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
@@ -1181,19 +1086,16 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: CallOverrides
     ): Promise<void>;
+
+    status(arg0: string, overrides?: CallOverrides): Promise<number>;
 
     transferOwnership(
       newOwner: string,
       overrides?: CallOverrides
     ): Promise<void>;
-
-    twitchClientId(overrides?: CallOverrides): Promise<string>;
-
-    twitterClientId(overrides?: CallOverrides): Promise<string>;
 
     upgradeTo(
       newImplementation: string,
@@ -1210,12 +1112,10 @@ export class Arcana extends BaseContract {
 
     uploadInit(
       _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
       _fileSize: BigNumberish,
       _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
       _storageNode: string,
+      _ephemeral_address: string,
       overrides?: CallOverrides
     ): Promise<void>;
 
@@ -1225,9 +1125,19 @@ export class Arcana extends BaseContract {
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<string>;
+
+    walletType(overrides?: CallOverrides): Promise<number>;
   };
 
   filters: {
+    "AdminChanged(address,address)"(
+      previousAdmin?: null,
+      newAdmin?: null
+    ): TypedEventFilter<
+      [string, string],
+      { previousAdmin: string; newAdmin: string }
+    >;
+
     AdminChanged(
       previousAdmin?: null,
       newAdmin?: null
@@ -1236,29 +1146,54 @@ export class Arcana extends BaseContract {
       { previousAdmin: string; newAdmin: string }
     >;
 
+    "BeaconUpgraded(address)"(
+      beacon?: string | null
+    ): TypedEventFilter<[string], { beacon: string }>;
+
     BeaconUpgraded(
       beacon?: string | null
     ): TypedEventFilter<[string], { beacon: string }>;
+
+    "DeleteFileEvent(address,bytes32)"(
+      identity?: string | null,
+      file?: BytesLike | null
+    ): TypedEventFilter<[string, string], { identity: string; file: string }>;
 
     DeleteFileEvent(
       identity?: string | null,
       file?: BytesLike | null
     ): TypedEventFilter<[string, string], { identity: string; file: string }>;
 
+    "NewFileUpdate(address,bytes32,uint256)"(
+      identity?: string | null,
+      file?: BytesLike | null,
+      fileSize?: null
+    ): TypedEventFilter<
+      [string, string, BigNumber],
+      { identity: string; file: string; fileSize: BigNumber }
+    >;
+
     NewFileUpdate(
       identity?: string | null,
       file?: BytesLike | null,
-      n?: null,
-      k?: null,
       fileSize?: null
     ): TypedEventFilter<
-      [string, string, BigNumber, BigNumber, BigNumber],
+      [string, string, BigNumber],
+      { identity: string; file: string; fileSize: BigNumber }
+    >;
+
+    "NewPermissionCheck(address,bytes32,uint256,bytes32)"(
+      identity?: string | null,
+      file?: BytesLike | null,
+      validity?: null,
+      accessType?: null
+    ): TypedEventFilter<
+      [string, string, BigNumber, string],
       {
         identity: string;
         file: string;
-        n: BigNumber;
-        k: BigNumber;
-        fileSize: BigNumber;
+        validity: BigNumber;
+        accessType: string;
       }
     >;
 
@@ -1274,6 +1209,23 @@ export class Arcana extends BaseContract {
         file: string;
         validity: BigNumber;
         accessType: string;
+      }
+    >;
+
+    "NewShare(address,bytes32,address,bytes32,uint256)"(
+      identity?: string | null,
+      file?: BytesLike | null,
+      user?: string | null,
+      accessType?: null,
+      validity?: null
+    ): TypedEventFilter<
+      [string, string, string, string, BigNumber],
+      {
+        identity: string;
+        file: string;
+        user: string;
+        accessType: string;
+        validity: BigNumber;
       }
     >;
 
@@ -1294,7 +1246,7 @@ export class Arcana extends BaseContract {
       }
     >;
 
-    NewUpdateACK(
+    "NewUpdateAccess(address,bytes32,address,bytes32)"(
       identity?: string | null,
       file?: BytesLike | null,
       user?: string | null,
@@ -1304,6 +1256,24 @@ export class Arcana extends BaseContract {
       { identity: string; file: string; user: string; accessType: string }
     >;
 
+    NewUpdateAccess(
+      identity?: string | null,
+      file?: BytesLike | null,
+      user?: string | null,
+      accessType?: null
+    ): TypedEventFilter<
+      [string, string, string, string],
+      { identity: string; file: string; user: string; accessType: string }
+    >;
+
+    "OwnershipTransferred(address,address)"(
+      previousOwner?: string | null,
+      newOwner?: string | null
+    ): TypedEventFilter<
+      [string, string],
+      { previousOwner: string; newOwner: string }
+    >;
+
     OwnershipTransferred(
       previousOwner?: string | null,
       newOwner?: string | null
@@ -1311,6 +1281,10 @@ export class Arcana extends BaseContract {
       [string, string],
       { previousOwner: string; newOwner: string }
     >;
+
+    "Upgraded(address)"(
+      implementation?: string | null
+    ): TypedEventFilter<[string], { implementation: string }>;
 
     Upgraded(
       implementation?: string | null
@@ -1337,24 +1311,33 @@ export class Arcana extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    checkPermission(
-      _file: BytesLike,
-      _accessType: BytesLike,
+    changeUserStatus(
+      _user: string,
+      _status: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    checkPermission(
+      _file: BytesLike,
+      _accessType: BytesLike,
+      _ephemeral_address: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    clientID(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
+
     consumption(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
-    convergence(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
-
     defaultLimit(overrides?: CallOverrides): Promise<BigNumber>;
+
+    deleteAccount(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     deleteFile(
       _file: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    discordClientId(overrides?: CallOverrides): Promise<BigNumber>;
 
     factory(overrides?: CallOverrides): Promise<BigNumber>;
 
@@ -1374,11 +1357,9 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    getImplementation(overrides?: CallOverrides): Promise<BigNumber>;
+
     getUploadLimit(overrides?: CallOverrides): Promise<BigNumber>;
-
-    githubClientId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    googleClientId(overrides?: CallOverrides): Promise<BigNumber>;
 
     initialize(
       _appName: string,
@@ -1386,6 +1367,9 @@ export class Arcana extends BaseContract {
       _relayer: string,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _wallet_type: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1398,7 +1382,9 @@ export class Arcana extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
-    redditClientId(overrides?: CallOverrides): Promise<BigNumber>;
+    reactivateAccount(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1417,44 +1403,26 @@ export class Arcana extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
-    setConvergence(
-      _convergence: string,
+    setAppName(
+      _name: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setClientId(
+      _client: string,
+      _clientId: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setClientIds(
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     setDefaultLimit(
       _store: BigNumberish,
       _bandwidth: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setDiscordClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setGithubClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setGoogleClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setRedditClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setTwitchClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<BigNumber>;
-
-    setTwitterClientId(
-      _id: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1469,7 +1437,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
@@ -1478,19 +1445,16 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
+
+    status(arg0: string, overrides?: CallOverrides): Promise<BigNumber>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
-
-    twitchClientId(overrides?: CallOverrides): Promise<BigNumber>;
-
-    twitterClientId(overrides?: CallOverrides): Promise<BigNumber>;
 
     upgradeTo(
       newImplementation: string,
@@ -1510,12 +1474,10 @@ export class Arcana extends BaseContract {
 
     uploadInit(
       _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
       _fileSize: BigNumberish,
       _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
       _storageNode: string,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1525,6 +1487,8 @@ export class Arcana extends BaseContract {
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<BigNumber>;
+
+    walletType(overrides?: CallOverrides): Promise<BigNumber>;
   };
 
   populateTransaction: {
@@ -1547,10 +1511,22 @@ export class Arcana extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
+    changeUserStatus(
+      _user: string,
+      _status: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     checkPermission(
       _file: BytesLike,
       _accessType: BytesLike,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    clientID(
+      arg0: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     consumption(
@@ -1558,19 +1534,16 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
-    convergence(
-      arg0: string,
-      overrides?: CallOverrides
-    ): Promise<PopulatedTransaction>;
-
     defaultLimit(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
+    deleteAccount(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     deleteFile(
       _file: BytesLike,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    discordClientId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     factory(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
@@ -1593,11 +1566,9 @@ export class Arcana extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    getImplementation(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     getUploadLimit(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    githubClientId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    googleClientId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     initialize(
       _appName: string,
@@ -1605,6 +1576,9 @@ export class Arcana extends BaseContract {
       _relayer: string,
       _aggregateLogin: boolean,
       _appId: BigNumberish,
+      _wallet_type: BigNumberish,
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1620,7 +1594,9 @@ export class Arcana extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
-    redditClientId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+    reactivateAccount(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
 
     renounceOwnership(
       overrides?: Overrides & { from?: string | Promise<string> }
@@ -1639,44 +1615,26 @@ export class Arcana extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
-    setConvergence(
-      _convergence: string,
+    setAppName(
+      _name: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setClientId(
+      _client: string,
+      _clientId: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setClientIds(
+      _client: string[],
+      _clientId: string[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     setDefaultLimit(
       _store: BigNumberish,
       _bandwidth: BigNumberish,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setDiscordClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setGithubClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setGoogleClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setRedditClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setTwitchClientId(
-      _id: string,
-      overrides?: Overrides & { from?: string | Promise<string> }
-    ): Promise<PopulatedTransaction>;
-
-    setTwitterClientId(
-      _id: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1691,7 +1649,6 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
@@ -1700,19 +1657,19 @@ export class Arcana extends BaseContract {
       _files: BytesLike[],
       _user: string[],
       _accessType: BytesLike[],
-      _encryptedKey: BytesLike[],
       _validity: BigNumberish[],
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    status(
+      arg0: string,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
-
-    twitchClientId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
-
-    twitterClientId(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     upgradeTo(
       newImplementation: string,
@@ -1732,12 +1689,10 @@ export class Arcana extends BaseContract {
 
     uploadInit(
       _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
       _fileSize: BigNumberish,
       _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
       _storageNode: string,
+      _ephemeral_address: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1747,5 +1702,7 @@ export class Arcana extends BaseContract {
       arg2: BigNumberish,
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
+
+    walletType(overrides?: CallOverrides): Promise<PopulatedTransaction>;
   };
 }

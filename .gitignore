@@ -2,6 +2,8 @@
 /types
 /lib
 data
+storage.tar
+make_tar.sh
 
 # Created by https://www.toptal.com/developers/gitignore/api/node,visualstudiocode
 # Edit at https://www.toptal.com/developers/gitignore?templates=node,visualstudiocode
@@ -147,3 +149,7 @@ temp/
 
 # End of https://www.toptal.com/developers/gitignore/api/node,visualstudiocode
 !dist/arcana.js
+
+# Auth and Wallet SDK are committing generating markdown so will Storage SDK.  However, generated html does not need to be checked in, hence ignoring. Markdown can be browsed at github and provides easy, fast doc access.
+
+htmldocs/

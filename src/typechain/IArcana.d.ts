@@ -17,27 +17,52 @@ import {
 import { BytesLike } from "@ethersproject/bytes";
 import { Listener, Provider } from "@ethersproject/providers";
 import { FunctionFragment, EventFragment, Result } from "@ethersproject/abi";
-import { TypedEventFilter, TypedEvent, TypedListener } from "./commons";
+import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface IArcanaInterface extends ethers.utils.Interface {
   functions: {
-    "uploadInit(bytes32,uint256,uint256,uint256,bytes,bytes,address)": FunctionFragment;
+    "setAppName(string)": FunctionFragment;
+    "setClientId(string,string)": FunctionFragment;
+    "setClientIds(string[],string[])": FunctionFragment;
+    "setDefaultLimit(uint256,uint256)": FunctionFragment;
+    "setUserLevelLimit(address,uint256,uint256)": FunctionFragment;
   };
 
+  encodeFunctionData(functionFragment: "setAppName", values: [string]): string;
   encodeFunctionData(
-    functionFragment: "uploadInit",
-    values: [
-      BytesLike,
-      BigNumberish,
-      BigNumberish,
-      BigNumberish,
-      BytesLike,
-      BytesLike,
-      string
-    ]
+    functionFragment: "setClientId",
+    values: [string, string]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setClientIds",
+    values: [string[], string[]]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setDefaultLimit",
+    values: [BigNumberish, BigNumberish]
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setUserLevelLimit",
+    values: [string, BigNumberish, BigNumberish]
   ): string;
 
-  decodeFunctionResult(functionFragment: "uploadInit", data: BytesLike): Result;
+  decodeFunctionResult(functionFragment: "setAppName", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "setClientId",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setClientIds",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setDefaultLimit",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setUserLevelLimit",
+    data: BytesLike
+  ): Result;
 
   events: {};
 }
@@ -86,38 +111,92 @@ export class IArcana extends BaseContract {
   interface: IArcanaInterface;
 
   functions: {
-    uploadInit(
-      _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
-      _fileSize: BigNumberish,
-      _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
-      _storageNode: string,
+    setAppName(
+      _name: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setClientId(
+      _client: string,
+      _clientId: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setClientIds(
+      _client: string[],
+      _clientId: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setDefaultLimit(
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setUserLevelLimit(
+      user: string,
+      store: BigNumberish,
+      bandwidth: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
 
-  uploadInit(
-    _file: BytesLike,
-    _n: BigNumberish,
-    _k: BigNumberish,
-    _fileSize: BigNumberish,
-    _encryptedMetaData: BytesLike,
-    _encryptedKey: BytesLike,
-    _storageNode: string,
+  setAppName(
+    _name: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setClientId(
+    _client: string,
+    _clientId: string,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setClientIds(
+    _client: string[],
+    _clientId: string[],
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setDefaultLimit(
+    _store: BigNumberish,
+    _bandwidth: BigNumberish,
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setUserLevelLimit(
+    user: string,
+    store: BigNumberish,
+    bandwidth: BigNumberish,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
-    uploadInit(
-      _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
-      _fileSize: BigNumberish,
-      _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
-      _storageNode: string,
+    setAppName(_name: string, overrides?: CallOverrides): Promise<void>;
+
+    setClientId(
+      _client: string,
+      _clientId: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setClientIds(
+      _client: string[],
+      _clientId: string[],
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setDefaultLimit(
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<void>;
+
+    setUserLevelLimit(
+      user: string,
+      store: BigNumberish,
+      bandwidth: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
   };
@@ -125,27 +204,65 @@ export class IArcana extends BaseContract {
   filters: {};
 
   estimateGas: {
-    uploadInit(
-      _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
-      _fileSize: BigNumberish,
-      _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
-      _storageNode: string,
+    setAppName(
+      _name: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setClientId(
+      _client: string,
+      _clientId: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setClientIds(
+      _client: string[],
+      _clientId: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setDefaultLimit(
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setUserLevelLimit(
+      user: string,
+      store: BigNumberish,
+      bandwidth: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
-    uploadInit(
-      _file: BytesLike,
-      _n: BigNumberish,
-      _k: BigNumberish,
-      _fileSize: BigNumberish,
-      _encryptedMetaData: BytesLike,
-      _encryptedKey: BytesLike,
-      _storageNode: string,
+    setAppName(
+      _name: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setClientId(
+      _client: string,
+      _clientId: string,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setClientIds(
+      _client: string[],
+      _clientId: string[],
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setDefaultLimit(
+      _store: BigNumberish,
+      _bandwidth: BigNumberish,
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setUserLevelLimit(
+      user: string,
+      store: BigNumberish,
+      bandwidth: BigNumberish,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
   };
