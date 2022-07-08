@@ -9,7 +9,7 @@
 <a title="Beta release" href="https://github.com/arcana-network/storage/releases"><img src="https://img.shields.io/github/v/release/arcana-network/storage?style=flat-square&color=28A745"/></a>
 <a title="Twitter" href="https://twitter.com/ArcanaNetwork"><img alt="Twitter URL" src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FArcanaNetwork"/></a>
 </p><p id="start" align="center">
-<a href="https://docs.dev.arcana.network/"><img src="https://raw.githubusercontent.com/arcana-network/branding/main/an_banner_temp.png" alt="Arcana Storage SDK"/></a>
+<a href="https://docs.beta.arcana.network/"><img src="https://raw.githubusercontent.com/arcana-network/branding/main/an_banner_temp.png" alt="Arcana Storage SDK"/></a>
 </p>
 
 # What is Storage SDK?
@@ -53,15 +53,15 @@ import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 
 # 📋 Prerequisites
 
-Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.arcana.network/).
+Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.beta.arcana.network/).
 
 A unique **AppId** will be assigned to your dApp and you need to provide this to Arcana Storage SDK in order to use the SDK functionality.
 
 # 📚 Documentation
 
-Check out [Arcana Network documentation](https://docs.dev.arcana.network/) for [Storage SDK Quick Start Guide](https://docs.dev.arcana.network/docs/stgsdk_qs), [Usage Guide](https://docs.dev.arcana.network/docs/stgsdk_usage) and [API reference Guide](https://docs.dev.arcana.network/docs/stg_ref).
+Check out [Arcana Network documentation](https://docs.beta.arcana.network/) for [Storage SDK Quick Start Guide](https://docs.beta.arcana.network/docs/stgsdk_qs), [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage) and [API reference Guide](https://docs.beta.arcana.network/docs/stg_ref).
 
-Refer to the [sample app code](https://docs.dev.arcana.network/docs/demo-app) or the [How To Guides](https://docs.dev.arcana.network/docs/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
+Refer to the [sample app code](https://docs.beta.arcana.network/docs/demo-app) or the [How To Guides](https://docs.beta.arcana.network/docs/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
 
 # 💡 Support
 
@@ -69,7 +69,7 @@ For any support or integration related queries, contact [Arcana support team](ma
 
 # 🤝 Contributing
 
-We appreciate your feedback and contribution to Arcana Storage component. Open a GitHub issue and discuss your RFP with Arcana Network developers. We plan to come up with a detailed contributing guide soon. Stay tuned!
+We welcome all contributions to the Arcana Storage SDK from the community. Read our [contributing guide](https://github.com/arcana-network/license/blob/main/CONTRIBUTING.md) to learn about the SDK development process, how to propose bug fixes and improvements, and the code of conduct that we expect the participants to adhere to. Refer to the build and test section of this readme for details on how to test and validate your changes to the Auth SDK code before submitting your contributions.
 
 # ℹ️ License
 
