@@ -51,6 +51,21 @@ You can use the standalone module which includes the polyfills.
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```
 
+# :computer: Development
+## Build
+```
+npm run build
+```
+
+## Integration testing
+
+Run an HTTP server from the storage SDK, and go to */integration-tests/*. Connect to metamask with arcana beta RPC (https://blockchain001-testnet.arcana.network/). Make sure that you are using the correct chain-Id (40405) and gateway URL (https://gateway001-testnet.arcana.network/) in the */integration-tets/test.js/* while initializing the storage instance.
+
+One way to start the server is using,
+```
+http-server
+```
+
 # 📋 Prerequisites
 
 Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.arcana.network/).
