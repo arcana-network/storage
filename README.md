@@ -9,7 +9,7 @@
 <a title="Beta release" href="https://github.com/arcana-network/storage/releases"><img src="https://img.shields.io/github/v/release/arcana-network/storage?style=flat-square&color=28A745"/></a>
 <a title="Twitter" href="https://twitter.com/ArcanaNetwork"><img alt="Twitter URL" src="https://img.shields.io/twitter/url?style=social&url=https%3A%2F%2Ftwitter.com%2FArcanaNetwork"/></a>
 </p><p id="start" align="center">
-<a href="https://docs.beta.arcana.network/"><img src="https://raw.githubusercontent.com/arcana-network/branding/main/an_banner_temp.png" alt="Arcana Storage SDK"/></a>
+<a href="https://docs.beta.arcana.network/"><img src="https://raw.githubusercontent.com/arcana-network/branding/main/an_banner_docs.png" alt="Arcana Storage SDK"/></a>
 </p>
 
 # What is Storage SDK?
@@ -18,8 +18,8 @@ The Arcana Storage SDK enables you to configure dApp and allow users to store fi
 
 In the beta release, the storage nodes are operated by Arcana Networks. In the future, the storage subsystem will be fully decentralized and third party storage nodes can be plugged into the Arcana Network storage subsystem once they meet the Arcana storage QoS criteria.
 
-| :warning: Caution: Arcana Network SDKs and apps (Beta Release), not recommended for production usage.|
-| --- |
+| :warning: Caution: Arcana Network SDKs and apps (Beta Release), not meant for production usage.|
+| :--- |
 
 # 💪 Key Features
 
