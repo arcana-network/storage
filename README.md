@@ -62,9 +62,9 @@ A unique **AppId** will be assigned to your dApp and you need to provide this to
 
 # 📚 Documentation
 
-Check out [Arcana Network documentation](https://docs.beta.arcana.network/) for [Storage SDK Quick Start Guide](https://docs.beta.arcana.network/docs/stgsdk_qs), [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage) and [API reference Guide](https://docs.beta.arcana.network/docs/stg_ref).
+Check out [Arcana Network documentation](https://docs.beta.arcana.network/) for [Storage SDK Quick Start Guide](https://docs.beta.arcana.network/docs/stgsdk_qs), [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage) and [Storage SDK Reference Guide](https://storagesdk-ref-guide.netlify.app/).
 
-Refer to the [sample app code](https://docs.beta.arcana.network/docs/demo-app) or the [How To Guides](https://docs.beta.arcana.network/docs/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
+Refer to the [demo app](https://docs.beta.arcana.network/docs/demo-app) or the [How To Guides](https://docs.beta.arcana.network/docs/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
 
 # 💡 Support
 
