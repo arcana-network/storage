@@ -163,7 +163,7 @@ describe('Upload File', () => {
   //       subDomain += "dev";
   //   }
 
-  //   chai.expect(oMetadata.external_url).to.equal(`https://nftviewer${subDomain}.arcana.network/asset/${did}`);
+  //   chai.expect(oMetadata.external_url).to.equal(`https://nft-viewer${subDomain}.arcana.network/asset/${did}`);
   // });
 
   // it('Sharing again with the same user', async () => {
