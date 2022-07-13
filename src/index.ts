@@ -99,12 +99,12 @@ export class StorageProvider {
     return new Uploader(this.appId, this.appAddress, this.provider, this.api, this.debug);
   };
 
-  getAccess = async () => {
+  getAccess = async (): Promise<Access> => {
     await this.login();
     return new Access(this.appAddress, this.provider, this.api, this.debug);
   };
 
-  getDownloader = async () => {
+  getDownloader = async (): Promise<Downloader> => {
     await this.login();
     return new Downloader(this.appAddress, this.provider, this.api, this.debug);
   };
@@ -162,7 +162,7 @@ export class StorageProvider {
     return this.initialisedPromise;
   }
 
-  _login = async () => {
+  private _login = async () => {
     if (!this.provider) {
       // @ts-ignore
       if (window.ethereum) {
