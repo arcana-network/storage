@@ -59,12 +59,24 @@ npm run build
 
 ## Integration testing
 
-Run an HTTP server from the storage SDK, and go to */integration-tests/*. Connect to metamask with arcana beta RPC (https://blockchain001-testnet.arcana.network/). Make sure that you are using the correct chain-Id (40405) and gateway URL (https://gateway001-testnet.arcana.network/) in the */integration-tets/test.js/* while initializing the storage instance.
+1. In the */integration-tets/test.js* file, make sure you are using the correct chain-ID (40405) and gateway URL (https://gateway001-testnet.arcana.network/) while initializing the Arcana Storage SDK instance.
 
-One way to start the server is using,
-```
-http-server
-```
+2. Start running a HTTP server by http-server. There are many ways to run http server
+
+    + Eg for python 3
+    ```
+    python3 -m http.server
+    ```
+
+    + Eg for python
+    ```
+    python -m SimpleHTTPServer
+    ```
+    + One can also use packages like [http-server](https://www.npmjs.com/package/http-server), [browser-sync](https://browsersync.io/)
+
+3. Change directory to /integration-tests/ folder.
+
+4. Make sure to configure metamask for Arcana network's RPC URL as https://blockchain001-testnet.arcana.network/.
 
 # 📋 Prerequisites
 
