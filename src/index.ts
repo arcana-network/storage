@@ -210,11 +210,9 @@ export class StorageProvider {
 
   numOfMyFiles = async () => {
     await this.login();
-    let numberOfFiles = 0;
-    if((await this.api('list-files/')).data != null){
-      numberOfFiles = await (await this.api('list-files/')).data.length;
-    }
-    return numberOfFiles; 
+    let numberOfFiles = (await this.api('files/total')).data;
+
+    return 1; 
   }
 
   numOfPagesMyFiles =async (page_size: number=20) => {
@@ -236,10 +234,8 @@ export class StorageProvider {
 
   numOfSharedFiles = async () => {
     await this.login();
-    var numberOfFiles = 0;
-    if((await this.api('shared-files/')).data != null){
-      numberOfFiles = await (await this.api('shared-files/')).data.length;
-    }
+    let numberOfFiles = (await this.api('files/shared/total/')).data;
+
     return numberOfFiles;
   }
 
