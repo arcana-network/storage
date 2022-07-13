@@ -212,7 +212,7 @@ export class StorageProvider {
     await this.login();
     let numberOfFiles = (await this.api('files/total')).data;
 
-    return 1; 
+    return numberOfFiles; 
   }
 
   numOfPagesMyFiles =async (page_size: number=20) => {
