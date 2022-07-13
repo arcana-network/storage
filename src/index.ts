@@ -142,7 +142,7 @@ export class StorageProvider {
         break;
     }
 
-    let external_url = `https://nftviewer${subDomain}.arcana.network/asset/${did}`;
+    let external_url = `https://nft-viewer${subDomain}.arcana.network/asset/${did}`;
 
     let res2 = await api.post('/api/v1/metadata', {
       title,
