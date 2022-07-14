@@ -54,6 +54,7 @@ You can use the standalone module which includes the polyfills.
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```
 
+
 # 📋 Prerequisites
 
 Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.beta.arcana.network/).
@@ -73,6 +74,34 @@ For any support or integration related queries, contact [Arcana support team](ma
 # 🤝 Contributing
 
 We welcome all contributions to the Arcana Storage SDK from the community. Read our [contributing guide](https://github.com/arcana-network/license/blob/main/CONTRIBUTING.md) to learn about the SDK development process, how to propose bug fixes and improvements, and the code of conduct that we expect the participants to adhere to. Refer to the build and test section of this readme for details on how to test and validate your changes to the Auth SDK code before submitting your contributions.
+
+
+# :computer: Development
+## Build
+```
+npm run build
+```
+
+## Integration testing
+
+1. In the */integration-tets/test.js* file, make sure you are using the correct chain-ID (40405) and gateway URL (https://gateway001-testnet.arcana.network/) while initializing the Arcana Storage SDK instance.
+
+Start running an HTTP server using one of these suggested methods:
+
+    + Eg for python 3
+    ```
+    python3 -m http.server
+    ```
+
+    + Eg for python
+    ```
+    python -m SimpleHTTPServer
+    ```
+    + One can also use packages like [http-server](https://www.npmjs.com/package/http-server), [browser-sync](https://browsersync.io/)
+
+3. Change directory to /integration-tests/ folder.
+
+4. Make sure to configure [MetaMask](https://metamask.io/) for Arcana network's RPC URL as https://blockchain001-testnet.arcana.network/.
 
 # ℹ️ License
 
