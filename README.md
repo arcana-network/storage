@@ -54,6 +54,28 @@ You can use the standalone module which includes the polyfills.
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 ```
 
+
+# 📋 Prerequisites
+
+Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.beta.arcana.network/).
+
+A unique **AppId** will be assigned to your dApp and you need to provide this to Arcana Storage SDK in order to use the SDK functionality.
+
+# 📚 Documentation
+
+Check out [Arcana Network documentation](https://docs.beta.arcana.network/) for [Storage SDK Quick Start Guide](https://docs.beta.arcana.network/docs/stgsdk_qs), [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage) and [Storage SDK Reference Guide](https://storagesdk-ref-guide.netlify.app/).
+
+Refer to the [demo app](https://docs.beta.arcana.network/docs/demo-app) or the [How To Guides](https://docs.beta.arcana.network/docs/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
+
+# 💡 Support
+
+For any support or integration related queries, contact [Arcana support team](mailto:support@arcana.network).
+
+# 🤝 Contributing
+
+We welcome all contributions to the Arcana Storage SDK from the community. Read our [contributing guide](https://github.com/arcana-network/license/blob/main/CONTRIBUTING.md) to learn about the SDK development process, how to propose bug fixes and improvements, and the code of conduct that we expect the participants to adhere to. Refer to the build and test section of this readme for details on how to test and validate your changes to the Auth SDK code before submitting your contributions.
+
+
 # :computer: Development
 ## Build
 ```
@@ -79,27 +101,7 @@ npm run build
 
 3. Change directory to /integration-tests/ folder.
 
-4. Make sure to configure metamask for Arcana network's RPC URL as https://blockchain001-testnet.arcana.network/.
-
-# 📋 Prerequisites
-
-Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.beta.arcana.network/).
-
-A unique **AppId** will be assigned to your dApp and you need to provide this to Arcana Storage SDK in order to use the SDK functionality.
-
-# 📚 Documentation
-
-Check out [Arcana Network documentation](https://docs.beta.arcana.network/) for [Storage SDK Quick Start Guide](https://docs.beta.arcana.network/docs/stgsdk_qs), [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage) and [Storage SDK Reference Guide](https://storagesdk-ref-guide.netlify.app/).
-
-Refer to the [demo app](https://docs.beta.arcana.network/docs/demo-app) or the [How To Guides](https://docs.beta.arcana.network/docs/config_dapp) for performing specific tasks such as uploading/downloading a file, sharing file or revoking access to a file, and change file ownership.
-
-# 💡 Support
-
-For any support or integration related queries, contact [Arcana support team](mailto:support@arcana.network).
-
-# 🤝 Contributing
-
-We welcome all contributions to the Arcana Storage SDK from the community. Read our [contributing guide](https://github.com/arcana-network/license/blob/main/CONTRIBUTING.md) to learn about the SDK development process, how to propose bug fixes and improvements, and the code of conduct that we expect the participants to adhere to. Refer to the build and test section of this readme for details on how to test and validate your changes to the Auth SDK code before submitting your contributions.
+4. Make sure to configure [MetaMask](https://metamask.io/) for Arcana network's RPC URL as https://blockchain001-testnet.arcana.network/.
 
 # ℹ️ License
 
