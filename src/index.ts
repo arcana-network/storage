@@ -99,12 +99,12 @@ export class StorageProvider {
     return new Uploader(this.appId, this.appAddress, this.provider, this.api, this.debug);
   };
 
-  getAccess = async () => {
+  getAccess = async (): Promise<Access> => {
     await this.login();
     return new Access(this.appAddress, this.provider, this.api, this.debug);
   };
 
-  getDownloader = async () => {
+  getDownloader = async (): Promise<Downloader> => {
     await this.login();
     return new Downloader(this.appAddress, this.provider, this.api, this.debug);
   };
@@ -142,7 +142,7 @@ export class StorageProvider {
         break;
     }
 
-    let external_url = `https://nftviewer${subDomain}.arcana.network/asset/${did}`;
+    let external_url = `https://nft-viewer${subDomain}.arcana.network/asset/${did}`;
 
     let res2 = await api.post('/api/v1/metadata', {
       title,
@@ -162,7 +162,7 @@ export class StorageProvider {
     return this.initialisedPromise;
   }
 
-  _login = async () => {
+  private _login = async () => {
     if (!this.provider) {
       // @ts-ignore
       if (window.ethereum) {
@@ -208,17 +208,49 @@ export class StorageProvider {
     }
   };
 
-  myFiles = async () => {
+  numOfMyFiles = async () => {
     await this.login();
-    let res = await this.api('list-files/');
+    let numberOfFiles = (await this.api('files/total')).data;
+
+    return numberOfFiles; 
+  }
+
+  numOfPagesMyFiles =async (page_size: number=20) => {
+    await this.login();
+    let numOfPages = (await this.numOfMyFiles())/page_size;
+    return Math.ceil(numOfPages);
+  }
+
+  myFiles = async (page_number: number = 1, page_size: number=20) => {
+    await this.login();
+    if(page_number > await this.numOfPagesMyFiles(page_size)){
+      throw new Error("invalid_page_number");
+    }
+    let res = await this.api('list-files/?offset=' + (page_number-1)*page_size + '&count=' + page_size);
     let data = [];
     if (res.data) data = res.data;
     return data;
   };
 
-  sharedFiles = async () => {
+  numOfSharedFiles = async () => {
     await this.login();
-    let res = await this.api('shared-files/');
+    let numberOfFiles = (await this.api('files/shared/total/')).data;
+
+    return numberOfFiles;
+  }
+
+  numOfPagesSharedFiles =async (page_size: number=20) => {
+    await this.login();
+    let numOfPages = (await this.numOfSharedFiles())/page_size;
+    return Math.ceil(numOfPages);
+  }
+
+  sharedFiles = async (page_number: number = 1, page_size: number=20) => {
+    await this.login();
+    if(page_number > await this.numOfPagesSharedFiles(page_size)){
+      throw new Error("invalid_page_number");
+    }
+    let res = await this.api('shared-files/?offset=' + (page_number-1)*page_size + '&count=' + page_size);
     let data = [];
     if (res.data) data = res.data;
     return data;
