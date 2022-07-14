@@ -86,7 +86,7 @@ npm run build
 
 1. In the */integration-tets/test.js* file, make sure you are using the correct chain-ID (40405) and gateway URL (https://gateway001-testnet.arcana.network/) while initializing the Arcana Storage SDK instance.
 
-2. Start running a HTTP server by http-server. There are many ways to run http server
+Start running an HTTP server using one of these suggested methods:
 
     + Eg for python 3
     ```
