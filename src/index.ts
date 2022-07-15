@@ -1,11 +1,11 @@
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { Access } from './Access';
-import { Config, getProvider, customError,makeTx, parseHex, getFile } from './Utils';
+import { Config, getProvider, customError, makeTx, parseHex, getFile } from './Utils';
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
-import { chainId, chainIdToGateway } from './constant';
+import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant';
 import { wrapInstance } from "./sentry";
 
 export class StorageProvider {
@@ -171,12 +171,45 @@ export class StorageProvider {
     }
 
     // Fetch chain id from provider
-    let network = await this.provider.getNetwork();
+    const network = await this.provider.getNetwork();
+    const hexChainID = '0x' + this.chainId.toString(16)
 
     // throw error if chain id is not equal to the chain id of the app
     if (this.chainId !== network.chainId) {
-      throw new Error('wrong_network, please change the network to the arcana');
+      try {
+        await this.provider.provider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: hexChainID }],
+        });
+      } catch (e) {
+        // This error code indicates that the chain has not been added to the wallet.
+        if (e.code === 4902) {
+          const blockchainURL = chainIdToBlockchainExplorerURL.get(this.chainId)
+          await this.provider.provider.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: hexChainID,
+                chainName: 'Arcana',
+
+                rpcUrls: [chainIdToRPCURL.get(this.chainId)],
+                blockExplorerUrls: blockchainURL ? [blockchainURL] : [],
+
+
+                nativeCurrency: {
+                  symbol: 'XAR',
+                  // ?
+                  decimals: 18
+                }
+              }
+            ]
+          })
+        } else {
+          throw e
+        }
+      }
     }
+
     let res = (await axios.get(this.gateway + 'get-config/')).data;
     localStorage.setItem('forwarder', res['Forwarder']);
     localStorage.setItem('dkg', res['DKG']);
@@ -212,7 +245,7 @@ export class StorageProvider {
     await this.login();
     let numberOfFiles = (await this.api('files/total')).data;
 
-    return numberOfFiles; 
+    return numberOfFiles;
   }
 
   numOfPagesMyFiles =async (page_size: number=20) => {
