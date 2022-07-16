@@ -1,27 +1,17 @@
 import test from 'ava';
-import { StorageProvider } from '../src/index';
-import * as utils from '../src/Utils';
-import { Blob as nBlob } from 'blob-polyfill';
 import sinon from 'sinon';
 import { ethers } from 'ethers';
 import { createProvider } from './sub_provider'
-
 import fs from 'fs';
-
 import nock from 'nock';
-// import HDWalletProvider from "@truffle/hdwallet-provider";
-
 import { utils as ethUtils, BigNumber } from 'ethers';
-
-import arcana from '../src/contracts/Arcana';
-import forwarder from '../src/contracts/Forwarder';
-
-//To ignore strict http request/response rules
 import axios from 'axios';
 import httpAdapter from 'axios/lib/adapters/http';
-axios.defaults.adapter = httpAdapter;
 
-//SDK Errors
+
+//SDK imports
+import { StorageProvider } from '../src/index';
+import * as utils from '../src/Utils';
 import {errorCodes} from "../src/errors";
 
 //Load contract addresses
@@ -33,14 +23,15 @@ const RPC_URL = 'http://127.0.0.1:10002/';
 const appId = 1;
 const debug = false;
 
+//To ignore strict http request/response rules
+axios.defaults.adapter = httpAdapter;
+const nockOptions = { 'Access-Control-Allow-Origin': '*' }
+
 /*
-Not using moxis because of axios instance in login
+Not using moxis because of axios instance initialization in SDK
 Below to be covered in Integration Tests
--> Upload (due to tus client instance)
 -> Download  (due to tus client instance)
 */
-
-const nockOptions = { 'Access-Control-Allow-Origin': '*' }
 
 function sleep(ms) {
     return new Promise((resolve) => {
@@ -61,58 +52,9 @@ const makeEmail = () => {
     return strEmail;
 };
 
-async function mockShareResponse() {
-    const hasher = new utils.KeyGen(file, 10 * 2 ** 20);
-
-    const hash = await hasher.getHash();
-    let key = await window.crypto.subtle.generateKey(
-        {
-            name: 'AES-CTR',
-            length: 256,
-        },
-        true,
-        ['encrypt', 'decrypt'],
-    );
-    const aes_raw = await crypto.subtle.exportKey('raw', key);
-    const hexString = await utils.toHexString(aes_raw);
-
-    const encryptedKey = await utils.encryptKey(await arcanaWallet._signingKey().publicKey, hexString);
-
-    const encryptedMetaData = await utils.AESEncrypt(
-        key,
-        JSON.stringify({
-            name: file.name,
-            type: file.type,
-            size: file.size,
-            lastModified: file.lastModified,
-            hash,
-        }),
-    );
-
-
-    let uMetadata = await ethUtils.toUtf8Bytes(encryptedMetaData),
-        udata = await ethUtils.toUtf8Bytes(encryptedKey);
-
-
-    return Promise.resolve([await arcanaWallet.getAddress(),
-        6,
-        6,
-    file.size,
-        true,
-        uMetadata,
-        udata,
-    await arcanaWallet.getAddress()
-    ]);
-
-}
-
-
 let file,
-    did = "0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066",
     arcanaInstance,
-    access,
-    receiverInstance,
-    meta_tx_scope;
+    receiverInstance
 
 function meta_tx_nock(reply_data) {
 
@@ -265,7 +207,7 @@ test.serial.before(async (t) => {
 
 });
 
-//remove fixture
+//clear fixture after each test
 test.afterEach((t) => {
     if (!!fixture) t.context.arcanaProvider.removeProvider(fixture);
     fixture = null;
@@ -291,6 +233,10 @@ test.serial("Upload file", async (t) => {
     await t.notThrowsAsync(upload.upload(file));
 
 })
+
+test.todo("Download file")
+
+test.todo("Metadata URL")
 
 test.serial('Share file', async (t) => {
     t.plan(4);
@@ -329,9 +275,6 @@ test.serial('Fail revoke transaction on unauthorized files', async (t) => {
     t.assert(err.code.startsWith(expected_errorCode));
 });
 
-
-
-//done
 /*
 //Redundent test, covered in sharing
 test.serial.only('Files shared with self', async (t) => {
@@ -349,7 +292,6 @@ test.serial.only('Files shared with self', async (t) => {
 });
 */
 
-//done
 test.serial('Get consumed and total upload limit', async (t) => {
 
     fixture = new FixtureProvider({
@@ -372,7 +314,6 @@ test.serial('Get consumed and total upload limit', async (t) => {
 Migration in progress for all the below test cases
  ~~~~~~~~~~~ */
 
-//done
 test.serial('Revoke', async (t) => {
 
     let access = await arcanaInstance.getAccess();
@@ -403,7 +344,6 @@ test.serial('Revoke', async (t) => {
 
 });
 
-//done
 test.serial('Delete File', async (t) => {
     // meta_tx_nock();
 
