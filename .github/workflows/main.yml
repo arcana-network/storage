@@ -20,26 +20,23 @@ jobs:
         with:
           version: nightly
 
-      - name: check_folder
-        run: pwd
-
       - name: Run anvil
-        run: screen -d -m anvil --chain-id 31337
+        run: screen -d -m anvil -p 10002
 
       - name: Run Uploader tusc
         run: |
             wget https://github.com/jackhftang/tusc/releases/download/0.4.7/tusc_linux_amd64
             chmod u+x tusc_linux_amd64
-            screen -d -m tusc_linux_amd64 -p 3000 --files-endpoint '/api/v1/files/'
+            screen -d -m tusc_linux_amd64 server -p 3000 --files-endpoint '/api/v1/files/'
 
-      # - name: check port
-      #   run: sudo lsof -i -P -n | grep LISTEN 
+      - name: check port
+        run: sudo lsof -i -P -n | grep LISTEN 
 
       - name: Clone Arcana Repo
         uses: GuillaumeFalourd/clone-github-repo-action@v2
         env:
         # TODO VERY IMPORTANT: Need a way to store github secret access token, remove token
-          Token : put_token_value_here
+          Token : <Token>
         with:
           owner: 'arcana-network'
           repository: 'arcana-smart-contract'
@@ -60,8 +57,8 @@ jobs:
             cd arcana-smart-contract
             git checkout himank/AR-3217_export_contract_address_for_ci && npm i && npm run deploy:network hardhat
 
-      # - name: Run unit tests
-      #   run:  npm i && npm test
+      - name: Run unit tests
+        run:  npm i && npm test
 
 
 
