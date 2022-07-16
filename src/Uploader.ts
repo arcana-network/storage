@@ -176,8 +176,13 @@ export class Uploader {
       onError: this.onError,
       onProgress: this.onProgress,
       onSuccess: () => {
+        localStorage.removeItem(`${walletAddress}::key::${hash}`);
+        localStorage.removeItem(`${walletAddress}::host::${hash}`);
+        localStorage.removeItem(`${walletAddress}::token::${hash}`);
         this.onUpload(host, token, did);
       },
+
+      removeFingerprintOnSuccess: true,
       fileReader: new FileReader(key),
       fingerprint: function (file, options) {
         return Promise.resolve(options.metadata.hash);

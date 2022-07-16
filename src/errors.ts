@@ -14,7 +14,7 @@ export let errorCodes: IHash = {
     "file_already_uploaded": "You cannot upload a file that is already uploaded by a different user address.",
     "zero_file_size": "Your file size must not be null while uploading.",
     "only_storage_node": "Only assigned storage node has access to the function.",
-    "zero_validity": "Validity must be a non-zero value as it is the access specifier of the duration for which file sharing is enabled.",
+    "zero_validity": "You do not have access to this file. This can happen if the file is not shared with you, or the access timer has expired or the access has been revoked by the file owner.",
     "avoid_sharing_file_themselves": "Avoid sharing file to themselves.",
     "already_shared": "File is already shared with the user.",
     "file_not_found": "File with the specified DID does not exist in the Arcana Store.",

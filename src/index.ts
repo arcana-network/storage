@@ -1,11 +1,11 @@
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { Access } from './Access';
-import { Config, getProvider, customError,makeTx, parseHex, getFile } from './Utils';
+import { Config, getProvider, customError, makeTx, parseHex, getFile } from './Utils';
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
-import { chainId } from './constant';
+import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant';
 import { wrapInstance } from "./sentry";
 
 export class StorageProvider {
@@ -37,20 +37,20 @@ export class StorageProvider {
     }
     this.email = config.email;
     this.appId = config.appId;
-    if (!config.gateway) {
-      this.gateway = 'https://gateway-testnet.arcana.network/api/v1/';
-    } else {
-      this.gateway = new URL("/api/v1/",config.gateway).href;
-    }
     if (!config.chainId) {
       this.chainId = chainId;
     } else {
       this.chainId = config.chainId;
     }
+    if (!config.gateway) {
+      this.gateway = chainIdToGateway.get(this.chainId)
+    } else {
+      this.gateway = new URL("/api/v1/",config.gateway).href;
+    }
 
     if (config.debug) {
       SentryInit({
-        dsn: 'https://6fbd3c0536b543ecbacbf6ba4320ec11@o394338.ingest.sentry.io/5244311',
+        dsn: 'https://1a411b6bfed244de8f6a7d64bb432bd4@o1011868.ingest.sentry.io/6081085',
         integrations: [
           new Integrations.BrowserTracing({
             tracingOrigins: [this.gateway],
@@ -99,12 +99,12 @@ export class StorageProvider {
     return new Uploader(this.appId, this.appAddress, this.provider, this.api, this.debug);
   };
 
-  getAccess = async () => {
+  getAccess = async (): Promise<Access> => {
     await this.login();
     return new Access(this.appAddress, this.provider, this.api, this.debug);
   };
 
-  getDownloader = async () => {
+  getDownloader = async (): Promise<Downloader> => {
     await this.login();
     return new Downloader(this.appAddress, this.provider, this.api, this.debug);
   };
@@ -131,7 +131,7 @@ export class StorageProvider {
     if (!res.data.success) {
       throw new Error('Error uploading image');
     }
-    
+
     let subDomain = ".";
     switch ( this.chainId ) {
       case 40405 :
@@ -142,7 +142,7 @@ export class StorageProvider {
         break;
     }
 
-    let external_url = `https://nftviewer${subDomain}.arcana.network/asset/${did}`;
+    let external_url = `https://nft-viewer${subDomain}.arcana.network/asset/${did}`;
 
     let res2 = await api.post('/api/v1/metadata', {
       title,
@@ -162,7 +162,7 @@ export class StorageProvider {
     return this.initialisedPromise;
   }
 
-  _login = async () => {
+  private _login = async () => {
     if (!this.provider) {
       // @ts-ignore
       if (window.ethereum) {
@@ -171,12 +171,45 @@ export class StorageProvider {
     }
 
     // Fetch chain id from provider
-    let network = await this.provider.getNetwork();
+    const network = await this.provider.getNetwork();
+    const hexChainID = '0x' + this.chainId.toString(16)
 
     // throw error if chain id is not equal to the chain id of the app
     if (this.chainId !== network.chainId) {
-      throw new Error('wrong_network, please change the network to the arcana');
+      try {
+        await this.provider.provider.request({
+          method: 'wallet_switchEthereumChain',
+          params: [{ chainId: hexChainID }],
+        });
+      } catch (e) {
+        // This error code indicates that the chain has not been added to the wallet.
+        if (e.code === 4902) {
+          const blockchainURL = chainIdToBlockchainExplorerURL.get(this.chainId)
+          await this.provider.provider.request({
+            method: 'wallet_addEthereumChain',
+            params: [
+              {
+                chainId: hexChainID,
+                chainName: 'Arcana',
+
+                rpcUrls: [chainIdToRPCURL.get(this.chainId)],
+                blockExplorerUrls: blockchainURL ? [blockchainURL] : [],
+
+
+                nativeCurrency: {
+                  symbol: 'XAR',
+                  // ?
+                  decimals: 18
+                }
+              }
+            ]
+          })
+        } else {
+          throw e
+        }
+      }
     }
+
     let res = (await axios.get(this.gateway + 'get-config/')).data;
     localStorage.setItem('forwarder', res['Forwarder']);
     localStorage.setItem('dkg', res['DKG']);
@@ -208,23 +241,56 @@ export class StorageProvider {
     }
   };
 
-  myFiles = async () => {
+  numOfMyFiles = async () => {
     await this.login();
-    let res = await this.api('list-files/');
+    let numberOfFiles = (await this.api('files/total')).data;
+
+    return numberOfFiles;
+  }
+
+  numOfPagesMyFiles =async (page_size: number=20) => {
+    await this.login();
+    let numOfPages = (await this.numOfMyFiles())/page_size;
+    return Math.ceil(numOfPages);
+  }
+
+  myFiles = async (page_number: number = 1, page_size: number=20) => {
+    await this.login();
+    if(page_number > await this.numOfPagesMyFiles(page_size)){
+      throw new Error("invalid_page_number");
+    }
+    let res = await this.api('list-files/?offset=' + (page_number-1)*page_size + '&count=' + page_size);
     let data = [];
     if (res.data) data = res.data;
     return data;
   };
 
-  sharedFiles = async () => {
+  numOfSharedFiles = async () => {
     await this.login();
-    let res = await this.api('shared-files/');
+    let numberOfFiles = (await this.api('files/shared/total/')).data;
+
+    return numberOfFiles;
+  }
+
+  numOfPagesSharedFiles =async (page_size: number=20) => {
+    await this.login();
+    let numOfPages = (await this.numOfSharedFiles())/page_size;
+    return Math.ceil(numOfPages);
+  }
+
+  sharedFiles = async (page_number: number = 1, page_size: number=20) => {
+    await this.login();
+    if(page_number > await this.numOfPagesSharedFiles(page_size)){
+      throw new Error("invalid_page_number");
+    }
+    let res = await this.api('shared-files/?offset=' + (page_number-1)*page_size + '&count=' + page_size);
     let data = [];
     if (res.data) data = res.data;
     return data;
   };
 
   linkNft = async (fileId:string, tokenId:Number, nftContract:string, chainId:Number) => {
+    await this.login();
     fileId = parseHex(fileId);
     nftContract = parseHex(nftContract);
     return await makeTx(this.appAddress, this.api, this.provider  , 'linkNFT', [fileId, tokenId, nftContract,chainId]);
