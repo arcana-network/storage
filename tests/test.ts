@@ -4,7 +4,7 @@ import * as utils from '../src/Utils';
 import { Blob as nBlob } from 'blob-polyfill';
 import sinon from 'sinon';
 import { ethers } from 'ethers';
-import { createProvider} from './sub_provider'
+import { createProvider } from './sub_provider'
 
 import fs from 'fs';
 
@@ -20,6 +20,9 @@ import forwarder from '../src/contracts/Forwarder';
 import axios from 'axios';
 import httpAdapter from 'axios/lib/adapters/http';
 axios.defaults.adapter = httpAdapter;
+
+//SDK Errors
+import {errorCodes} from "../src/errors";
 
 //Load contract addresses
 let sContracts: any = fs.readFileSync("./contracts.json"),
@@ -126,13 +129,13 @@ function meta_tx_nock(reply_data) {
 
 async function nockSetup() {
 
-  nock("https://dkgnode1.arcana.network:443")
+    nock("https://dkgnode1.arcana.network:443")
         .defaultReplyHeaders(nockOptions)
         .persist()
         .post("/rpc")
         .reply(200, { "jsonrpc": "2.0", "result": { "ok": true }, "id": 10 });
 
-  nock('http://localhost:9010')
+    nock('http://localhost:9010')
         .defaultReplyHeaders(nockOptions)
         .persist()
         .get("/api/v1/get-config/")
@@ -221,9 +224,9 @@ const deployer = ethers.Wallet.fromMnemonic(memonic, path + "0"),
     bridge = ethers.Wallet.fromMnemonic(memonic, path + "3"),
     arcanaWallet = ethers.Wallet.fromMnemonic(memonic, path + "4"),
     receiverWallet = ethers.Wallet.fromMnemonic(memonic, path + "5");
-    ;
+;
 
-import FixtureProvider from 'web3-provider-engine/subproviders/fixture.js' ;
+import FixtureProvider from 'web3-provider-engine/subproviders/fixture.js';
 
 
 //shared fixture     
@@ -238,7 +241,8 @@ test.serial.before(async (t) => {
     //File prep
     await mockFile();
 
-    const arcanaProvider = createProvider(RPC_URL,{address : arcanaWallet.address, privateKey : arcanaWallet.privateKey })
+    t.context.arcanaProvider = createProvider(RPC_URL, { address: arcanaWallet.address, privateKey: arcanaWallet.privateKey })
+    t.context.receiverProvider = createProvider(RPC_URL, { address: receiverWallet.address, privateKey: receiverWallet.privateKey })
 
     //Storage instances
     arcanaInstance = new StorageProvider({
@@ -247,66 +251,40 @@ test.serial.before(async (t) => {
         gateway: gateway + "/",
         debug,
         chainId: 100,
-        provider : arcanaProvider
+        provider: t.context.arcanaProvider
     });
 
-    t.context.arcanaProvider = arcanaProvider;
-    
-    /*
     receiverInstance = new StorageProvider({
         appId,
-        provider:  new Eip1193Bridge(ethers.Wallet.fromMnemonic(memonic, path + "5"), localProvider),
+        provider: t.context.receiverProvider,
         email: makeEmail(),
-        gateway: gateway + "/" ,
+        gateway: gateway + "/",
         debug,
         chainId: 100
     });
-    */
+
 });
 
-
-test.afterEach((t)=> {    
-    t.context.arcanaProvider.removeProvider(fixture);
+//remove fixture
+test.afterEach((t) => {
+    if (!!fixture) t.context.arcanaProvider.removeProvider(fixture);
+    fixture = null;
 })
 
-test.serial.only("Upload file", async (t) => {
+test.serial("Upload file", async (t) => {
     meta_tx_nock(undefined);
 
-    const address = arcanaWallet.address;
-
+    //Add sub provider Fixture at index 0 for top most priority
     fixture = new FixtureProvider({
-        eth_requestAccounts: [address],
-        eth_accounts: [address],
-        eth_chainId: 100,
         personal_sign: async (payload, next, done) => {
-          payload.params[0] = ethers.utils.hashMessage(payload.params[0])
-          next(null, payload);
+            payload.params[0] = ethers.utils.hashMessage(payload.params[0])
+            next(null, payload);
         },
         eth_call: async (payload, next, done) => {
-      
-          //EXPERIMENTAL: return response based on function selector and data
-          // switch(true) {
-      
-          //   case payload.params[0].data.startsWith("0x2d0335ab") : done(null, {
-          //     "jsonrpc": "2.0",
-          //     "id": payload.id,
-          //     "result": ethers.constants.HashZero 
-          // } ) ;
-      
-          // default : next(null, payload);
-          // }
-      
-          next(null, payload);
-        },
-        eth_signTypedData_v4: async (payload, next, done) => {
-      
-          done(null, "dummy signature");
+            done(null, ethers.utils.defaultAbiCoder.encode(["uint"], [ethers.BigNumber.from("0")] ) );
         }
-      
-      });
-
-    //Add sub provider Fixture at index 0 for top most priority
-    t.context.arcanaProvider.addProvider(fixture,0);  
+    });
+    t.context.arcanaProvider.addProvider(fixture, 0);
 
     let upload = await arcanaInstance.getUploader();
 
@@ -314,49 +292,50 @@ test.serial.only("Upload file", async (t) => {
 
 })
 
-
-
-/* ~~~~~~~~~~
-Migration in progress for all the below test cases
-
- ~~~~~~~~~~~ */
-
-
-
-//done
 test.serial('Share file', async (t) => {
+    t.plan(4);
     meta_tx_nock(undefined);
+
     let access = await arcanaInstance.getAccess();
-    let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
+    // let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
+    let tx = await access.share([did], [receiverWallet.address], [150]);
     t.truthy(tx);
+
+    //Now check whether it showing in receipt user list
+    nock(gateway).defaultReplyHeaders(nockOptions)
+        .get("/shared-files/")
+        .reply(200, [{ did: did.substring(2), size: file.size }], { 'access-control-allow-headers': 'Authorization' });
+
+    let files = await receiverInstance.sharedFiles();
+    t.is(files.length, 1);
+    t.is(files[0]['did'], did.substring(2));
+    t.is(files[0]['size'], file.size);
+
 });
 
-
-//done
 test.serial('Fail revoke transaction on unauthorized files', async (t) => {
+    t.plan(3);
+    const expected_errorCode = "only_file_owner";
     nock(gateway).defaultReplyHeaders(nockOptions)
-        .intercept("/meta-tx/", "OPTIONS")
-        .reply(200, null, { 'access-control-allow-headers': 'Authorization' })
         .post("/meta-tx/")
         .reply(200, {
-            err: {
-                error:
-                {
-                    message: 'This function can only be called by file owner'
-                }
-            }
+            err: expected_errorCode
         })
 
 
     let access = await receiverInstance.getAccess();
     let err = await t.throwsAsync(access.revoke(did, arcanaWallet.address));
-    t.is(err.message, 'This function can only be called by file owner');
-    t.is(err.code, 'TRANSACTION');
+    t.is(err.message, errorCodes[expected_errorCode].replace(/[.,]/g,""));
+    t.assert(err.code.startsWith(expected_errorCode));
 });
 
-//done
-test.serial('Files shared with self', async (t) => {
 
+
+//done
+/*
+//Redundent test, covered in sharing
+test.serial.only('Files shared with self', async (t) => {
+    t.plan(3);
     nock(gateway).defaultReplyHeaders(nockOptions)
         .get("/shared-files/")
         .reply(200, [{ did: did.substring(2), size: file.size }], { 'access-control-allow-headers': 'Authorization' })
@@ -368,14 +347,30 @@ test.serial('Files shared with self', async (t) => {
     t.is(files[0]['did'], did.substring(2));
     t.is(files[0]['size'], file.size);
 });
+*/
 
 //done
 test.serial('Get consumed and total upload limit', async (t) => {
+
+    fixture = new FixtureProvider({
+        eth_call: async (payload, next, done) => {            
+            done(null, ethers.utils.defaultAbiCoder.encode(["uint","uint"],[file.size,"1000000"]));
+        }
+    });
+
+    t.context.arcanaProvider.addProvider(fixture,0)
+
     const Access = await arcanaInstance.getAccess();
     let [consumed, total] = await Access.getUploadLimit(did);
 
     t.is(consumed, file.size);
+    t.is(total,1000000 );
 });
+
+
+/* ~~~~~~~~~~
+Migration in progress for all the below test cases
+ ~~~~~~~~~~~ */
 
 //done
 test.serial('Revoke', async (t) => {

@@ -14,41 +14,20 @@ module.exports.createProvider = createProvider;
 function createProvider(rpcUrl, { address, privateKey }) {
   var engine = new ProviderEngine();
 
-  /* 
+
   
   engine.addProvider(new FixtureProvider({
       eth_requestAccounts: [address],
       eth_accounts: [address],
       eth_chainId: 100,
-      personal_sign: async (payload, next, done) => {
-        payload.params[0] = ethers.utils.hashMessage(payload.params[0])
-        next(null, payload);
-      },
-      eth_call: async (payload, next, done) => {
-    
-        //EXPERIMENTAL: return response based on function selector and data
-        // switch(true) {
-    
-        //   case payload.params[0].data.startsWith("0x2d0335ab") : done(null, {
-        //     "jsonrpc": "2.0",
-        //     "id": payload.id,
-        //     "result": ethers.constants.HashZero 
-        // } ) ;
-    
-        // default : next(null, payload);
-        // }
-    
-        next(null, payload);
-      },
       eth_signTypedData_v4: async (payload, next, done) => {
     
         done(null, "dummy signature");
       }
-    
     }
     ));
 
-    */
+    
 
 
   engine.addProvider(new HookedWalletSubprovider({
@@ -68,6 +47,43 @@ function createProvider(rpcUrl, { address, privateKey }) {
   return engine;
 
 }
+
+
+/*
+
+ fixture = new FixtureProvider({
+        eth_requestAccounts: [address],
+        eth_accounts: [address],
+        eth_chainId: 100,
+        personal_sign: async (payload, next, done) => {
+          payload.params[0] = ethers.utils.hashMessage(payload.params[0])
+          next(null, payload);
+        },
+        eth_call: async (payload, next, done) => {
+      
+          //EXPERIMENTAL: return response based on function selector and data
+          // switch(true) {
+      
+          //   case payload.params[0].data.startsWith("0x2d0335ab") : done(null, {
+          //     "jsonrpc": "2.0",
+          //     "id": payload.id,
+          //     "result": ethers.constants.HashZero 
+          // } ) ;
+      
+          // default : next(null, payload);
+          // }
+      
+          next(null, payload);
+        },
+        eth_signTypedData_v4: async (payload, next, done) => {
+      
+          done(null, "dummy signature");
+        }
+      
+    });
+
+
+*/
 
 /*
 const address = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266",
