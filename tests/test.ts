@@ -17,7 +17,7 @@ import { Downloader } from '../src/Downloader';
 import {errorCodes} from "../src/errors";
 
 //Load contract addresses
-let sContracts: any = fs.readFileSync("./contracts.json"),
+let sContracts: any = fs.readFileSync("./tests/contracts.json"),
     oContracts = JSON.parse(sContracts);
 
 const gateway = 'http://localhost:9010/api/v1';
@@ -217,7 +217,7 @@ test.afterEach((t) => {
     fixture = null;
 })
 
-test.serial.only("Upload file", async (t) => {
+test.serial("Upload file", async (t) => {
     
     meta_tx_nock(undefined);
 
