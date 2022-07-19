@@ -16,9 +16,20 @@ function createProvider(rpcUrl, { address, privateKey }) {
       eth_accounts: [address],
       eth_chainId: 100,
       eth_signTypedData_v4: async (payload, next, done) => {
-    
         done(null, "dummy signature");
+      },
+      eth_call:  
+      async (payload, next, done) => {
+      
+        //EXPERIMENTAL: return response based on function selector and data
+        switch(true) {
+        case payload.params[0].data.startsWith("0x2d0335ab") :  done(null, ethers.utils.defaultAbiCoder.encode(["uint"], [ethers.BigNumber.from("0")] ) ) ;
+          break;
+        default : next(null, payload);
+        }
+    
       }
+
     }
     ));
 
