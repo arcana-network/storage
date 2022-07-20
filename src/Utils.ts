@@ -206,14 +206,6 @@ export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
   return str;
 };
 
-export const encryptKey = async (publicKey: string, key: string): Promise<any> => {
-  return 'key';
-};
-
-export const decryptKey = async (privateKey: string, encryptedKey: string): Promise<string> => {
-  return 'key';
-};
-
 export const isFileUploaded = async (address: string, fileId: string, provider: any): Promise<boolean> => {
   const arcana = Arcana(address, provider);
   const file = await arcana.files(fileId);
