@@ -205,6 +205,6 @@ export class Uploader {
       // Start the upload
       upload.start();
     });
-    return did;
+    return did.replace("0x" , "");
   };
 }
