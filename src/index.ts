@@ -1,12 +1,12 @@
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { Access } from './Access';
-import { Config, getProvider, customError, makeTx, parseHex, getFile } from './Utils';
+import { Config, customError, getFile, getProvider, makeTx, parseHex } from './Utils';
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant';
-import { wrapInstance } from "./sentry";
+import { wrapInstance } from './sentry';
 
 export class StorageProvider {
   // private provider: providers.Web3Provider;
@@ -116,18 +116,18 @@ export class StorageProvider {
 			throw new Error('Please fill in all the fields');
 		}
     // get signer from provider
-    let signer = this.provider.getSigner();
-    let signature = await signer.signMessage(`Sign this message to attach NFT metadata with your did ${did}`);
-    let node = await this.api.get('/get-node-address/?appid=' + this.appId);
-    let api = axios.create({
-      baseURL: node.data['host'],
+    const signer = this.provider.getSigner();
+    const signature = await signer.signMessage(`Sign this message to attach NFT metadata with your did ${did}`);
+    const node = await this.api.get('/get-node-address/?appid=' + this.appId);
+    const api = axios.create({
+      baseURL: node.data.host,
       headers: {
         Authorization: `Bearer ${did}-${signature}`,
       },
     });
-    let form = new FormData();
+    const form = new FormData();
     form.append('file', file);
-    let res = await api.post(`api/v1/nft`, form);
+    const res = await api.post(`api/v1/nft`, form);
     if (!res.data.success) {
       throw new Error('Error uploading image');
     }
@@ -142,13 +142,13 @@ export class StorageProvider {
         break;
     }
 
-    let external_url = `https://nft-viewer${subDomain}.arcana.network/asset/${did}`;
+    const externalURL = `https://nft-viewer${subDomain}.arcana.network/asset/${did}`;
 
-    let res2 = await api.post('/api/v1/metadata', {
+    const res2 = await api.post('/api/v1/metadata', {
       title,
       description,
       did,
-      external_url,
+      external_url: externalURL,
       image: res.request.responseURL + '/' + did,
     });
     return res2.request.responseURL + '/' + did;
@@ -211,13 +211,13 @@ export class StorageProvider {
     }
 
     let res = (await axios.get(this.gateway + 'get-config/')).data;
-    localStorage.setItem('forwarder', res['Forwarder']);
-    localStorage.setItem('dkg', res['DKG']);
-    localStorage.setItem('did', res['DID']);
-    let accounts = await this.provider.send('eth_requestAccounts', []);
-    let nonce = (await axios.get(this.gateway + `get-nonce/?address=${accounts[0]}`)).data;
+    localStorage.setItem('forwarder', res.Forwarder);
+    localStorage.setItem('dkg', res.DKG);
+    localStorage.setItem('did', res.DID);
+    const accounts = await this.provider.send('eth_requestAccounts', []);
+    const nonce = (await axios.get(this.gateway + `get-nonce/?address=${accounts[0]}`)).data;
     const signer = await this.provider.getSigner();
-    let sig = await signer.signMessage(String(nonce));
+    const sig = await signer.signMessage(String(nonce));
     res = await axios.post(this.gateway + `login/`, {
       signature: sig,
       email: this.email,
@@ -243,23 +243,25 @@ export class StorageProvider {
 
   numOfMyFiles = async () => {
     await this.login();
-    let numberOfFiles = (await this.api('files/total')).data;
-
-    return numberOfFiles;
+    return (await this.api('files/total')).data;
   }
 
-  numOfPagesMyFiles =async (page_size: number=20) => {
-    await this.login();
-    let numOfPages = (await this.numOfMyFiles())/page_size;
+  numOfMyFilesPages = async (pageSize: number = 20) => {
+    const numOfPages = (await this.numOfMyFiles()) / pageSize;
     return Math.ceil(numOfPages);
   }
 
-  myFiles = async (page_number: number = 1, page_size: number=20) => {
+  myFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
     await this.login();
-    if(page_number > await this.numOfPagesMyFiles(page_size)){
+    if(pageNumber > await this.numOfMyFilesPages(pageSize)){
       throw new Error("invalid_page_number");
     }
-    let res = await this.api('list-files/?offset=' + (page_number-1)*page_size + '&count=' + page_size);
+    const res = await this.api.get('list-files/',{
+      params: {
+        offset: (pageNumber - 1) * pageSize,
+        count: pageSize
+      }
+    })
     let data = [];
     if (res.data) data = res.data;
     return data;
@@ -267,32 +269,33 @@ export class StorageProvider {
 
   numOfSharedFiles = async () => {
     await this.login();
-    let numberOfFiles = (await this.api('files/shared/total/')).data;
-
-    return numberOfFiles;
+    return (await this.api('files/shared/total/')).data;
   }
 
-  numOfPagesSharedFiles =async (page_size: number=20) => {
-    await this.login();
-    let numOfPages = (await this.numOfSharedFiles())/page_size;
-    return Math.ceil(numOfPages);
+  numOfSharedFilesPages = async (pageSize: number = 20) => {
+    return Math.ceil((await this.numOfSharedFiles()) / pageSize);
   }
 
-  sharedFiles = async (page_number: number = 1, page_size: number=20) => {
+  sharedFiles = async (pageNumber: number = 1, pageSize: number=20) => {
     await this.login();
-    if(page_number > await this.numOfPagesSharedFiles(page_size)){
+    if(pageNumber > await this.numOfSharedFilesPages(pageSize)){
       throw new Error("invalid_page_number");
     }
-    let res = await this.api('shared-files/?offset=' + (page_number-1)*page_size + '&count=' + page_size);
+    const res = await this.api('shared-files/', {
+      params: {
+        offset: (pageNumber - 1) * pageSize,
+        count: pageSize
+      }
+    })
     let data = [];
     if (res.data) data = res.data;
     return data;
   };
 
-  linkNft = async (fileId:string, tokenId:Number, nftContract:string, chainId:Number) => {
+  linkNft = async (fileId:string, tokenId: number, nftContract:string, nftChainID: number) => {
     await this.login();
     fileId = parseHex(fileId);
     nftContract = parseHex(nftContract);
-    return await makeTx(this.appAddress, this.api, this.provider  , 'linkNFT', [fileId, tokenId, nftContract,chainId]);
+    return await makeTx(this.appAddress, this.api, this.provider  , 'linkNFT', [fileId, tokenId, nftContract, nftChainID]);
   }
 }
