@@ -1,0 +1,40 @@
+name: test
+on: [push]
+
+jobs:
+  check:
+    name: Unit test
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+
+      - name: install screen
+        run: sudo apt-get update && sudo apt-get install -y screen && sudo apt-get install -y lsof
+
+      # Replace it with Polygon docker image.
+      # Port should be 8545 and chain Id 31337
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly
+
+      - name: Run anvil
+        run: screen -d -m anvil -p 10002
+
+      - name: Run Uploader tusc
+        run: |
+            wget https://github.com/jackhftang/tusc/releases/download/0.4.7/tusc_linux_amd64
+            chmod u+x tusc_linux_amd64
+            screen -d -m tusc_linux_amd64 server -p 3000 --files-endpoint '/api/v1/files/'
+
+      - name: check port
+        run: sudo lsof -i -P -n | grep LISTEN 
+
+      - name: Run unit tests
+        run:  npm i && npm test
+
+
+
+
