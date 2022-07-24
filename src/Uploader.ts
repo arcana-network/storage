@@ -38,7 +38,7 @@ export class Uploader {
 
   onSuccess = () => {};
 
-  onProgress = (bytesUploaded: number, bytesTotal: number) => {};
+  onProgress = (bytesUploaded: number, bytesTotal: number): void => {};
 
   onError = (err) => {
     console.log('Error', err);

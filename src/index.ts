@@ -298,4 +298,21 @@ export class StorageProvider {
     nftContract = parseHex(nftContract);
     return await makeTx(this.appAddress, this.api, this.provider  , 'linkNFT', [fileId, tokenId, nftContract, nftChainID]);
   }
+
+  upload = async (fileRaw: any, onProgress: (bytesUploaded: number, bytesTotal: number) => void): Promise<string> => {
+    const uploader = await this.getUploader();
+    uploader.onProgress = onProgress;
+
+    return new Promise((resolve, reject) => {
+      uploader.onError = reject;
+      uploader.upload(fileRaw).then(resolve).catch(reject);
+    });
+  }
+
+  download = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => void): Promise<void> => {
+    const downloader = await this.getDownloader();
+    downloader.onProgress = onProgress;
+
+    return downloader.download(did)
+  }
 }
