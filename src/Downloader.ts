@@ -55,7 +55,7 @@ export class Downloader {
   }
 
   onSuccess = async () => {};
-  onProgress = async (bytesDownloaded: number, bytesTotal: number) => {};
+  onProgress = async (bytesDownloaded: number, bytesTotal: number): void => {};
 
   download = async (did) => {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
