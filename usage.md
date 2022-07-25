@@ -6,31 +6,50 @@
 // address: Smart contract address of app
 // provider: Web3provider (Eg: If you have installed metamask then window.ethereum will work)
 // Default value of provider is window.ethereum
-const arcanaInstance = new arcana.storage.StorageProvider({ appId, provider, email });
+import { StorageProvider } from '@arcana/storage';
+
+const storage = new StorageProvider({ appId, provider, email });
 ```
 
-## Get Uploader
+## Upload a File object
 
-```typescript
-const Uploader = arcanaInstance.getUploader();
-// file: Blob format
+The `file` object must be an instance of a `Blob` or a descendant (`File`, etc.).
+
+#### v0.3 (for simpler use cases)
+```javascript
+storage
+  .upload(file, (bytesUploaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')})
+  .then((did) => console.log('File successfully uploaded. DID:', did))
+  .catch(e => console.error(e));
+```
+
+#### v0.2
+```javascript
+const Uploader = storage.getUploader();
+Uploader.onProgress = (bytesUploaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')}
 Uploader.upload(file);
 ```
 
-## Get Downloader
+## Download from a DID
 
-```typescript
-const Downloader = arcanaInstance.getDownloader();
-// did: DID of file which you want to download
+#### v0.3 (for simpler use cases)
+```javascript
+storage.download(did, (bytesDownloaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')});
+```
+
+#### v0.2
+```javascript
+const Downloader = storage.getDownloader();
+Downloader.onProgress = (bytesDownloaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')}
 Downloader.download(did);
 ```
 
 ## Get Access
 
 ```typescript
-const Access = new arcanaInstance.getAccess();
+const Access = new storage.getAccess();
 
-### Share a File
+// Share a File
 // did: DID of file to be shared
 // address: recipients address
 // validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds
@@ -80,7 +99,7 @@ List files shared with the current user.
 
 ```javascript
 //Get files shared with the current user
-let files = await arcanaInstance.sharedFiles();
+let files = await storage.sharedFiles();
 ```
 
 ### List of Files Uploaded
@@ -89,7 +108,7 @@ List files uploaded by the current user.
 
 ```javascript
 //List of files uploaded by the current user
-let files = await arcanaInstance.myFiles();
+let files = await storage.myFiles();
 ```
 ---
 
@@ -105,8 +124,8 @@ let files = await arcanaInstance.myFiles();
 // Pass the provider during initialization of the Storage SDK, if required.
 // Otherwise by default, the Storage SDK will choose window.ethereum
 
-let arcanaInstance = new arcana.storage.StorageProvider();
-await arcanaInstance.downloadDID('<did of the file>');
+let storage = new arcana.storage.StorageProvider();
+await storage.downloadDID('<did of the file>');
 ```
 
 ---
@@ -120,7 +139,7 @@ Use the following Storage SDK functionality for minting private NFTs.
 Use `makeMetadataURL` to obtain a URL that can be used to mint private NFT.
 
 ```javascript
-let metadata = await arcanaInstance.makeMetadataURL(
+let metadata = await storage.makeMetadataURL(
   title,
   description,
   did,
@@ -136,7 +155,7 @@ Once you have minted the NFT, to make it private and control access to it and ma
 
 ```javascript
 let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
-    await arcanaInstance.linkNft(did, tokenId, nftContract, chainId);
+    await storage.linkNft(did, tokenId, nftContract, chainId);
 ```
 
 ---
@@ -225,14 +244,14 @@ Uploader.onError = (err) => {
 ### Change Network
 ```js
 // Below is default function, which can be modified by the developers
-arcanaInstance.onNetworkChange = (oldNetwork, newNetwork) => {
+storage.onNetworkChange = (oldNetwork, newNetwork) => {
   window.location.reload()
 }
 ```
 ### Change Account
 ```js
 // Below is default function, which can be modified by the developers
-arcanaInstance.onAccountChange = (accounts) => {
+storage.onAccountChange = (accounts) => {
   window.location.reload()
 }
 ```
