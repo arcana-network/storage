@@ -259,7 +259,8 @@ export class StorageProvider {
     const res = await this.api.get('list-files/',{
       params: {
         offset: (pageNumber - 1) * pageSize,
-        count: pageSize
+        count: pageSize,
+        appid: this.appId
       }
     })
     let data = [];
