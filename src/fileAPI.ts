@@ -4,7 +4,12 @@ import { readHash } from './constant';
 import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress } from './Utils';
 import { wrapInstance } from "./sentry";
 
-export class Access {
+export enum AccessTypeEnum {
+  MY_FILES,
+  SHARED_FILES
+}
+
+export class FileAPI {
   private provider: any;
   private api: AxiosInstance;
   private appAddress: string;
@@ -26,6 +31,67 @@ export class Access {
     }
   }
 
+  numOfMyFiles = async () => {
+    return (await this.api('files/total/')).data;
+  }
+
+  numOfMyFilesPages = async (pageSize: number = 20) => {
+    const numOfPages = (await this.numOfMyFiles()) / pageSize;
+    return Math.ceil(numOfPages);
+  }
+
+  myFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
+    if(pageNumber > await this.numOfMyFilesPages(pageSize)){
+      throw new Error("invalid_page_number");
+    }
+    const res = await this.api.get('list-files/',{
+      params: {
+        offset: (pageNumber - 1) * pageSize,
+        count: pageSize
+      }
+    })
+    let data = [];
+    if (res.data) data = res.data;
+    return data;
+  };
+
+  numOfSharedFiles = async () => {
+    return (await this.api('files/shared/total/')).data;
+  }
+
+  numOfSharedFilesPages = async (pageSize: number = 20) => {
+    return Math.ceil((await this.numOfSharedFiles()) / pageSize);
+  }
+
+  sharedFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
+    if(pageNumber > await this.numOfSharedFilesPages(pageSize)){
+      throw new Error("invalid_page_number");
+    }
+    const res = await this.api('shared-files/', {
+      params: {
+        offset: (pageNumber - 1) * pageSize,
+        count: pageSize
+      }
+    })
+    let data = [];
+    if (res.data) data = res.data;
+    return data;
+  };
+
+  list (type: AccessTypeEnum, pageNumber: number = 1, pageSize: number = 20) {
+    if (typeof type !== 'number') {
+      throw customError('TRANSACTION', 'Invalid argument passed to list. Type must be a number.')
+    }
+
+    switch (type) {
+      case AccessTypeEnum.MY_FILES:
+        return this.myFiles(pageNumber, pageSize)
+      case AccessTypeEnum.SHARED_FILES:
+        return this.sharedFiles(pageNumber, pageSize)
+      default:
+        throw customError('TRANSACTION', 'Invalid argument passed to list. Type must be in AccessTypeEnum.')
+    }
+  }
 
   share = async (did: string[] | string, _address: string[] | string, validity: number[] | number | null): Promise<string> => {
     did = ensureArray(did).map(parseHex)

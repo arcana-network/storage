@@ -44,53 +44,43 @@ Downloader.onProgress = (bytesDownloaded, bytesTotal) => { console.log('Progress
 Downloader.download(did);
 ```
 
-## Get Access
-
-```typescript
-const Access = new storage.getAccess();
-
-// Share a File
-// did: DID of file to be shared
-// address: recipients address
-// validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds
-Access.share([did], [address]);
-```
+## Access Control
 
 ### Revoke File Sharing
 
-```typescript
+```javascript
 // did: DID of file from which access is removed
 // address: Address of the user who's access is getting revoked
-Access.revoke(did, address);
+storage.files.revoke(did, address);
 ```
 
 ### Change File Ownership
 
-```typescript
+```javascript
 // address: new owner's address
-Access.changeFileOwner(did, address);
+storage.files.changeFileOwner(did, address);
 ```
 
 ### Delete a File
 
-```typescript
-Access.deleteFile(did);
+```javascript
+storage.files.deleteFile(did);
 ```
 
 ## Storage Usage Metrics
 
 ### Get Upload Limit
 
-```typescript
+```javascript
 //Get consumed and total storage of the current user
-let [consumed, total] = await Access.getUploadLimit();
+let [consumed, total] = await storage.files.getUploadLimit();
 ```
 
 ### Get Download Limit
 
-```typescript
+```javascript
 //Get consumed and total bandwidth of the current user
-let [consumed, total] = await Access.getDownloadLimit();
+let [consumed, total] = await storage.files.getDownloadLimit();
 ```
 
 ### List of Files Shared
@@ -98,8 +88,7 @@ let [consumed, total] = await Access.getDownloadLimit();
 List files shared with the current user.
 
 ```javascript
-//Get files shared with the current user
-let files = await storage.sharedFiles();
+let files = await storage.files.list(AccessTypeEnum.SHARED_FILES);
 ```
 
 ### List of Files Uploaded
@@ -107,10 +96,16 @@ let files = await storage.sharedFiles();
 List files uploaded by the current user.
 
 ```javascript
-//List of files uploaded by the current user
-let files = await storage.myFiles();
+let files = await storage.files.list(AccessTypeEnum.MY_FILES);
 ```
 ---
+### Old Access API
+
+Anything you can do with `storage.files` can also be done with the `Access` object returned by `storage.getAccess`.
+
+```javascript
+const Access = await storage.getAccess();
+```
 
 ## Download File by DID
 

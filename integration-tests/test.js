@@ -94,7 +94,7 @@ describe('Upload File', () => {
   //   await downloadArcana.downloadDID('0x03dcef07ceeb3c4bbb554a568b3a33d58df3bb7e9c527f9e1204a124ea5d1ee0');
   // });
 
-  
+
   it('My files', async () => {
     let files = await arcanaInstance.sharedFiles();
     console.log({files})
@@ -125,7 +125,7 @@ describe('Upload File', () => {
     chai.expect(tx).not.null;
   });
 
-  
+
   // it('Change File Owner', async () => {
   //   let newOwner = '0x04efC2A7E86cBaD7e5e65fc60eedfa92A413890e';
   //   let tx = await access.changeFileOwner(did, newOwner);
@@ -191,10 +191,10 @@ describe('Upload File', () => {
   //   );
   //   console.log(metadata);
   // });
-  
+
 
   // it("Should link nft", async ()=> {
-  //   let 
+  //   let
   //     chainId = 80001,
   //       tokenId  = 3,
   //       nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
@@ -255,7 +255,7 @@ describe('Upload File', () => {
   //   chai.expect(files[0]['size']).equal(file.size);
   // });
 
-  
+
 
   // it('Should download a file', async () => {
   //   let download = await arcanaInstance.getDownloader();
@@ -321,8 +321,8 @@ describe('Upload File', () => {
   // });
 
   // it('Get consumed and total upload limit', async () => {
-  //   const Access = await arcanaInstance.getAccess();
-  //   let [consumed, total] = await Access.getUploadLimit(did);
+  //   const FileAPI = await arcanaInstance.getAccess();
+  //   let [consumed, total] = await FileAPI.getUploadLimit(did);
   //   chai.expect(consumed).equal(file.size);
   // });
 
@@ -351,15 +351,15 @@ describe('Upload File', () => {
   // })
 
   // it('Get consumed and total download limit', async () => {
-  //   const Access = await sharedInstance.getAccess();
-  //   let [consumed, total] = await Access.getDownloadLimit(did);
+  //   const FileAPI = await sharedInstance.getAccess();
+  //   let [consumed, total] = await FileAPI.getDownloadLimit(did);
   //   chai.expect(consumed).equal(file.size);
   // });
 
   // it('Delete Account', async () => {
-  //   const Access = await sharedInstance.getAccess();
-  //   await Access.deleteAccount();
-  //   chai.expect(await Access.getAccountStatus()).equal(2);
+  //   const FileAPI = await sharedInstance.getAccess();
+  //   await FileAPI.deleteAccount();
+  //   chai.expect(await FileAPI.getAccountStatus()).equal(2);
   // });
 });
 

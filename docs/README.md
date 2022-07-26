@@ -52,7 +52,7 @@ Downloader.download(did);
 ### Get Access
 
 ```js
-const Access = arcanaInstance.getAccess();
+const FileAPI = arcanaInstance.getAccess();
 ```
 
 #### Share a File
@@ -61,7 +61,7 @@ const Access = arcanaInstance.getAccess();
 // did: DID of file to be shared, can be a hexadecimal string or an array of such strings
 // address: recipients address, similar type as "did"
 // validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds.
-Access.share(did, address);
+FileAPI.share(did, address);
 ```
 
 #### Revoke File Sharing
@@ -69,25 +69,26 @@ Access.share(did, address);
 ```js
 // did: DID of file from which access is removed
 // address: Address of the user who's access is getting revoked
-Access.revoke(did, address);
+FileAPI.revoke(did, address);
 ```
 
 #### Transfer File Ownership
 
 ```js
 // address: new owner's address
-Access.changeFileOwner(did, address);
+FileAPI.changeFileOwner(did, address);
 ```
 
 #### Delete a File
 
 ```js
-Access.deleteFile(did);
+FileAPI.deleteFile(did);
 ```
 
 #### Get Listed of users who are having access to the file
+
 ```js
-Access.getSharedUsers(did)
+FileAPI.getSharedUsers(did)
 ```
 
 ### Storage Usage Metrics
@@ -96,13 +97,13 @@ Access.getSharedUsers(did)
 
 ```js
 //Get consumed and total storage of the current user
-let [consumed, total] = await Access.getUploadLimit();
+let [consumed, total] = await FileAPI.getUploadLimit();
 ```
 #### Get Download Limit
 
 ```js
 //Get consumed and total bandwidth of the current user
-let [consumed, total] = await Access.getDownloadLimit();
+let [consumed, total] = await FileAPI.getDownloadLimit();
 ```
 
 #### List Shared Files
