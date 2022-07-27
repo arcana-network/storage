@@ -1,6 +1,6 @@
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
-import { Access } from './Access';
+import { FileAPI } from './fileAPI';
 import { Config, customError, getFile, getProvider, makeTx, parseHex } from './Utils';
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
@@ -19,6 +19,7 @@ export class StorageProvider {
   private chainId: number;
   private debug: boolean;
   private initialisedPromise: Promise<void>;
+  public files: FileAPI;
 
   constructor(cfg: Config) {
     let config;
@@ -99,9 +100,8 @@ export class StorageProvider {
     return new Uploader(this.appId, this.appAddress, this.provider, this.api, this.debug);
   };
 
-  getAccess = async (): Promise<Access> => {
-    await this.login();
-    return new Access(this.appAddress, this.provider, this.api, this.debug);
+  getAccess = async (): Promise<FileAPI> => {
+    return this.files;
   };
 
   getDownloader = async (): Promise<Downloader> => {
@@ -239,59 +239,34 @@ export class StorageProvider {
         throw new Error('app_not_found');
       }
     }
+
+    this.files = new FileAPI(this.appAddress, this.provider, this.api, this.debug)
   };
 
-  numOfMyFiles = async () => {
-    await this.login();
-    return (await this.api('files/total/')).data;
+  // TODO: remove when breaking backward compatibility
+  numOfMyFiles = () => {
+    return this.files.numOfMyFiles()
   }
 
   numOfMyFilesPages = async (pageSize: number = 20) => {
-    const numOfPages = (await this.numOfMyFiles()) / pageSize;
-    return Math.ceil(numOfPages);
+    return this.files.numOfMyFilesPages(pageSize)
   }
 
   myFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
-    await this.login();
-    if(pageNumber > await this.numOfMyFilesPages(pageSize)){
-      throw new Error("invalid_page_number");
-    }
-    const res = await this.api.get('list-files/',{
-      params: {
-        offset: (pageNumber - 1) * pageSize,
-        count: pageSize,
-        appid: this.appId
-      }
-    })
-    let data = [];
-    if (res.data) data = res.data;
-    return data;
-  };
+    return this.files.myFiles(pageNumber, pageSize, this.appId)
+  }
 
-  numOfSharedFiles = async () => {
-    await this.login();
-    return (await this.api('files/shared/total/')).data;
+  numOfSharedFiles = () => {
+    return this.files.numOfSharedFiles()
   }
 
   numOfSharedFilesPages = async (pageSize: number = 20) => {
-    return Math.ceil((await this.numOfSharedFiles()) / pageSize);
+    return this.files.numOfSharedFilesPages(pageSize)
   }
 
-  sharedFiles = async (pageNumber: number = 1, pageSize: number=20) => {
-    await this.login();
-    if(pageNumber > await this.numOfSharedFilesPages(pageSize)){
-      throw new Error("invalid_page_number");
-    }
-    const res = await this.api('shared-files/', {
-      params: {
-        offset: (pageNumber - 1) * pageSize,
-        count: pageSize
-      }
-    })
-    let data = [];
-    if (res.data) data = res.data;
-    return data;
-  };
+  sharedFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
+    return this.files.sharedFiles(pageNumber, pageSize)
+  }
 
   linkNft = async (fileId:string, tokenId: number, nftContract:string, nftChainID: number) => {
     await this.login();
@@ -317,3 +292,4 @@ export class StorageProvider {
     return downloader.download(did)
   }
 }
+export { AccessTypeEnum } from './fileAPI'
