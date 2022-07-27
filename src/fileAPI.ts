@@ -40,16 +40,20 @@ export class FileAPI {
     return Math.ceil(numOfPages);
   }
 
-  myFiles = async (pageNumber: number = 1, pageSize: number = 20, appid : number) => {
+  myFiles = async (pageNumber: number = 1, pageSize: number = 20, appid? : number) => {
     if(pageNumber > await this.numOfMyFilesPages(pageSize)){
       throw new Error("invalid_page_number");
     }
+
+    let params:any = {
+      offset: (pageNumber - 1) * pageSize,
+      count: pageSize
+    }
+
+    if (appid) params.appid = appid;
+
     const res = await this.api.get('list-files/',{
-      params: {
-        offset: (pageNumber - 1) * pageSize,
-        count: pageSize,
-        appid
-      }
+      params
     })
     let data = [];
     if (res.data) data = res.data;
@@ -79,7 +83,7 @@ export class FileAPI {
     return data;
   };
 
-  list (type: AccessTypeEnum, pageNumber: number = 1, pageSize: number = 20) {
+  list = (type: AccessTypeEnum, pageNumber: number = 1, pageSize: number = 20) =>  {
     if (typeof type !== 'number') {
       throw customError('TRANSACTION', 'Invalid argument passed to list. Type must be a number.')
     }
