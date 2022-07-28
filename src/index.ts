@@ -277,8 +277,11 @@ export class StorageProvider {
 
   upload = async (fileRaw: any, onProgress: (bytesUploaded: number, bytesTotal: number) => void): Promise<string> => {
     const uploader = await this.getUploader();
-    uploader.onProgress = onProgress;
 
+    if (onProgress != null) {
+      uploader.onProgress = onProgress;
+    }
+    
     return new Promise((resolve, reject) => {
       uploader.onError = reject;
       uploader.upload(fileRaw).then(resolve).catch(reject);
@@ -287,7 +290,10 @@ export class StorageProvider {
 
   download = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => void): Promise<void> => {
     const downloader = await this.getDownloader();
-    downloader.onProgress = onProgress;
+
+    if (onProgress != null) {
+      downloader.onProgress = onProgress;
+    }
 
     return downloader.download(did)
   }
