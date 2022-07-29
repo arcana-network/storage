@@ -1,7 +1,7 @@
 import test from 'ava';
 import sinon from 'sinon';
 import { ethers, Wallet } from 'ethers';
-// import FixtureProvider from 'web3-provider-engine/subproviders/fixture.js';
+
 import { createEngine } from './sub_provider'
 import fs from 'fs';
 import nock from 'nock';
@@ -9,7 +9,6 @@ import { utils as ethUtils, BigNumber } from 'ethers';
 import axios from 'axios';
 import httpAdapter from 'axios/lib/adapters/http';
 
-// import { JsonRpcEngine, createAsyncMiddleware } from 'json-rpc-engine';
 import { providerFromEngine } from 'eth-json-rpc-middleware';
 
 //SDK imports
@@ -192,12 +191,6 @@ test.serial.before(async (t) => {
 
 });
 
-// //clear fixture after each test
-// test.afterEach((t) => {
-//     if (!!fixture) t.context.arcanaProvider.removeProvider(fixture);
-//     fixture = null;
-// })
-
 
 //TODO: get request handler in arrays
 async function createStrorageInstance( wallet:Wallet ,middleware?) {
@@ -334,23 +327,6 @@ test.serial('Fail revoke transaction on unauthorized files', async (t) => {
     t.assert(err.code.startsWith(expected_errorCode));
 });
 
-/*
-//Redundent test, covered in sharing
-test.serial.only('Files shared with self', async (t) => {
-    t.plan(3);
-    nock(gateway).defaultReplyHeaders(nockOptions)
-        .get("/shared-files/")
-        .reply(200, [{ did: did.substring(2), size: file.size }], { 'access-control-allow-headers': 'Authorization' })
-        .intercept("/shared-files/", "OPTIONS")
-        .reply(200, null, { 'access-control-allow-headers': 'Authorization' });
-
-    let files = await receiverInstance.sharedFiles();
-    t.is(files.length, 1);
-    t.is(files[0]['did'], did.substring(2));
-    t.is(files[0]['size'], file.size);
-});
-*/
-
 test.serial('Get consumed and total upload limit', async (t) => {
 
 
@@ -382,7 +358,6 @@ test.serial('Revoke', async (t) => {
             switch (true) {
                 case req.params[0].data.startsWith("0x6184533f"):
                     res.result = ethers.utils.defaultAbiCoder.encode(["address[]"], [[receiverWallet.address]]); break;
-
             }
         }
         end();
