@@ -240,7 +240,7 @@ export class StorageProvider {
       }
     }
 
-    this.files = new FileAPI(this.appAddress, this.provider, this.api, this.debug)
+    this.files = new FileAPI(this.appAddress,this.appId, this.provider, this.api, this.debug)
   };
 
   // TODO: remove when breaking backward compatibility
@@ -253,7 +253,7 @@ export class StorageProvider {
   }
 
   myFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
-    return this.files.myFiles(pageNumber, pageSize, this.appId)
+    return this.files.myFiles(pageNumber, pageSize)
   }
 
   numOfSharedFiles = () => {
@@ -285,7 +285,7 @@ export class StorageProvider {
     });
   }
 
-  download = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => void): Promise<void> => {
+  download = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void> ): Promise<void> => {
     const downloader = await this.getDownloader();
     downloader.onProgress = onProgress;
 

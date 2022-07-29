@@ -13,11 +13,13 @@ export class FileAPI {
   private provider: any;
   private api: AxiosInstance;
   private appAddress: string;
+  private appId: number;
 
-  constructor(appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
+  constructor(appAddress: string,appId:number, provider: any, api: AxiosInstance, debug: boolean) {
     this.provider = provider;
     this.api = api;
     this.appAddress = appAddress;
+    this.appId = appId;
 
     if (debug) {
       wrapInstance(this)
@@ -40,20 +42,17 @@ export class FileAPI {
     return Math.ceil(numOfPages);
   }
 
-  myFiles = async (pageNumber: number = 1, pageSize: number = 20, appid? : number) => {
+  myFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
     if(pageNumber > await this.numOfMyFilesPages(pageSize)){
       throw new Error("invalid_page_number");
     }
 
-    let params:any = {
-      offset: (pageNumber - 1) * pageSize,
-      count: pageSize
-    }
-
-    if (appid) params.appid = appid;
-
     const res = await this.api.get('list-files/',{
-      params
+      params : {
+        offset: (pageNumber - 1) * pageSize,
+        count: pageSize,
+        appid: this.appId
+      }
     })
     let data = [];
     if (res.data) data = res.data;
