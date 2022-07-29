@@ -1,20 +1,22 @@
 import test from 'ava';
 import sinon from 'sinon';
-import { ethers } from 'ethers';
-import FixtureProvider from 'web3-provider-engine/subproviders/fixture.js';
-import { createProvider } from './sub_provider'
+import { ethers, Wallet } from 'ethers';
+// import FixtureProvider from 'web3-provider-engine/subproviders/fixture.js';
+import { createEngine } from './sub_provider'
 import fs from 'fs';
 import nock from 'nock';
 import { utils as ethUtils, BigNumber } from 'ethers';
 import axios from 'axios';
 import httpAdapter from 'axios/lib/adapters/http';
 
+// import { JsonRpcEngine, createAsyncMiddleware } from 'json-rpc-engine';
+import { providerFromEngine } from 'eth-json-rpc-middleware';
 
 //SDK imports
 import { StorageProvider } from '../src/index';
 import * as utils from '../src/Utils';
 import { Downloader } from '../src/Downloader';
-import {errorCodes} from "../src/errors";
+import { errorCodes } from "../src/errors";
 
 //Load contract addresses
 let sContracts: any = fs.readFileSync("./tests/contracts.json"),
@@ -55,8 +57,8 @@ const makeEmail = () => {
 };
 
 let file,
-    arcanaInstance,
-    receiverInstance,
+    // arcanaInstance,
+    // receiverInstance,
     did = "0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066";
 
 function meta_tx_nock(reply_data) {
@@ -71,12 +73,12 @@ function meta_tx_nock(reply_data) {
         .reply(200, nockMetaReply, { 'access-control-allow-headers': 'Authorization' });
 }
 
-function mock_dkg(reply_data){
+function mock_dkg(reply_data) {
     nock("https://dkgnode1.arcana.network:443")
-    .defaultReplyHeaders(nockOptions)
-    .post("/rpc")
-    .times(6)
-    .reply(200, { "jsonrpc": "2.0", "result": { "ok": true }, "id": 10 });
+        .defaultReplyHeaders(nockOptions)
+        .post("/rpc")
+        .times(6)
+        .reply(200, { "jsonrpc": "2.0", "result": { "ok": true }, "id": 10 });
 
 }
 
@@ -151,12 +153,12 @@ function sinonMockObjectSetup() {
         }
     ]);
     sinon.replace(utils, "checkTxnStatus", () => Promise.resolve());
-    sinon.replace(utils, "getFile", ()  => Promise.resolve({app :"0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9"}) )
+    sinon.replace(utils, "getFile", () => Promise.resolve({ app: "0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9" }))
 }
 
 async function mockFile() {
     // file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
-   let file = await (await fetch("https://picsum.photos/id/872/200/300")).blob();
+    let file = await (await fetch("https://picsum.photos/id/872/200/300")).blob();
     // file = new File([file], "picsum_img", { type: file.type });
     return Promise.resolve(file);
 }
@@ -185,56 +187,50 @@ test.serial.before(async (t) => {
     //Mock basic Storage utils
     sinonMockObjectSetup();
     //File prep
-   file = await mockFile();
+    file = await mockFile();
 
-    t.context.arcanaProvider = createProvider(RPC_URL, { address: arcanaWallet.address, privateKey: arcanaWallet.privateKey })
-    t.context.receiverProvider = createProvider(RPC_URL, { address: receiverWallet.address, privateKey: receiverWallet.privateKey })
-
-    //Storage instances
-    arcanaInstance = new StorageProvider({
-        appId,
-        email: makeEmail(),
-        gateway: gateway + "/",
-        debug,
-        chainId: 100,
-        provider: t.context.arcanaProvider
-    });
-
-    receiverInstance = new StorageProvider({
-        appId,
-        provider: t.context.receiverProvider,
-        email: makeEmail(),
-        gateway: gateway + "/",
-        debug,
-        chainId: 100
-    });
 
 });
 
-//clear fixture after each test
-test.afterEach((t) => {
-    if (!!fixture) t.context.arcanaProvider.removeProvider(fixture);
-    fixture = null;
-})
+// //clear fixture after each test
+// test.afterEach((t) => {
+//     if (!!fixture) t.context.arcanaProvider.removeProvider(fixture);
+//     fixture = null;
+// })
 
-test.serial("Upload file", async (t) => {
-    
+
+//TODO: get request handler in arrays
+async function createStrorageInstance( wallet:Wallet ,middleware?) {
+
+    let engine = createEngine(wallet.address);
+
+    if (middleware)
+        engine.push(middleware)
+
+    const instance = new StorageProvider({
+        appId,
+        email: "test@email.com",
+        gateway: gateway + "/",
+        debug,
+        chainId: 100,
+        provider: providerFromEngine(engine)
+    });
+
+   await instance.login();
+
+   return Promise.resolve(instance);
+
+}
+
+test.serial.only("Upload file", async (t) => {
+
     meta_tx_nock(undefined);
 
-    //Add sub provider Fixture at index 0 for top most priority
-    fixture = new FixtureProvider({
-        personal_sign: async (payload, next, done) => {
-            payload.params[0] = ethers.utils.hashMessage(payload.params[0])
-            next(null, payload);
-        },
-        eth_call: async (payload, next, done) => {
-            done(null, ethers.utils.defaultAbiCoder.encode(["uint"], [ethers.BigNumber.from("0")] ) );
-        }
-    });
-    t.context.arcanaProvider.addProvider(fixture, 0);
+    const arcanaInstance = await createStrorageInstance(arcanaWallet);
 
     let upload = await arcanaInstance.getUploader();
-
+    // error DetailedError: tus: failed to upload chunk at offset 0, caused by 
+    // TypeError: value.arrayBuffer is not a function, originated from request (method: PATCH,
     // let sucesss = 0;
 
     // upload.onSuccess = () => {
@@ -257,9 +253,9 @@ test.serial("Upload file", async (t) => {
 
 })
 
-test.skip("Download file", async t  => {
+test.skip("Download file", async t => {
     //unable to fake key shares responses
-   
+
 })
 
 test.serial.skip("Metadata URL", async t => {
@@ -268,19 +264,19 @@ test.serial.skip("Metadata URL", async t => {
     nock("http://localhost:3000")
         .defaultReplyHeaders(nockOptions)
         .post("/api/v1/nft")
-        .reply(200,  (req) =>  {
-            Promise.resolve( { data : { request : { responseURL : "dummy.image.url" } } } ) 
-    } ); 
-    
+        .reply(200, (req) => {
+            Promise.resolve({ data: { request: { responseURL: "dummy.image.url" } } })
+        });
+
     nock(gateway)
         .post('/metadata/')
-        .reply(201, Promise.resolve( { request : { responseURL : "dummy.metadata.url" } } ))
+        .reply(201, Promise.resolve({ request: { responseURL: "dummy.metadata.url" } }))
     const freader = await (await fetch("https://picsum.photos/id/872/200/300")).arrayBuffer();
 
-  const metadataURL = await arcanaInstance.makeMetadataURL("test", "test description", did,
-  file);
+    const metadataURL = await arcanaInstance.makeMetadataURL("test", "test description", did,
+        file);
 
-  t.is(metadataURL,"dummy.metadata.url".concat("/",did) ) ;
+    t.is(metadataURL, "dummy.metadata.url".concat("/", did));
 
 })
 
@@ -288,15 +284,18 @@ test.serial('Share file', async (t) => {
     t.plan(4);
     meta_tx_nock(undefined);
 
-    fixture = new FixtureProvider({
-        eth_call: async (payload, next, done) => {
-            done(null, ethers.utils.defaultAbiCoder.encode(["uint"], [ethers.BigNumber.from("0")] ) );
+
+    const middleware = (req, res, next, end) => {
+        switch (req.method) {
+            case "eth_call": res.result = ethers.utils.defaultAbiCoder.encode(["uint"], [ethers.BigNumber.from("0")]); break;
         }
-    });
-    t.context.arcanaProvider.addProvider(fixture, 0);
+        end();
+    }
+
+    const arcanaInstance = await createStrorageInstance(arcanaWallet ,middleware);
 
     let access = await arcanaInstance.getAccess();
-    // let tx = await access.share([did], [receiverWallet._signingKey().publicKey], [150]);
+
     let tx = await access.share([did], [receiverWallet.address], [150]);
     t.truthy(tx);
 
@@ -306,8 +305,11 @@ test.serial('Share file', async (t) => {
         .query(true)
         .reply(200, [{ did: did.substring(2), size: file.size }], { 'access-control-allow-headers': 'Authorization' })
         .get("/files/shared/total/")
-        .reply(200, {data: 0} );
+        .reply(200, { data: 0 });
 
+
+    const receiverInstance = await createStrorageInstance(receiverWallet);
+         
     let files = await receiverInstance.sharedFiles();
     t.is(files.length, 1);
     t.is(files[0]['did'], did.substring(2));
@@ -324,10 +326,11 @@ test.serial('Fail revoke transaction on unauthorized files', async (t) => {
             err: expected_errorCode
         })
 
+    const receiverInstance = await createStrorageInstance(receiverWallet);    
 
     let access = await receiverInstance.getAccess();
     let err = await t.throwsAsync(access.revoke(did, arcanaWallet.address));
-    t.is(err.message, errorCodes[expected_errorCode].replace(/[.,]/g,""));
+    t.is(err.message, errorCodes[expected_errorCode].replace(/[.,]/g, ""));
     t.assert(err.code.startsWith(expected_errorCode));
 });
 
@@ -350,56 +353,65 @@ test.serial.only('Files shared with self', async (t) => {
 
 test.serial('Get consumed and total upload limit', async (t) => {
 
-    fixture = new FixtureProvider({
-        eth_call: async (payload, next, done) => {            
-            done(null, ethers.utils.defaultAbiCoder.encode(["uint","uint"],[file.size,"1000000"]));
-        }
-    });
 
-    t.context.arcanaProvider.addProvider(fixture,0)
+    const middleware = (req, res, next, end) => {
+       res.result = ethers.utils.defaultAbiCoder.encode(["uint", "uint"], [file.size, "1000000"]); 
+        
+        end();
+    }
+
+    const arcanaInstance = await createStrorageInstance(arcanaWallet, middleware);
 
     const Access = await arcanaInstance.getAccess();
-    let [consumed, total] = await Access.getUploadLimit(did);
+  
+    let [consumed, total] = await Access.getUploadLimit();
 
     t.is(consumed, file.size);
-    t.is(total,1000000 );
+    t.is(total, 1000000);
 });
 
 
 test.serial('Revoke', async (t) => {
-    const access = await arcanaInstance.getAccess();
+
 
     meta_tx_nock(null);
-    fixture = new FixtureProvider({
-        eth_call: async (payload, next, done) => {         
-            switch(true) {
-                case payload.params[0].data.startsWith("0x6184533f") :                     
-                       done(null, ethers.utils.defaultAbiCoder.encode(["address[]"], [[receiverWallet.address]] ) ) ;
-                  break;
-                default : next(null, payload);
-                }
-        
-        }
-    });
-    t.context.arcanaProvider.addProvider(fixture, 0);
 
-    let beforeRevokeUsers = await access.getSharedUsers(did);  
+    let middleware = (req, res, next, end) => {
+
+        if (req.method == "eth_call") {
+            switch (true) {
+                case req.params[0].data.startsWith("0x6184533f"):
+                    res.result = ethers.utils.defaultAbiCoder.encode(["address[]"], [[receiverWallet.address]]); break;
+
+            }
+        }
+        end();
+    }
+
+    let arcanaInstance = await createStrorageInstance(arcanaWallet, middleware);
+
+    let access = await arcanaInstance.getAccess();
+
+    let beforeRevokeUsers = await access.getSharedUsers(did);
     let tx = await access.revoke(did, receiverWallet.address);
-    t.truthy(tx);  
-    t.context.arcanaProvider.removeProvider(fixture);
-    fixture = new FixtureProvider({
-        eth_call: async (payload, next, done) => {
+    t.truthy(tx);
 
-            switch(true) {
-                case payload.params[0].data.startsWith("0x6184533f") : 
-                  done(null, ethers.utils.defaultAbiCoder.encode(["address[]"], [[]] )) ;
-                  break;
-                default : next(null, payload);
-                }
-        
+    middleware = (req, res, next, end) => {
+
+        if (req.method == "eth_call") {
+            switch (true) {
+                case req.params[0].data.startsWith("0x6184533f"):
+                    res.result = ethers.utils.defaultAbiCoder.encode(["address[]"], [[]]);
+                    break;
+            }
         }
-    });
-    t.context.arcanaProvider.addProvider(fixture, 0);
+        end();
+
+    }
+
+    arcanaInstance = await createStrorageInstance(arcanaWallet, middleware),
+    access = await arcanaInstance.getAccess();
+
 
     let afterRevokeUsers = await access.getSharedUsers(did);
 
@@ -412,7 +424,9 @@ test.serial('Revoke', async (t) => {
         .query(true)
         .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
         .get("/files/shared/total/")
-        .reply(200, {data: 0} );
+        .reply(200, { data: 0 });
+
+    let receiverInstance = await createStrorageInstance(receiverWallet);
 
     let files = await receiverInstance.sharedFiles();
     t.is(files.length, 0);
@@ -423,27 +437,31 @@ test.serial('Revoke', async (t) => {
 test.serial('Delete File', async (t) => {
     meta_tx_nock(null);
 
-    nock(gateway).defaultReplyHeaders(nockOptions)
+   const scope = nock(gateway).defaultReplyHeaders(nockOptions)
         .get("/list-files/")
         .query(true)
         .reply(200, [{ did: did.substring(2) }], { 'access-control-allow-headers': 'Authorization' })
-        .get("/files/total")
-        .reply(200, {data: 1} );
+        .get("/files/total/")
+        .reply(200, { data: 1 });
 
-    let access = await arcanaInstance.getAccess(),
-        files = await arcanaInstance.myFiles();
+    let arcanaInstance = await createStrorageInstance(arcanaWallet);
 
+    let access = await arcanaInstance.getAccess();
+    
+    let files = await arcanaInstance.myFiles();
+     
     t.is(files.length, 1);
     t.is(files[0].did, did.substring(2));
 
     let tx = await access.deleteFile(did);
 
     nock(gateway).defaultReplyHeaders(nockOptions)
-    .get("/list-files/")
-    .query(true)
-    .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
-    .get("/files/total")
-    .reply(200, {data: 0} );
+        .get("/list-files/")
+        .query(true)
+        .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
+        .get("/files/total/")
+        .reply(200, { data: 0 });
+        
     files = await arcanaInstance.myFiles();
 
     t.is(files.length, 0);
