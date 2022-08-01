@@ -21,6 +21,20 @@ In the beta release, the storage nodes are operated by Arcana Networks. In the f
 | :warning: Caution: Arcana Network SDKs and apps (Beta Release), not meant for production usage. |
 |:------------------------------------------------------------------------------------------------|
 
+## Simple to Integrate
+
+It is super easy to integrate Arcana's Storage SDK with your dApp. Just install, add a few lines of code and you are all set:
+
+```
+import { StorageProvider } from '@arcana/storage';
+
+const storage = new StorageProvider({ appId, provider, email });
+let did = storage.upload(file)
+storage.download(did)
+```
+
+See [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage) for details.
+
 # 💪 Key Features
 
 <p>🗄️ &nbsp; Save dApp user data in Arcana data store</p>
