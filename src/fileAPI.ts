@@ -142,18 +142,26 @@ export class FileAPI {
     return await makeTx(this.appAddress, this.api, this.provider, 'revoke', [did, address, readHash]);
   };
 
-  changeFileOwner = async (did: string, newOwnerAddress: string): Promise<string> => {
+  changeOwner = async (did: string, newOwnerAddress: string): Promise<string> => {
     did = parseHex(did);
     await this.setAppAddress(did);
     newOwnerAddress = parseHex(newOwnerAddress)
     return await makeTx(this.appAddress, this.api, this.provider, 'changeFileOwner', [did, newOwnerAddress]);
   };
 
-  deleteFile = async (did: string): Promise<string> => {
+  changeFileOwner = (did, newOwnerAddress: string): Promise<string> => {
+    return this.changeOwner(did, newOwnerAddress)
+  }
+
+  delete = async (did: string): Promise<string> => {
     await this.setAppAddress(did);
     did = parseHex(did);
     return await makeTx(this.appAddress, this.api, this.provider, 'deleteFile', [did]);
   };
+
+  deleteFile = (did: string): Promise<string> => {
+    return this.delete(did)
+  }
 
   deleteAccount = async () => {
     return await makeTx(this.appAddress, this.api, this.provider, 'deleteAccount', []);
