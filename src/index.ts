@@ -1,23 +1,24 @@
+import axios, { AxiosInstance } from 'axios';
+import { init as SentryInit } from '@sentry/browser';
+import { Integrations } from '@sentry/tracing';
+
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
 import { FileAPI } from './fileAPI';
 import { Config, customError, getFile, getProvider, makeTx, parseHex } from './Utils';
-import axios, { AxiosInstance } from 'axios';
-import { init as SentryInit } from '@sentry/browser';
-import { Integrations } from '@sentry/tracing';
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant';
 import { wrapInstance } from './sentry';
 
 export class StorageProvider {
   // private provider: providers.Web3Provider;
-  private provider: any;
-  private email: string;
+  private readonly provider: any;
+  private readonly email: string;
   private api: AxiosInstance;
   private appAddress: string;
-  private appId: number;
-  private gateway: string;
-  private chainId: number;
-  private debug: boolean;
+  private readonly appId: number;
+  private readonly gateway: string;
+  private readonly chainId: number;
+  private readonly debug: boolean;
   private initialisedPromise: Promise<void>;
   public files: FileAPI;
 
