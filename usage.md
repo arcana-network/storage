@@ -58,13 +58,13 @@ storage.files.revoke(did, address);
 
 ```javascript
 // address: new owner's address
-storage.files.changeFileOwner(did, address);
+storage.files.changeOwner(did, address);
 ```
 
 ### Delete a File
 
 ```javascript
-storage.files.deleteFile(did);
+storage.files.delete(did);
 ```
 
 ## Storage Usage Metrics
