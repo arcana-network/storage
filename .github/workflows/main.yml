@@ -1,8 +1,21 @@
-name: test
+name: CI
 on: [push]
 
 jobs:
-  check:
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: recursive
+      - name: Authenticate with private NPM package
+        run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
+      - name: Install dependencies
+        run: npm i       
+      - name: Run linter
+        run: npm run lint
+  Test:
     name: Unit test
     runs-on: ubuntu-latest
     steps:
@@ -10,8 +23,18 @@ jobs:
         with:
           submodules: recursive
 
+      - name: check node version
+        run: node -v
+
       - name: Run unit tests
         run:  npm i && npm test
+      - name: Upload test coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: coverage/tmp/coverage-*
+          fail_ci_if_error: true
+          verbose: true
 
 
 
