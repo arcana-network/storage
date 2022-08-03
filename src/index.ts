@@ -8,6 +8,7 @@ import { FileAPI } from './fileAPI';
 import { Config, customError, getFile, getProvider, makeTx, parseHex } from './Utils';
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant';
 import { wrapInstance } from './sentry';
+import { Mutex } from 'async-mutex';
 
 export class StorageProvider {
   // private provider: providers.Web3Provider;
@@ -19,7 +20,9 @@ export class StorageProvider {
   private readonly gateway: string;
   private readonly chainId: number;
   private readonly debug: boolean;
+  private readonly lock: Mutex;
   private initialisedPromise: Promise<void>;
+
   public files: FileAPI;
 
   constructor(cfg: Config) {
@@ -49,6 +52,8 @@ export class StorageProvider {
     } else {
       this.gateway = new URL("/api/v1/",config.gateway).href;
     }
+
+    this.lock = new Mutex()
 
     if (config.debug) {
       SentryInit({
@@ -88,17 +93,17 @@ export class StorageProvider {
     window.location.reload();
   }
 
-  downloadDID = async (did: string) => {
+  async downloadDID (did: string) {
     await this.login();
     const file = await getFile(did, this.provider);
     this.appAddress = file.app;
-    const downloader = new Downloader(this.appAddress, this.provider, this.api, this.debug);
+    const downloader = new Downloader(this.appAddress, this.provider, this.api, this.lock, this.debug);
     await downloader.download(did);
   };
 
   getUploader = async () => {
     await this.login();
-    return new Uploader(this.appId, this.appAddress, this.provider, this.api, this.debug);
+    return new Uploader(this.appId, this.appAddress, this.provider, this.api, this.lock, this.debug);
   };
 
   getAccess = async (): Promise<FileAPI> => {
@@ -107,7 +112,7 @@ export class StorageProvider {
 
   getDownloader = async (): Promise<Downloader> => {
     await this.login();
-    return new Downloader(this.appAddress, this.provider, this.api, this.debug);
+    return new Downloader(this.appAddress, this.provider, this.api, this.lock, this.debug);
   };
 
   makeMetadataURL = async (title: string, description: string, did: string, file: File) => {
@@ -241,7 +246,7 @@ export class StorageProvider {
       }
     }
 
-    this.files = new FileAPI(this.appAddress,this.appId, this.provider, this.api, this.debug)
+    this.files = new FileAPI(this.appAddress,this.appId, this.provider, this.api, this.lock, this.debug)
   };
 
   // TODO: remove when breaking backward compatibility
@@ -282,7 +287,7 @@ export class StorageProvider {
     if (onProgress != null) {
       uploader.onProgress = onProgress;
     }
-    
+
     return new Promise((resolve, reject) => {
       uploader.onError = reject;
       uploader.upload(fileRaw).then(resolve).catch(reject);

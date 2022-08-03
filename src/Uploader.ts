@@ -17,19 +17,24 @@ import { encrypt } from 'eciesjs';
 
 import { randomBytes } from 'crypto-browserify';
 import { id } from 'ethers/lib/utils';
+import { Mutex } from 'async-mutex';
+
 import {wrapInstance} from "./sentry";
+import { requiresLocking } from './locking';
 
 export class Uploader {
   private provider: any;
   private api: AxiosInstance;
   private appAddress: string;
   private appId: number;
+  private readonly lock: Mutex;
 
-  constructor(appId: number, appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
+  constructor(appId: number, appAddress: string, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
     this.provider = provider;
     this.api = api;
     this.appId = appId;
     this.appAddress = appAddress;
+    this.lock = lock;
 
     if (debug) {
       wrapInstance(this)
@@ -76,7 +81,8 @@ export class Uploader {
     }
   };
 
-  upload = async (fileRaw: any, chunkSize: number = 10 * 2 ** 20) => {
+  @requiresLocking
+  async upload (fileRaw: any, chunkSize: number = 10 * 2 ** 20) {
     let file = fileRaw;
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     const hasher = new KeyGen(file, chunkSize);

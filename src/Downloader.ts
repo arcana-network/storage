@@ -9,7 +9,10 @@ import { join } from 'shamir';
 import { id } from 'ethers/lib/utils';
 import { decodeHex } from 'eciesjs/dist/utils';
 import { decrypt } from 'eciesjs';
+import { Mutex } from 'async-mutex';
+
 import {wrapInstance} from "./sentry";
+import { requiresLocking } from './locking';
 
 const downloadBlob = (blob, fileName) => {
   // @ts-ignore
@@ -42,12 +45,14 @@ export class Downloader {
   private hasher;
   private api: AxiosInstance;
   private appAddress: string;
+  private readonly lock: Mutex;
 
-  constructor(appAddress: string, provider: any, api: AxiosInstance, debug: boolean) {
+  constructor(appAddress: string, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
     this.provider = provider;
     this.hasher = new Sha256();
     this.api = api;
     this.appAddress = appAddress;
+    this.lock = lock;
 
     if (debug) {
       wrapInstance(this)
@@ -57,7 +62,8 @@ export class Downloader {
   onSuccess = async () => {};
   onProgress = async (bytesDownloaded: number, bytesTotal: number): Promise<void> => {};
 
-  download = async (did) => {
+  @requiresLocking
+  async download (did) {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
     const arcana = Arcana(this.appAddress, this.provider);
     let file, txHash;
