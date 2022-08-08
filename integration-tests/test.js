@@ -2,11 +2,11 @@
 
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-const gateway = 'http://localhost:9010/';
+// const gateway = 'http://localhost:9010/';
 // const gateway = 'https://gateway01-testnet.arcana.network/';
 // const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
-const appId = 338;
+const appId = 400;
 // const appId = 28;
 
 const debug = false;
@@ -68,7 +68,6 @@ describe('Upload File', () => {
     file = new File([file], file.name, { type: file.type });
     arcanaInstance = new arcana.storage.StorageProvider({
       appId,
-      gateway,
       provider: window.ethereum,
       email: makeEmail(),
       chainId,
@@ -82,10 +81,10 @@ describe('Upload File', () => {
   //   chai.expect(files.length).equal(0);
   // });
 
-  // it('Shared Files should return empty array', async () => {
-  //   let files = await arcanaInstance.sharedFiles();
-  //   chai.expect(files.length).equal(0);
-  // });
+  it('Shared Files should return empty array', async () => {
+    let files = await arcanaInstance.sharedFiles();
+    chai.expect(files.length).equal(0);
+  });
 
   // it('Should download a file', async () => {
   //   let downloadArcana = new arcana.storage.StorageProvider({

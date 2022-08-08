@@ -37,6 +37,7 @@ export class StorageProvider {
     }
     this.email = config.email;
     this.appId = config.appId;
+    console.log({config});
     if (!config.chainId) {
       this.chainId = chainId;
     } else {

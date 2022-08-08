@@ -1,11 +1,10 @@
 import './SHA256';
 import Sha256 from './SHA256';
-import { Contract, providers, Wallet, utils, Bytes } from 'ethers';
+import { Contract, providers, Wallet } from 'ethers';
 import arcana from './contracts/Arcana';
 import dkg from './contracts/DKG';
 import forwarder from './contracts/Forwarder';
 import { sign } from './signer';
-import { Arcana as ArcanaT, Forwarder as ForwarderT, NodeList as NodeListT } from './typechain';
 import { AxiosInstance } from 'axios';
 import DID from './contracts/DID';
 import { Web3Provider } from '@ethersproject/providers';
@@ -104,16 +103,16 @@ export const getProvider = (provider: any) => {
   return new providers.Web3Provider(provider, "any");
 };
 
-export const Arcana = (address: string, provider): ArcanaT => {
-  return new Contract(address, arcana.abi, provider) as ArcanaT;
+export const Arcana = (address: string, provider): Contract => {
+  return new Contract(address, arcana.abi, provider) as Contract;
 };
 
-export const DKG = (address: string, provider): NodeListT => {
-  return new Contract(address, dkg.abi, provider) as NodeListT;
+export const DKG = (address: string, provider): Contract => {
+  return new Contract(address, dkg.abi, provider) as Contract;
 };
 
-export const Forwarder = (address: string, provider): ForwarderT => {
-  return new Contract(address, forwarder.abi, provider) as ForwarderT;
+export const Forwarder = (address: string, provider): Contract => {
+  return new Contract(address, forwarder.abi, provider) as Contract;
 };
 
 const cleanMessage = (message: string): string => {
@@ -134,8 +133,8 @@ function hex_to_ascii(str1) {
 }
 
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
-  const arcana: ArcanaT = Arcana(address, wallet);
-  const forwarderContract: ForwarderT = Forwarder(localStorage.getItem('forwarder'), wallet);
+  const arcana: Contract = Arcana(address, wallet);
+  const forwarderContract: Contract = Forwarder(localStorage.getItem('forwarder'), wallet);
   let req = await sign(wallet, arcana, forwarderContract, method, params);
   let res = await api.post('meta-tx/', req);
   if (res.data.err) {
