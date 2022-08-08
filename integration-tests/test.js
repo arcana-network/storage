@@ -247,12 +247,12 @@ describe('Upload File', () => {
   //   }
   // });
 
-  // it('My files', async () => {
-  //   let files = await arcanaInstance.myFiles();
-  //   chai.expect(files.length).equal(file_count);
-  //   chai.expect(files[0]['did']).equal(did.substring(2));
-  //   chai.expect(files[0]['size']).equal(file.size);
-  // });
+  it('My files', async () => {
+    let files = await arcanaInstance.myFiles();
+    chai.expect(files.length).equal(file_count);
+    chai.expect(files[0]['did']).equal(did.substring(2));
+    chai.expect(files[0]['size']).equal(file.size);
+  });
 
   
 
