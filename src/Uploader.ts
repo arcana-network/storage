@@ -38,7 +38,7 @@ export class Uploader {
 
   onSuccess = () => {};
 
-  onProgress = (bytesUploaded: number, bytesTotal: number) => {};
+  onProgress = (bytesUploaded: number, bytesTotal: number): void => {};
 
   onError = (err) => {
     console.log('Error', err);
@@ -205,6 +205,6 @@ export class Uploader {
       // Start the upload
       upload.start();
     });
-    return did;
+    return did.replace("0x" , "");
   };
 }

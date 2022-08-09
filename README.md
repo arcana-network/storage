@@ -18,8 +18,22 @@ The Arcana Storage SDK enables you to configure dApp and allow users to store fi
 
 In the beta release, the storage nodes are operated by Arcana Networks. In the future, the storage subsystem will be fully decentralized and third party storage nodes can be plugged into the Arcana Network storage subsystem once they meet the Arcana storage QoS criteria.
 
-| :warning: Caution: Arcana Network SDKs and apps (Beta Release), not meant for production usage.|
-| :--- |
+| :warning: Caution: Arcana Network SDKs and apps (Beta Release), not meant for production usage. |
+|:------------------------------------------------------------------------------------------------|
+
+## Simple to Integrate
+
+It is super easy to integrate Arcana's Storage SDK with your dApp. Just install, add a few lines of code and you are all set:
+
+```
+import { StorageProvider } from '@arcana/storage';
+
+const storage = new StorageProvider({ appId, provider, email });
+let did = storage.upload(file)
+storage.download(did)
+```
+
+See [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage) for details.
 
 # 💪 Key Features
 
@@ -44,14 +58,14 @@ npm i @arcana/storage
 yarn add @arcana/storage
 ```
 
-You can use the standalone module which includes the polyfills.
+You can also use the standalone module which includes the polyfills.
 
 ```html
 <script src="./dist/standalone/storage.umd.js"></script>
 ```
 
 ```js
-import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
+import { StorageProvider } from '@arcana/storage'
 ```
 
 
