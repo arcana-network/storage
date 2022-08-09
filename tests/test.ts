@@ -215,7 +215,7 @@ async function createStrorageInstance( wallet:Wallet ,middleware?) {
 
 }
 
-test.serial.only("Upload file", async (t) => {
+test.serial("Upload file", async (t) => {
 
     meta_tx_nock(undefined);
 
