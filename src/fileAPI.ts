@@ -1,8 +1,11 @@
 import { AxiosInstance } from 'axios';
 import { BigNumber, ethers } from 'ethers';
+import { Mutex } from 'async-mutex';
+
 import { readHash } from './constant';
 import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress } from './Utils';
 import { wrapInstance } from "./sentry";
+import { requiresLocking } from './locking';
 
 export enum AccessTypeEnum {
   MY_FILES,
@@ -14,12 +17,14 @@ export class FileAPI {
   private api: AxiosInstance;
   private appAddress: string;
   private appId: number;
+  private readonly lock: Mutex;
 
-  constructor(appAddress: string,appId:number, provider: any, api: AxiosInstance, debug: boolean) {
+  constructor(appAddress: string,appId:number, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
     this.provider = provider;
     this.api = api;
     this.appAddress = appAddress;
     this.appId = appId;
+    this.lock = lock
 
     if (debug) {
       wrapInstance(this)
@@ -97,7 +102,8 @@ export class FileAPI {
     }
   }
 
-  share = async (did: string[] | string, _address: string[] | string, validity: number[] | number | null): Promise<string> => {
+  @requiresLocking
+  async share (did: string[] | string, _address: string[] | string, validity: number[] | number | null): Promise<string> {
     did = ensureArray(did).map(parseHex)
     await this.setAppAddress(did[0]);
     const address = ensureArray(_address).map(parseHex)
@@ -135,14 +141,16 @@ export class FileAPI {
     ]);
   };
 
-  revoke = async (did: string, address: string): Promise<string> => {
+  @requiresLocking
+  async revoke (did: string, address: string): Promise<string> {
     did = parseHex(did);
     await this.setAppAddress(did);
     address = parseHex(address)
     return await makeTx(this.appAddress, this.api, this.provider, 'revoke', [did, address, readHash]);
   };
 
-  changeOwner = async (did: string, newOwnerAddress: string): Promise<string> => {
+  @requiresLocking
+  async changeOwner (did: string, newOwnerAddress: string): Promise<string> {
     did = parseHex(did);
     await this.setAppAddress(did);
     newOwnerAddress = parseHex(newOwnerAddress)
@@ -153,7 +161,8 @@ export class FileAPI {
     return this.changeOwner(did, newOwnerAddress)
   }
 
-  delete = async (did: string): Promise<string> => {
+  @requiresLocking
+  async delete (did: string): Promise<string> {
     await this.setAppAddress(did);
     did = parseHex(did);
     return await makeTx(this.appAddress, this.api, this.provider, 'deleteFile', [did]);
@@ -163,7 +172,8 @@ export class FileAPI {
     return this.delete(did)
   }
 
-  deleteAccount = async () => {
+  @requiresLocking
+  async deleteAccount () {
     return await makeTx(this.appAddress, this.api, this.provider, 'deleteAccount', []);
   };
 
@@ -174,13 +184,13 @@ export class FileAPI {
 
   getUploadLimit = async (): Promise<[number, number]> => {
     const arcana = Arcana(this.appAddress, this.provider);
-    let con = await arcana.getUploadLimit({from: (await this.provider.listAccounts())[0]});
+    const con = await arcana.getUploadLimit({from: (await this.provider.listAccounts())[0]});
     return [con[0].toNumber(), con[1].toNumber()];
   };
 
   getDownloadLimit = async (): Promise<[number, number]> => {
     const arcana = Arcana(this.appAddress, this.provider);
-    let con = await arcana.getDownloadLimit({from: (await this.provider.listAccounts())[0]});
+    const con = await arcana.getDownloadLimit({from: (await this.provider.listAccounts())[0]});
     return [con[0].toNumber(), con[1].toNumber()];
   };
 
