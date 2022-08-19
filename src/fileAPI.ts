@@ -184,21 +184,25 @@ export class FileAPI {
 
   getUploadLimit = async (): Promise<[number, number]> => {
     const arcana = Arcana(this.appAddress, this.provider);
-    const con = await arcana.getUploadLimit({from: (await this.provider.listAccounts())[0]});
-    return [con[0].toNumber(), con[1].toNumber()];
+    let con = await arcana.consumption((await this.provider.listAccounts())[0]);
+    let limit = await arcana.limit((await this.provider.listAccounts())[0]);
+    let default_limit = await arcana.defaultLimit();
+    return [con.store.toNumber(), Math.max(limit.store.toNumber(), default_limit.store.toNumber())];
   };
 
   getDownloadLimit = async (): Promise<[number, number]> => {
     const arcana = Arcana(this.appAddress, this.provider);
-    const con = await arcana.getDownloadLimit({from: (await this.provider.listAccounts())[0]});
-    return [con[0].toNumber(), con[1].toNumber()];
+    let con = await arcana.consumption((await this.provider.listAccounts())[0]);
+    let limit = await arcana.limit((await this.provider.listAccounts())[0]);
+    let default_limit = await arcana.defaultLimit();
+    return [con.bandwidth.toNumber(), Math.max(limit.bandwidth.toNumber(), default_limit.bandwidth.toNumber())];
   };
 
   getSharedUsers = async (did: string): Promise<string[]> => {
     const realDID = parseHex(did)
     await this.setAppAddress(realDID);
     const arcana = Arcana(this.appAddress, this.provider);
-    const users = await arcana.getAllUsers(realDID, readHash);
+    const users = (await this.api.get("/shared-users/?did=" + realDID)).data;
     return users.filter((d) => d !== ethers.constants.AddressZero);
   };
 }

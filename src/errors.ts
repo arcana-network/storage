@@ -10,7 +10,7 @@ export let errorCodes: IHash = {
     "only_factory_contract": "Only factory contract has access. The access can be to add new app or setup app level limit i.e, storage and bandwidth.",
     "no_app_space": "Your current app's storage or bandwidth limit has been consumed.",
     "no_user_space": "You have already consumed your storage or bandwidth limit.",
-    "non_trusted_forwarder_or_factory": "For meta-transaction, transaction should happen from valid factory or forwarder contract.",
+    "non_trusted_forwarder_or_factory": "For meta transaction, transaction should happen from valid factory or forwarder contract.",
     "file_already_uploaded": "You cannot upload a file that is already uploaded by a different user address.",
     "zero_file_size": "Your file size must not be null while uploading.",
     "only_storage_node": "Only assigned storage node has access to the function.",

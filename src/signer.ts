@@ -1,6 +1,5 @@
 const ethSigUtil = require('eth-sig-util');
-import { SigningKey } from '@ethersproject/signing-key';
-import { Forwarder, Arcana } from './typechain';
+import { Contract } from 'ethers';
 
 const EIP712Domain = [
   { name: 'name', type: 'string' },
@@ -50,14 +49,14 @@ async function buildTypedData(forwarder: any, request: any) {
   return { ...typeData, message: request };
 }
 
-export async function signMetaTxRequest(signer: any, forwarder: Forwarder, input: any) {
+export async function signMetaTxRequest(signer: any, forwarder: Contract, input: any) {
   const request = await buildRequest(forwarder, input);
   const toSign = await buildTypedData(forwarder, request);
   const signature = await signTypedData(signer, input.from, toSign);
   return { signature, request };
 }
 
-export async function sign(provider: any, arcana: Arcana, forwarder: Forwarder, method: any, params: any) {
+export async function sign(provider: any, arcana: Contract, forwarder: Contract, method: any, params: any) {
 	const signer = provider.getSigner();
   const { request, signature } = await signMetaTxRequest(signer, forwarder, {
     from: await signer.getAddress(),

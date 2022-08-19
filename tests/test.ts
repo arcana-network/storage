@@ -16,6 +16,7 @@ import { StorageProvider } from '../src/index';
 import * as utils from '../src/Utils';
 import { Downloader } from '../src/Downloader';
 import { errorCodes } from "../src/errors";
+import { parseData } from './utils';
 
 //Load contract addresses
 let sContracts: any = fs.readFileSync("./tests/contracts.json"),
@@ -328,23 +329,59 @@ test.serial('Fail revoke transaction on unauthorized files', async (t) => {
 });
 
 test.serial('Get consumed and total upload limit', async (t) => {
-
-
     const middleware = (req, res, next, end) => {
-       res.result = ethers.utils.defaultAbiCoder.encode(["uint", "uint"], [file.size, "1000000"]); 
-        
+        const data = parseData({
+            value: ethers.utils.parseEther("0"),
+            data: req.params[0].data
+        })
+        switch (data.name) {
+            case "limit":
+                res.result = ethers.utils.defaultAbiCoder.encode(["uint", "uint"], [100000000, 100000000]);
+                break;
+            case "consumption":
+                res.result = ethers.utils.defaultAbiCoder.encode(["uint", "uint"], [file.size, 0]);
+                break;
+            case "defaultLimit":
+                res.result = ethers.utils.defaultAbiCoder.encode(["uint", "uint"], [100000000, 100000000]);
+                break;
+        }
         end();
     }
 
     const arcanaInstance = await createStrorageInstance(arcanaWallet, middleware);
-
     const Access = await arcanaInstance.getAccess();
-  
     let [consumed, total] = await Access.getUploadLimit();
-
     t.is(consumed, file.size);
-    t.is(total, 1000000);
+    t.is(total, 100000000);
 });
+
+test.serial('Get consumed and total download limit', async (t) => {
+    const middleware = (req, res, next, end) => {
+        const data = parseData({
+            value: ethers.utils.parseEther("0"),
+            data: req.params[0].data
+        })
+        switch (data.name) {
+            case "limit":
+                res.result = ethers.utils.defaultAbiCoder.encode(["uint", "uint"], [100000000, 100000000]);
+                break;
+            case "consumption":
+                res.result = ethers.utils.defaultAbiCoder.encode(["uint", "uint"], [0, file.size]);
+                break;
+            case "defaultLimit":
+                res.result = ethers.utils.defaultAbiCoder.encode(["uint", "uint"], [100000000, 100000000]);
+                break;
+        }
+        end();
+    }
+
+    const arcanaInstance = await createStrorageInstance(arcanaWallet, middleware);
+    const Access = await arcanaInstance.getAccess();
+    let [consumed, total] = await Access.getDownloadLimit();
+    t.is(consumed, file.size);
+    t.is(total, 100000000);
+});
+
 
 
 test.serial('Revoke', async (t) => {
@@ -366,7 +403,9 @@ test.serial('Revoke', async (t) => {
     let arcanaInstance = await createStrorageInstance(arcanaWallet, middleware);
 
     let access = await arcanaInstance.getAccess();
-
+    nock(gateway).defaultReplyHeaders(nockOptions)
+        .get("/shared-users/?did="+did)
+        .reply(200, [receiverWallet.address], { 'access-control-allow-headers': 'Authorization' })
     let beforeRevokeUsers = await access.getSharedUsers(did);
     let tx = await access.revoke(did, receiverWallet.address);
     t.truthy(tx);
@@ -387,7 +426,9 @@ test.serial('Revoke', async (t) => {
     arcanaInstance = await createStrorageInstance(arcanaWallet, middleware),
     access = await arcanaInstance.getAccess();
 
-
+    nock(gateway).defaultReplyHeaders(nockOptions)
+        .get("/shared-users/?did="+did)
+        .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
     let afterRevokeUsers = await access.getSharedUsers(did);
 
     t.is(beforeRevokeUsers.includes(receiverWallet.address), true);

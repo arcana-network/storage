@@ -20,6 +20,7 @@ function createEngine(address) {
     case "personal_sign": res.result = "dummy Signature"; break;
     case "eth_call" : 
       switch(true)  {
+        // getNonce(address) mock
         case req.params[0].data.startsWith("0x2d0335ab") : res.result = ethers.utils.defaultAbiCoder.encode(["uint"], [ethers.BigNumber.from("0")]);
         break;
       }
