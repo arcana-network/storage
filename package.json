@@ -80,6 +80,7 @@
     "@sentry/browser": "^6.15.0",
     "@sentry/tracing": "^6.15.0",
     "assert": "^2.0.0",
+    "async-mutex": "^0.3.2",
     "axios": "^0.21.4",
     "buffer": "^6.0.3",
     "eciesjs": "^0.3.14",
