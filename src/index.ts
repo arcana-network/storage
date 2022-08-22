@@ -1,6 +1,7 @@
 import axios, { AxiosInstance } from 'axios';
 import { init as SentryInit } from '@sentry/browser';
 import { Integrations } from '@sentry/tracing';
+import { Mutex } from 'async-mutex';
 
 import { Uploader } from './Uploader';
 import { Downloader } from './Downloader';
@@ -8,7 +9,7 @@ import { FileAPI } from './fileAPI';
 import { Config, customError, getFile, getProvider, makeTx, parseHex } from './Utils';
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant';
 import { wrapInstance } from './sentry';
-import { Mutex } from 'async-mutex';
+import { SegmentAnalytics, trackWithCommonProps } from './segment';
 
 export class StorageProvider {
   // private provider: providers.Web3Provider;
@@ -247,6 +248,8 @@ export class StorageProvider {
     }
 
     this.files = new FileAPI(this.appAddress,this.appId, this.provider, this.api, this.lock, this.debug)
+    // Identify user with Segment
+    await SegmentAnalytics.identify(accounts[0])
   };
 
   // TODO: remove when breaking backward compatibility

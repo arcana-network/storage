@@ -13,6 +13,7 @@ import { Mutex } from 'async-mutex';
 
 import {wrapInstance} from "./sentry";
 import { requiresLocking } from './locking';
+import { trackWithCommonProps } from './segment';
 
 const downloadBlob = (blob, fileName) => {
   // @ts-ignore
@@ -133,5 +134,11 @@ export class Downloader {
     } else {
       throw new Error('Hash does not matches with uploaded file');
     }
+
+    await trackWithCommonProps(this, 'download', {
+      size: fileMeta.size,
+      fileID: did,
+      ownerAddr: file.owner
+    })
   };
 }

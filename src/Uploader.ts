@@ -21,6 +21,7 @@ import { Mutex } from 'async-mutex';
 
 import {wrapInstance} from "./sentry";
 import { requiresLocking } from './locking';
+import { trackWithCommonProps } from './segment';
 
 export class Uploader {
   private provider: any;
@@ -211,6 +212,13 @@ export class Uploader {
       // Start the upload
       upload.start();
     });
+
+    await trackWithCommonProps(this, 'upload', {
+      size: file.size,
+      fileID: did,
+      ownerAddr: walletAddress
+    })
+
     return did.replace("0x" , "");
   };
 }
