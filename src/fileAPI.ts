@@ -165,6 +165,10 @@ export class FileAPI {
     did = parseHex(did);
     await this.setAppAddress(did);
     newOwnerAddress = parseHex(newOwnerAddress)
+    await trackWithCommonProps(this, 'changeOwner', {
+      did,
+      address: newOwnerAddress
+    })
     return await makeTx(this.appAddress, this.api, this.provider, 'changeFileOwner', [did, newOwnerAddress]);
   };
 
@@ -176,6 +180,9 @@ export class FileAPI {
   async delete (did: string): Promise<string> {
     await this.setAppAddress(did);
     did = parseHex(did);
+    await trackWithCommonProps(this, 'deleteFile', {
+      did
+    })
     return await makeTx(this.appAddress, this.api, this.provider, 'deleteFile', [did]);
   };
 
