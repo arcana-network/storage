@@ -9,7 +9,7 @@ import { FileAPI } from './fileAPI';
 import { Config, customError, getFile, getProvider, makeTx, parseHex } from './Utils';
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant';
 import { wrapInstance } from './sentry';
-import { SegmentAnalytics, trackWithCommonProps } from './segment';
+import { SegmentAnalytics } from './segment';
 
 export class StorageProvider {
   // private provider: providers.Web3Provider;
@@ -248,8 +248,9 @@ export class StorageProvider {
     }
 
     this.files = new FileAPI(this.appAddress,this.appId, this.provider, this.api, this.lock, this.debug)
-    // Identify user with Segment
-    await SegmentAnalytics.identify(accounts[0])
+
+    // Identify user with Segment, not awaiting because it can throw an error
+    SegmentAnalytics.identify(accounts[0])
   };
 
   // TODO: remove when breaking backward compatibility

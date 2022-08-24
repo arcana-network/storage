@@ -6,6 +6,7 @@ import { readHash } from './constant';
 import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress } from './Utils';
 import { wrapInstance } from "./sentry";
 import { requiresLocking } from './locking';
+import { trackWithCommonProps } from './segment';
 
 export enum AccessTypeEnum {
   MY_FILES,
@@ -133,6 +134,12 @@ export class FileAPI {
     } else {
       throw customError('TRANSACTION', 'Validity must be undefined or an array.')
     }
+
+    await trackWithCommonProps(this, 'shareAccess', {
+      did,
+      address,
+      validity
+    })
     return await makeTx(this.appAddress, this.api, this.provider, 'share', [
       did,
       address,
@@ -146,6 +153,10 @@ export class FileAPI {
     did = parseHex(did);
     await this.setAppAddress(did);
     address = parseHex(address)
+    await trackWithCommonProps(this, 'revokeAccess', {
+      did,
+      address
+    })
     return await makeTx(this.appAddress, this.api, this.provider, 'revoke', [did, address, readHash]);
   };
 
