@@ -95,7 +95,7 @@ await downloader.download(did);
 ## Get Access
 
 ```typescript
-const access = new arcanaInstance.getAccess();
+const access = await arcanaInstance.getAccess();
 
 ### Share a File
 // did: DID of file to be shared
