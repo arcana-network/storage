@@ -44,8 +44,17 @@ Downloader.onProgress = (bytesDownloaded, bytesTotal) => { console.log('Progress
 Downloader.download(did);
 ```
 
-## Access Control
+## Get Access
 
+```typescript
+const access = await arcanaInstance.getAccess();
+
+### Share a File
+// did: DID of file to be shared
+// address: recipient user's address
+// validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds
+await access.share([did], [address]);
+```
 ### Revoke File Sharing
 
 ```javascript
