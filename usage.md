@@ -25,7 +25,7 @@ storage
 
 #### v0.2
 ```javascript
-const Uploader = storage.getUploader();
+const Uploader = await storage.getUploader();
 Uploader.onProgress = (bytesUploaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')}
 Uploader.upload(file);
 ```
@@ -39,7 +39,7 @@ storage.download(did, (bytesDownloaded, bytesTotal) => { console.log('Progress:'
 
 #### v0.2
 ```javascript
-const Downloader = storage.getDownloader();
+const Downloader = await storage.getDownloader();
 Downloader.onProgress = (bytesDownloaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')}
 Downloader.download(did);
 ```

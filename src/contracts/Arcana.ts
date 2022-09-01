@@ -744,6 +744,16 @@ export default {
           "internalType": "address",
           "name": "_ephemeral_address",
           "type": "address"
+        },
+        {
+          "internalType": "bool",
+          "name": "_public",
+          "type": "bool"
+        },
+        {
+          "internalType": "bool",
+          "name": "_duplicate",
+          "type": "bool"
         }
       ],
       "name": "uploadInit",
@@ -764,5 +774,5 @@ export default {
       "stateMutability": "view",
       "type": "function"
     }
-  ]
+  ],
 }

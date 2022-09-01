@@ -82,8 +82,12 @@ export class Uploader {
   };
 
   @requiresLocking
-  async upload (fileRaw: any, chunkSize: number = 10 * 2 ** 20) {
+  async upload (fileRaw: any, params: UploadParams = {chunkSize: 10 * 2 ** 20, duplicate: false, publicFile: false}) {
     let file = fileRaw;
+    let chunkSize = params.chunkSize? params.chunkSize : 10 * 2 ** 20
+    let duplicate = params.duplicate ? params.duplicate: false
+    let publicFile = params.publicFile ? params.publicFile: false
+
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     const hasher = new KeyGen(file, chunkSize);
     let key;
@@ -133,6 +137,8 @@ export class Uploader {
         utils.toUtf8Bytes(encryptedMetaData),
         node.address,
         ephemeralWallet.address,
+        publicFile,
+        duplicate
       ]);
       token = res.token;
       tx_hash = res.txHash;

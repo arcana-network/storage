@@ -54,6 +54,7 @@ const makeEmail = () => {
   return strEmail;
 };
 
+console.log("before describe")
 describe('Upload File', () => {
   let file,
     did,
@@ -63,7 +64,10 @@ describe('Upload File', () => {
     sharedInstance,
     file_count = 0;
 
+  console.log("inside describe")
+
   before(async () => {
+    console.log("inside before")
     file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 10, 'text/plain');
     file = new File([file], file.name, { type: file.type });
     arcanaInstance = new arcana.storage.StorageProvider({
@@ -73,6 +77,7 @@ describe('Upload File', () => {
       chainId,
       debug,
     });
+    console.log("run before")
     //await arcanaInstance.login();
   });
 
@@ -82,6 +87,7 @@ describe('Upload File', () => {
   // });
 
   it('Shared Files should return empty array', async () => {
+    console.log("shared files")
     let files = await arcanaInstance.sharedFiles();
     chai.expect(files.length).equal(0);
   });
