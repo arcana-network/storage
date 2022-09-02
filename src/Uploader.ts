@@ -82,8 +82,11 @@ export class Uploader {
   };
 
   @requiresLocking
-  async upload (fileRaw: any, chunkSize: number = 10 * 2 ** 20) {
-    let file = fileRaw;
+  async upload (file: File | Blob, chunkSize: number = 10 * 2 ** 20) {
+    if (!(file instanceof Blob)) {
+      throw customError('TRANSACTION', 'File must be a Blob or a descendant of a Blob such as a File.')
+    }
+
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     const hasher = new KeyGen(file, chunkSize);
     let key;
@@ -116,10 +119,10 @@ export class Uploader {
       const encryptedMetaData = await AESEncrypt(
         key,
         JSON.stringify({
-          name: file.name,
+          name: 'name' in file ? file.name : '',
           type: file.type,
           size: file.size,
-          lastModified: file.lastModified,
+          lastModified: 'lastModified' in file ? file.lastModified : new Date(),
           hash,
         }),
       );
@@ -174,7 +177,7 @@ export class Uploader {
       endpoint,
       retryDelays: [0, 3000, 5000, 10000, 20000],
       metadata: {
-        filename: file.name,
+        filename: 'name' in file ? file.name : '',
         filetype: file.type,
         hash,
         key: did,
