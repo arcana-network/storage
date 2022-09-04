@@ -13,9 +13,9 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 ## Usage Flow
 
 1. Install Storage SDK
-2. Initialize Storage SDK by creating a new `StorageProvider` for your dApp. As input specify the blockchain `provider` and the `appId`. Note: Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp.
+2. Initialize Storage SDK by creating a new `StorageProvider` for your dApp. As input specify the blockchain `provider` and the `appId`. Note: Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
 3. Use `StorageProvider` to:
-   - Call `myFiles` method to obtain a list of file DIDs for the files uploaded by the user (file owner)
+   - Call `myFiles` method to obtain a list of file DID for the files uploaded by the user (file owner)
    - Call `sharedFiles` method to obtain a list of files shared with the user
 4. Use `StorageProvider` and obtain the uploader using `getUploader` method first, and then:
    - Call `upload` method of the uploader with file data as input
@@ -100,7 +100,7 @@ const access = await arcanaInstance.getAccess();
 ### Share a File
 // did: DID of file to be shared
 // address: recipient user's address
-// validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds
+// validity (optional): For how long will the user be able to download the file, e.g. [400] would mean 400 seconds
 await access.share([did], [address]);
 ```
 
@@ -164,7 +164,7 @@ await arcanaInstance.downloadDID('<did of the file>');
 
 Use the following Storage SDK functionality for minting private NFTs.
 
-### Create Metdata URL
+### Create Metadata URL
 
 Use `makeMetadataURL` to obtain a URL that can be used to mint private NFT.
 
