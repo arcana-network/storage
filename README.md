@@ -32,7 +32,6 @@ It is super easy to integrate Arcana's Storage SDK with your dApp. Just install,
 
 ```
 import { StorageProvider } from '@arcana/storage';
-
 const storage = new StorageProvider({ appId, provider, email });
 let did = storage.upload(file)
 storage.download(did)
