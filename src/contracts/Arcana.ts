@@ -312,7 +312,7 @@ export default {
         },
         {
           "internalType": "address",
-          "name": "_ephemeral_address",
+          "name": "_ephemeralAddress",
           "type": "address"
         }
       ],
@@ -571,12 +571,12 @@ export default {
       "inputs": [
         {
           "internalType": "uint256",
-          "name": "store",
+          "name": "_store",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "bandwidth",
+          "name": "_bandwidth",
           "type": "uint256"
         }
       ],
@@ -614,17 +614,17 @@ export default {
       "inputs": [
         {
           "internalType": "address",
-          "name": "user",
+          "name": "_user",
           "type": "address"
         },
         {
           "internalType": "uint256",
-          "name": "store",
+          "name": "_store",
           "type": "uint256"
         },
         {
           "internalType": "uint256",
-          "name": "bandwidth",
+          "name": "_bandwidth",
           "type": "uint256"
         }
       ],
@@ -742,13 +742,8 @@ export default {
         },
         {
           "internalType": "address",
-          "name": "_ephemeral_address",
+          "name": "_ephemeralAddress",
           "type": "address"
-        },
-        {
-          "internalType": "bool",
-          "name": "_public",
-          "type": "bool"
         },
         {
           "internalType": "bool",

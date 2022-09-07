@@ -7,6 +7,7 @@ import {
   customError,
   isFileUploaded,
   getDKGNodes,
+  getFile,
 } from './Utils';
 import * as tus from 'tus-js-client';
 import FileReader from './fileReader';
@@ -21,6 +22,7 @@ import { Mutex } from 'async-mutex';
 
 import {wrapInstance} from "./sentry";
 import { requiresLocking } from './locking';
+import { errorCodes } from './errors';
 
 export class Uploader {
   private provider: any;
@@ -86,7 +88,6 @@ export class Uploader {
     let file = fileRaw;
     let chunkSize = params.chunkSize? params.chunkSize : 10 * 2 ** 20
     let duplicate = params.duplicate ? params.duplicate: false
-    let publicFile = params.publicFile ? params.publicFile: false
 
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     const hasher = new KeyGen(file, chunkSize);
@@ -100,7 +101,17 @@ export class Uploader {
       `Sign this to proceed with the encryption of file with hash ${hash}`,
       walletAddress,
     ]);
-    const did = utils.id(hash + sign_hash);
+    let did = utils.id(hash + sign_hash);
+    const prev_file = await getFile(did, this.provider);
+    if (prev_file.owner) {
+        if (prev_file.duplicate && duplicate === true) {
+          did = ethers.utils.hexlify(ethers.utils.randomBytes(32))
+        }
+        if (prev_file.duplicate && duplicate === false) {
+          const error =  "duplicate_can't_be_removed"
+          throw customError(error, errorCodes[error])
+        }
+    }
     if (prevKey) {
       key = await window.crypto.subtle.importKey('raw', fromHexString(prevKey), 'AES-CTR', false, ['encrypt']);
       if (await isFileUploaded(this.appAddress, did, this.provider)) {
@@ -137,7 +148,6 @@ export class Uploader {
         utils.toUtf8Bytes(encryptedMetaData),
         node.address,
         ephemeralWallet.address,
-        publicFile,
         duplicate
       ]);
       token = res.token;
