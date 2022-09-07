@@ -251,7 +251,7 @@ export class StorageProvider {
   };
 
   // TODO: remove when breaking backward compatibility
-  numOfMyFiles = () => {
+  numOfMyFiles = async () => {
     await this.login()
     return this.files.numOfMyFiles()
   }
@@ -266,7 +266,7 @@ export class StorageProvider {
     return this.files.myFiles(pageNumber, pageSize)
   }
 
-  numOfSharedFiles = () => {
+  numOfSharedFiles = async () => {
     await this.login()
     return this.files.numOfSharedFiles()
   }
