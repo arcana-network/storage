@@ -114,7 +114,7 @@ export class Downloader {
     const chunkSize = 10 * 2 ** 20;
     let downloaded = 0;
     for (let i = 0; i < fileMeta.size; i += chunkSize) {
-      const range = `bytes=${i}-${i + chunkSize - 1}`;
+      const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size)}`;
       const download = await fetch(checkPermissionResp.host + `files/${did}`, {
         headers: {
           Range: range,
@@ -135,7 +135,7 @@ export class Downloader {
       await this.onSuccess();
       return out
     } else {
-      throw new Error('Hash does not matches with uploaded file');
+      throw new Error('Hash does not match the uploaded file');
     }
   };
 
