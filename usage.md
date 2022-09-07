@@ -1,94 +1,68 @@
-# Arcana Storage Usage guide
+# Arcana Storage Usage Guide
 
-## Initialize SDK
+## Prerequisites
+
+To use the Storage SDK, you need to ensure that you have access to a blockchain `provider`.  This is required for signing blockchain transactions that power data access control in the Arcana protocol.
+
+You can obtain the blockchain provider if you initialize and integrate with the Arcana Auth SDK.  
+
+In case you choose to use MetaMask instead or one of the [supported third-party wallets](https://docs.beta.arcana.network/docs/config3pwallet), use the `window.ethereum` variable to access the provider.
+
+Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.network/docs/stgsdk_qs) to understand how to integrate with the Storage SDK.
+
+## Usage Flow
+
+1. Install Storage SDK
+2. Initialize Storage SDK by creating a new `StorageProvider` for your dApp. As input specify the blockchain `provider` and the `appId`. Note: Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
+3. Use `StorageProvider` to:
+   - Call `myFiles` method to obtain a list of file DID for the files uploaded by the user (file owner)
+   - Call `sharedFiles` method to obtain a list of files shared with the user
+4. Use `StorageProvider` and obtain the uploader using `getUploader` method first, and then:
+   - Call `upload` method of the uploader with file data as input
+   - Save file DID returned by the uploader
+5. Use `StorageProvider` and obtain the downloader using `getDownloader` method
+   - Call `download` method of the downloader using file DID as input
+6. Use `StorageProvider` and obtain the `access` object via `getAccess` call before invoking any of the file methods that govern access control such as:
+   - `delete` a file by specifying its DID
+   - `share` a file by specifying its DID and recipient's wallet address
+   - `revoke` access to a file by specifying its DID and recipient's wallet address
+   - `changeFileOwner` of a file by specifying its DID and recipient's wallet address
+7. Use `access` object to also call any of the storage getter methods:
+   - `getUploadLimit` set by the dApp
+   - `getDownloadLimit` set by the dApp
+   - `getSharedUsers` for a file with the specified DID
+
+## Initialize Storage SDK
 
 ```typescript
-// address: Smart contract address of app
-// provider: Web3provider (Eg: If you have installed metamask then window.ethereum will work)
-// Default value of provider is window.ethereum
-import { StorageProvider } from '@arcana/storage';
 
-const storage = new StorageProvider({ appId, provider, email });
+// provider:
+// Choose 'window.arcana.provider' (Arcana Auth SDK) or 'window.ethereum' (any other supported web3provider or wallet) as the provider.
+//
+// Arcana Auth SDK:
+// If you initialize the Auth SDK, by default the window.arcana.provider variable is
+// configured. During initialization, if you set 'inpageProvider' boolean as true, // then
+// 'window.ethereum' variable is also configured to point to the provider.
+//
+// Web3provider:
+// Alternately, if you are not using Auth SDK but working with MetaMask wallet or any
+// other supported wallet, then the 'window.ethereum' variable will point to the provider.
+
+// appId:
+// You can obtain appId from Arcana Developer Dashboard after registering and configuring your /// dApp.
+
+const arcanaInstance = new arcana.storage.StorageProvider({ appId, provider });
 ```
 
-## Upload a File object
-
-The `file` object must be an instance of a `Blob` or a descendant (`File`, etc.).
-
-#### v0.3 (for simpler use cases)
-```javascript
-storage
-  .upload(file, (bytesUploaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')})
-  .then((did) => console.log('File successfully uploaded. DID:', did))
-  .catch(e => console.error(e));
-```
-
-#### v0.2
-```javascript
-const Uploader = await storage.getUploader();
-Uploader.onProgress = (bytesUploaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')}
-Uploader.upload(file);
-```
-
-## Download from a DID
-
-#### v0.3 (for simpler use cases)
-```javascript
-storage.download(did, (bytesDownloaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')});
-```
-
-#### v0.2
-```javascript
-const Downloader = await storage.getDownloader();
-Downloader.onProgress = (bytesDownloaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')}
-Downloader.download(did);
-```
-
-## Access Control
-
-### Revoke File Sharing
-
-```javascript
-// did: DID of file from which access is removed
-// address: Address of the user who's access is getting revoked
-storage.files.revoke(did, address);
-```
-
-### Change File Ownership
-
-```javascript
-// address: new owner's address
-storage.files.changeOwner(did, address);
-```
-
-### Delete a File
-
-```javascript
-storage.files.delete(did);
-```
-
-## Storage Usage Metrics
-
-### Get Upload Limit
-
-```javascript
-//Get consumed and total storage of the current user
-let [consumed, total] = await storage.files.getUploadLimit();
-```
-
-### Get Download Limit
-
-```javascript
-//Get consumed and total bandwidth of the current user
-let [consumed, total] = await storage.files.getDownloadLimit();
-```
+**Note:**: It suffices to create a single instance of StorageProvider and reuse the same in your dApp. Recommended as a best practice.
 
 ### List of Files Shared
 
 List files shared with the current user.
 
 ```javascript
-let files = await storage.files.list(AccessTypeEnum.SHARED_FILES);
+//Get files shared with the current user
+let files = await arcanaInstance.sharedFiles();
 ```
 
 ### List of Files Uploaded
@@ -96,31 +70,92 @@ let files = await storage.files.list(AccessTypeEnum.SHARED_FILES);
 List files uploaded by the current user.
 
 ```javascript
-let files = await storage.files.list(AccessTypeEnum.MY_FILES);
+//List of files uploaded by the current user
+let files = await arcanaInstance.myFiles();
 ```
+
+## Get Uploader
+
+```typescript
+const uploader = await arcanaInstance.getUploader();
+// file: Specify the file that you want to upload - blob / image / music / data
+// Do not specify a URL to upload the file
+const myDid = uploader.upload(file);
+// Save and reuse the file DID returned by the uploader to access this file later
+```
+
+## Get Downloader
+
+```typescript
+const downloader = await arcanaInstance.getDownloader();
+// did: Specify the DID of file that you'd like to download
+await downloader.download(did);
+```
+
+## Get Access
+
+```typescript
+const access = await arcanaInstance.getAccess();
+
+### Share a File
+// did: DID of file to be shared
+// address: recipient user's address
+// validity (optional): For how long will the user be able to download the file, e.g. [400] would mean 400 seconds
+await access.share([did], [address]);
+```
+
+### Revoke File Sharing
+
+```typescript
+// did: DID of file from which access is removed
+// address: Address of the user for whom the access must be revoked
+await access.revoke(did, address);
+```
+
+### Change File Ownership
+
+```typescript
+// address: new owner's address
+await access.changeFileOwner(did, address);
+```
+
+### Delete a File
+
+```typescript
+await access.deleteFile(did);
+```
+
+### Get Upload Limit
+
+```typescript
+//Get consumed and total storage of the current user
+let [consumed, total] = await Access.getUploadLimit();
+```
+
+### Get Download Limit
+
+```typescript
+//Get consumed and total bandwidth of the current user
+let [consumed, total] = await Access.getDownloadLimit();
+```
+
 ---
-### Old Access API
 
-Anything you can do with `storage.files` can also be done with the `Access` object returned by `storage.getAccess`.
-
-```javascript
-const Access = await storage.getAccess();
-```
-
-## Download File by DID
+## Advanced File Download using `downloadDID` method
 
 ```javascript
 
 //The file DID is returned at the time of file upload and uniquely identifies the file in Arcana Store.
 
-//Note: No appID is required during initialization of the Storage SDK in order to
-//download a file using the file DID.
+//Note: It is not essential to use the appID during Storage SDK initialization if you wish to use the method `downloadDID`.
 
-// Pass the provider during initialization of the Storage SDK, if required.
-// Otherwise by default, the Storage SDK will choose window.ethereum
+// You can provide blockchain provider during initialization of the Storage SDK.
+// Provider can be obtained by installing and initializing the Auth SDK or a third-party provider.
+// If you do not specify a provider during Storage SDK initialization, then by default,
+// the Storage SDK will utilize `window.ethereum` setting.
 
-let storage = new arcana.storage.StorageProvider();
-await storage.downloadDID('<did of the file>');
+let arcanaInstance = new arcana.storage.StorageProvider();
+await arcanaInstance.downloadDID('<did of the file>');
 ```
 
 ---
@@ -129,12 +164,12 @@ await storage.downloadDID('<did of the file>');
 
 Use the following Storage SDK functionality for minting private NFTs.
 
-### Create Metdata URL
+### Create Metadata URL
 
 Use `makeMetadataURL` to obtain a URL that can be used to mint private NFT.
 
 ```javascript
-let metadata = await storage.makeMetadataURL(
+let metadata = await arcanaInstance.makeMetadataURL(
   title,
   description,
   did,
@@ -150,7 +185,7 @@ Once you have minted the NFT, to make it private and control access to it and ma
 
 ```javascript
 let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
-    await storage.linkNft(did, tokenId, nftContract, chainId);
+    await arcanaInstance.linkNft(did, tokenId, nftContract, chainId);
 ```
 
 ---
@@ -207,7 +242,7 @@ dAppStorageProvider = new StorageProvider({
 
 const uploader = await dAppStorageProvider.getUploader();
 
-uploader.upload(fileToUpload)
+const myDID = await uploader.upload(fileToUpload)
   .catch((error) => {
     if (error.message === NO_SPACE) {
       ...
@@ -236,17 +271,19 @@ Uploader.onError = (err) => {
 
 ## Changing Network and Wallet Account
 
+Here is how you can handle blockchain network change or user account change in your dApp, in the context of the Arcana Storage SDK StorageProvider instance:
+
 ### Change Network
 ```js
 // Below is default function, which can be modified by the developers
-storage.onNetworkChange = (oldNetwork, newNetwork) => {
+await arcanaInstance.onNetworkChange = (oldNetwork, newNetwork) => {
   window.location.reload()
 }
 ```
 ### Change Account
 ```js
 // Below is default function, which can be modified by the developers
-storage.onAccountChange = (accounts) => {
+await arcanaInstance.onAccountChange = (accounts) => {
   window.location.reload()
 }
 ```
