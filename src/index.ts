@@ -93,7 +93,7 @@ export class StorageProvider {
     window.location.reload();
   }
 
-  downloadDID = async (did: string) {
+  downloadDID = async (did: string) => {
     await this.login();
     const file = await getFile(did, this.provider);
     this.appAddress = file.app;
