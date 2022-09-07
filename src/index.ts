@@ -93,7 +93,7 @@ export class StorageProvider {
     window.location.reload();
   }
 
-  async downloadDID (did: string) {
+  downloadDID = async (did: string) {
     await this.login();
     const file = await getFile(did, this.provider);
     this.appAddress = file.app;
@@ -107,6 +107,7 @@ export class StorageProvider {
   };
 
   getAccess = async (): Promise<FileAPI> => {
+    await this.login();
     return this.files;
   };
 
@@ -251,26 +252,32 @@ export class StorageProvider {
 
   // TODO: remove when breaking backward compatibility
   numOfMyFiles = () => {
+    await this.login()
     return this.files.numOfMyFiles()
   }
 
   numOfMyFilesPages = async (pageSize: number = 20) => {
+    await this.login()
     return this.files.numOfMyFilesPages(pageSize)
   }
 
   myFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
+    await this.login()
     return this.files.myFiles(pageNumber, pageSize)
   }
 
   numOfSharedFiles = () => {
+    await this.login()
     return this.files.numOfSharedFiles()
   }
 
   numOfSharedFilesPages = async (pageSize: number = 20) => {
+    await this.login()
     return this.files.numOfSharedFilesPages(pageSize)
   }
 
   sharedFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
+    await this.login()
     return this.files.sharedFiles(pageNumber, pageSize)
   }
 
@@ -283,7 +290,6 @@ export class StorageProvider {
 
   upload = async (fileRaw: any, onProgress: (bytesUploaded: number, bytesTotal: number) => void): Promise<string> => {
     const uploader = await this.getUploader();
-
     if (onProgress != null) {
       uploader.onProgress = onProgress;
     }
