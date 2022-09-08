@@ -307,7 +307,7 @@ export class StorageProvider {
       downloader.onProgress = onProgress;
     }
 
-    return downloader.download(did)
+    return downloader.downloadToFilesystem(did)
   }
 }
 export { AccessTypeEnum } from './fileAPI'
