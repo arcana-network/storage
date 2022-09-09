@@ -51,7 +51,7 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 // appId:
 // You can obtain appId from Arcana Developer Dashboard after registering and configuring your /// dApp.
 
-const arcanaInstance = new arcana.storage.StorageProvider({ appId, provider });
+const arcanaInstance = await arcana.storage.StorageProvider.init({ appId, provider });
 ```
 
 **Note:**: It suffices to create a single instance of StorageProvider and reuse the same in your dApp. Recommended as a best practice.
@@ -96,6 +96,7 @@ await downloader.download(did);
 
 ```typescript
 const access = await arcanaInstance.getAccess();
+```
 
 ### Share a File
 // did: DID of file to be shared
@@ -234,7 +235,7 @@ During file upload operations, if there are any errors, dApp developers can addr
 ```javascript
 import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 
-dAppStorageProvider = new StorageProvider({
+dAppStorageProvider = await StorageProvider.init({
         appId: ARCANA_APP_ID,
         provider: window.ethereum,
         email: user_email_string,
@@ -245,11 +246,11 @@ const uploader = await dAppStorageProvider.getUploader();
 const myDID = await uploader.upload(fileToUpload)
   .catch((error) => {
     if (error.message === NO_SPACE) {
-      ...
+      // ...
     } else if (error.code === UNAUTHORIZED) {
-      ...
+      // ...
     } else {
-      ...
+      // ...
     }
   });
 ```

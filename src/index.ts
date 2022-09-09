@@ -25,6 +25,12 @@ export class StorageProvider {
 
   public files: FileAPI;
 
+  static async init (cfg: Config) {
+    const sp = new StorageProvider(cfg)
+    await sp.login()
+    return sp
+  }
+
   constructor(cfg: Config) {
     let config;
     if (cfg) {
