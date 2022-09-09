@@ -241,6 +241,7 @@ export class Uploader {
 
         counter += chunkSize
         uploadedParts++
+        this.onProgress(counter, file.size)
       }
 
       endpoint.pathname = `/api/v2/file/${did}/complete`
