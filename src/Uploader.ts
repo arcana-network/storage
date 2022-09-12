@@ -9,8 +9,6 @@ import {
   getDKGNodes,
   getFile,
 } from './Utils';
-import * as tus from 'tus-js-client';
-import FileReader from './fileReader';
 import { utils, BigNumber, Wallet, ethers } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
 import { split } from 'shamir';
@@ -24,10 +22,23 @@ import {wrapInstance} from "./sentry";
 import { requiresLocking } from './locking';
 import { errorCodes } from './errors';
 
+function generateCounterFromPartNumber (value: number) {
+  if (value === 0) {
+    return new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+  }
+  let counterValue = value / 16;
+  const counter = new Uint8Array(16);
+  for (let index = 15; index >= 0; --index) {
+    counter[index] = counterValue % 256;
+    counterValue = Math.floor(counterValue / 256);
+  }
+  return counter;
+}
+
 export class Uploader {
-  private provider: any;
-  private api: AxiosInstance;
-  private appAddress: string;
+  private readonly provider: any;
+  private readonly api: AxiosInstance;
+  private readonly appAddress: string;
   private appId: number;
   private readonly lock: Mutex;
 
@@ -85,9 +96,9 @@ export class Uploader {
 
   @requiresLocking
   async upload (fileRaw: File, params: UploadParams = {chunkSize: 10 * 2 ** 20, duplicate: false, publicFile: false}) {
-    let file: File = fileRaw;
-    let chunkSize = params.chunkSize? params.chunkSize : 10 * 2 ** 20
-    let duplicate = params.duplicate ? params.duplicate: false
+    const file: File = fileRaw;
+    const chunkSize = params.chunkSize? params.chunkSize : 10 * 2 ** 20
+    const duplicate = params.duplicate ? params.duplicate: false
     if (!(file instanceof Blob)) {
       throw customError('TRANSACTION', 'File must be a Blob or a descendant of a Blob such as a File.')
     }
@@ -96,31 +107,27 @@ export class Uploader {
     const hasher = new KeyGen(file, chunkSize);
     let key;
     const hash = await hasher.getHash();
-    let prevKey = localStorage.getItem(`${walletAddress}::key::${hash}`);
-    let host = localStorage.getItem(`${walletAddress}::host::${hash}`);
-    let token = localStorage.getItem(`${walletAddress}::token::${hash}`);
-    let tx_hash;
-    const sign_hash = await this.provider.send('personal_sign', [
+    const signHash = await this.provider.send('personal_sign', [
       `Sign this to proceed with the encryption of file with hash ${hash}`,
       walletAddress,
     ]);
-    let did = utils.id(hash + sign_hash);
-    const prev_file = await getFile(did, this.provider);
-    if (prev_file.owner) {
-        if (prev_file.duplicate && duplicate === true) {
+    let did = utils.id(hash + signHash);
+
+    const prevFile = await getFile(did, this.provider);
+    if (prevFile.owner) {
+        if (prevFile.duplicate && duplicate === true) {
           did = ethers.utils.hexlify(ethers.utils.randomBytes(32))
         }
-        if (prev_file.duplicate && duplicate === false) {
+        if (prevFile.duplicate && duplicate === false) {
           const error =  "duplicate_can't_be_removed"
           throw customError(error, errorCodes[error])
         }
     }
-    if (prevKey) {
-      key = await window.crypto.subtle.importKey('raw', fromHexString(prevKey), 'AES-CTR', false, ['encrypt']);
-      if (await isFileUploaded(this.appAddress, did, this.provider)) {
-        throw customError('TRANSACTION', `File is already uploaded. DID is ${did}`);
-      }
-    } else {
+
+    let host
+    let JWTToken
+
+    {
       key = await window.crypto.subtle.generateKey(
         {
           name: 'AES-CTR',
@@ -129,8 +136,8 @@ export class Uploader {
         true,
         ['encrypt', 'decrypt'],
       );
-      const aes_raw = await crypto.subtle.exportKey('raw', key);
-      const hexString = toHexString(aes_raw);
+      const aesRaw = await crypto.subtle.exportKey('raw', key);
+      const hexString = toHexString(aesRaw);
       const encryptedMetaData = await AESEncrypt(
         key,
         JSON.stringify({
@@ -142,10 +149,10 @@ export class Uploader {
         }),
       );
 
-      let node = (await this.api.get(`/get-node-address/?appid=${this.appId}`)).data;
+      const node = (await this.api.get(`/get-node-address/?appid=${this.appId}`)).data;
       host = node.host;
-      let ephemeralWallet = await Wallet.createRandom();
-      let res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
+      const ephemeralWallet = await Wallet.createRandom();
+      const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
         utils.toUtf8Bytes(encryptedMetaData),
@@ -153,8 +160,8 @@ export class Uploader {
         ephemeralWallet.address,
         duplicate
       ]);
-      token = res.token;
-      tx_hash = res.txHash;
+      JWTToken = res.token;
+      const txHash = res.txHash;
 
       // Fetch DKG Node Details from dkg contract
       const nodes = await getDKGNodes(this.provider);
@@ -162,74 +169,93 @@ export class Uploader {
       const parts = nodes.length;
       // At least 2/3rd nodes is required for share recovery
       const quorum = nodes.length - Math.floor(nodes.length / 3);
-      const shares = split(randomBytes, parts, quorum, new Uint8Array(aes_raw));
+      const shares = split(randomBytes, parts, quorum, new Uint8Array(aesRaw));
       for (let i = 0; i < parts; i++) {
         const publicKey = nodes[i].pubKx._hex.replace('0x', '').padStart(64, '0') + nodes[i].pubKy._hex.replace('0x', '').padStart(64, '0');
         if (publicKey.length < 128) {
           console.log('public key is too short');
           continue;
         }
-        let ciphertext_raw = encrypt(publicKey, shares[i + 1]);
-        let ciphertext = ciphertext_raw.toString('hex');
+        const ciphertextRaw = encrypt(publicKey, shares[i + 1]);
+        const ciphertext = ciphertextRaw.toString('hex');
         localStorage.setItem('pk', ephemeralWallet.privateKey);
-        let url = 'https://' + nodes[i].declaredIp + '/rpc';
+        const url = 'https://' + nodes[i].declaredIp + '/rpc';
         await axios.post(url, {
           jsonrpc: '2.0',
           method: 'StoreKeyShare',
           id: 10,
           params: {
-            tx_hash,
+            tx_hash: txHash,
             encrypted_share: ciphertext,
-            signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash, encrypted_share: ciphertext }))),
+            signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash: txHash, encrypted_share: ciphertext }))),
           },
         });
       }
-      localStorage.setItem(`${walletAddress}::host:${hash}`, host);
-      localStorage.setItem(`${walletAddress}::key::${hash}`, hexString);
-      localStorage.setItem(`${walletAddress}::token::${hash}`, token);
     }
-    let endpoint = host + 'api/v1/files/';
-    let upload = new tus.Upload(file, {
-      endpoint,
-      retryDelays: [0, 3000, 5000, 10000, 20000],
-      metadata: {
-        filename: 'name' in file ? file.name : '',
-        filetype: file.type,
-        hash,
-        key: did,
-      },
-      onError: this.onError,
-      onProgress: this.onProgress,
-      onSuccess: () => {
-        localStorage.removeItem(`${walletAddress}::key::${hash}`);
-        localStorage.removeItem(`${walletAddress}::host::${hash}`);
-        localStorage.removeItem(`${walletAddress}::token::${hash}`);
-        this.onUpload(host, token, did);
-      },
 
-      removeFingerprintOnSuccess: true,
-      fileReader: new FileReader(key),
-      fingerprint: function (file, options) {
-        return Promise.resolve(options.metadata.hash);
-      },
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
-      chunkSize,
-      onBeforeRequest: function (req) {
-        req.setHeader('signature', 'sig');
-      },
-    });
-
-    // Check if there are any previous uploads to continue.
-    upload.findPreviousUploads().then(function (previousUploads) {
-      // Found previous uploads so we select the first one.
-      if (previousUploads.length) {
-        upload.resumeFromPreviousUpload(previousUploads[0]);
+    try {
+      const endpoint = new URL(host)
+      endpoint.pathname = '/api/v2/file/' + did
+      const headers = {
+        Authorization: 'Bearer ' + JWTToken
       }
-      // Start the upload
-      upload.start();
-    });
+
+      // 1. Create a file
+      await axios({
+        method: 'POST',
+        url: endpoint.href,
+        headers
+      })
+
+      const parts = Math.ceil(file.size / chunkSize)
+      let uploadedParts = 0
+      let counter = 0
+      endpoint.pathname = `/api/v2/file/${did}`
+      while (uploadedParts < parts) {
+        const slicedChunk = await file.slice(counter, Math.min(counter + chunkSize, file.size))
+        const chunk = await slicedChunk.arrayBuffer()
+
+        const cipherText = await window.crypto.subtle.encrypt(
+          {
+            counter: generateCounterFromPartNumber(uploadedParts),
+            length: 64,
+            name: 'AES-CTR',
+          },
+          key,
+          chunk,
+        );
+
+        // 2. Upload parts
+        await axios({
+          method: 'PATCH',
+          url: endpoint.href,
+          params: {
+            part: (uploadedParts + 1).toString()
+          },
+          headers: {
+            ...headers,
+            'Content-Type': 'application/octet-stream'
+          },
+          data: cipherText
+        })
+
+        counter += chunkSize
+        uploadedParts++
+        this.onProgress(counter, file.size)
+      }
+
+      endpoint.pathname = `/api/v2/file/${did}/complete`
+      // 3. Complete the upload
+      await axios({
+        method: 'PATCH',
+        url: endpoint.href,
+        headers
+      })
+      this.onSuccess()
+    } catch (e) {
+      this.onError(e)
+    }
+
     return did.replace("0x" , "");
   };
 }

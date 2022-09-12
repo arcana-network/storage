@@ -25,6 +25,12 @@ export class StorageProvider {
 
   public files: FileAPI;
 
+  static async init (cfg: Config) {
+    const sp = new StorageProvider(cfg)
+    await sp.login()
+    return sp
+  }
+
   constructor(cfg: Config) {
     let config;
     if (cfg) {
@@ -288,15 +294,22 @@ export class StorageProvider {
     return await makeTx(this.appAddress, this.api, this.provider  , 'linkNFT', [fileId, tokenId, nftContract, nftChainID]);
   }
 
-  upload = async (fileRaw: any, onProgress: (bytesUploaded: number, bytesTotal: number) => void): Promise<string> => {
+  upload = async (fileRaw: any, params: UploadParams & {
+    onProgress: (bytesUploaded: number, bytesTotal: number) => void
+  } = {
+    onProgress: (bytesUploaded, bytesTotal) => null,
+    chunkSize: 10 * 2 ** 20,
+    duplicate: false,
+    publicFile: false
+  }): Promise<string> => {
     const uploader = await this.getUploader();
-    if (onProgress != null) {
-      uploader.onProgress = onProgress;
+    if (params.onProgress != null) {
+      uploader.onProgress = params.onProgress
     }
 
     return new Promise((resolve, reject) => {
       uploader.onError = reject;
-      uploader.upload(fileRaw).then(resolve).catch(reject);
+      uploader.upload(fileRaw, params).then(resolve).catch(reject);
     });
   }
 
