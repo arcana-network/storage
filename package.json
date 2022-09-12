@@ -86,6 +86,7 @@
     "buffer": "^6.0.3",
     "eciesjs": "^0.3.14",
     "eth-sig-util": "^3.0.1",
+    "js-sha3": "^0.8.0",
     "shamir": "^0.7.1",
     "tus-js-client": "^2.3.1",
     "tweetnacl": "^1.0.3"

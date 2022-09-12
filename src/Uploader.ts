@@ -15,8 +15,8 @@ import { split } from 'shamir';
 import { encrypt } from 'eciesjs';
 
 import { randomBytes } from 'crypto-browserify';
-import { id } from 'ethers/lib/utils';
 import { Mutex } from 'async-mutex';
+import sha3 from 'js-sha3';
 
 import {wrapInstance} from "./sentry";
 import { requiresLocking } from './locking';
@@ -73,18 +73,25 @@ export class Uploader {
 
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     const hasher = new KeyGen(file, chunkSize);
-    let key;
     const hash = await hasher.getHash();
     const signHash = await this.provider.send('personal_sign', [
       `Sign this to proceed with the encryption of file with hash ${hash}`,
       walletAddress,
     ]);
-    let did = utils.id(hash + signHash);
+    // 0x01 -> Public File
+    // 0x02 -> Private File (default)
+    const didPrefix = Uint8Array.from([params.publicFile ? 0x01 : 0x02])
+    let did = ethers.utils.hexlify(Buffer.concat([
+      didPrefix,
+      new Uint8Array(
+        sha3.keccak256.arrayBuffer(Buffer.from(hash + signHash, 'utf-8')).slice(0, 31)
+      )
+    ]));
 
     const prevFile = await getFile(did, this.provider);
     if (prevFile.owner) {
         if (prevFile.duplicate && duplicate === true) {
-          did = ethers.utils.hexlify(ethers.utils.randomBytes(32))
+          did = ethers.utils.hexlify(Buffer.concat([didPrefix, ethers.utils.randomBytes(31)]))
         }
         if (prevFile.duplicate && duplicate === false) {
           const error =  "duplicate_can't_be_removed"
@@ -92,10 +99,19 @@ export class Uploader {
         }
     }
 
+    let key
     let host
     let JWTToken
 
-    {
+    const { data: nodeResp } = await this.api.get('/get-node-address/', {
+      params: {
+        appid: this.appId.toString()
+      }
+    })
+    host = nodeResp.host;
+
+    // If it's a private file, generate a key and store the shares in the DKG
+    if (!params.publicFile) {
       key = await window.crypto.subtle.generateKey(
         {
           name: 'AES-CTR',
@@ -117,14 +133,12 @@ export class Uploader {
         }),
       );
 
-      const node = (await this.api.get(`/get-node-address/?appid=${this.appId}`)).data;
-      host = node.host;
       const ephemeralWallet = await Wallet.createRandom();
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
         utils.toUtf8Bytes(encryptedMetaData),
-        node.address,
+        nodeResp.address,
         ephemeralWallet.address,
         duplicate
       ]);
@@ -155,10 +169,28 @@ export class Uploader {
           params: {
             tx_hash: txHash,
             encrypted_share: ciphertext,
-            signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash: txHash, encrypted_share: ciphertext }))),
+            signature: await ephemeralWallet.signMessage(ethers.utils.id(JSON.stringify({ tx_hash: txHash, encrypted_share: ciphertext }))),
           },
         });
       }
+    } else {
+      // Otherwise, generate a random address and create the uploadInit transaction
+      const ephemeralWallet = await Wallet.createRandom();
+      const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
+        did,
+        BigNumber.from(file.size),
+        utils.toUtf8Bytes(JSON.stringify({
+          name: 'name' in file ? file.name : did,
+          type: file.type,
+          size: file.size,
+          lastModified: 'lastModified' in file ? file.lastModified : new Date(),
+          hash,
+        })),
+        nodeResp.address,
+        ephemeralWallet.address,
+        duplicate
+      ]);
+      JWTToken = res.token;
     }
 
     let completeResp
@@ -183,17 +215,19 @@ export class Uploader {
       endpoint.pathname = `/api/v2/file/${did}`
       while (uploadedParts < parts) {
         const slicedChunk = await file.slice(counter, Math.min(counter + chunkSize, file.size))
-        const chunk = await slicedChunk.arrayBuffer()
+        let chunk = await slicedChunk.arrayBuffer()
 
-        const cipherText = await window.crypto.subtle.encrypt(
-          {
-            counter: generateCounterFromPartNumber(counter),
-            length: 64,
-            name: 'AES-CTR',
-          },
-          key,
-          chunk,
-        );
+        if (!params.publicFile) {
+          chunk = await window.crypto.subtle.encrypt(
+            {
+              counter: generateCounterFromPartNumber(uploadedParts),
+              length: 64,
+              name: 'AES-CTR',
+            },
+            key,
+            chunk,
+          );
+        }
 
         // 2. Upload parts
         await axios({
@@ -206,7 +240,7 @@ export class Uploader {
             ...headers,
             'Content-Type': 'application/octet-stream'
           },
-          data: cipherText
+          data: chunk
         })
 
         this.onProgress(counter + chunk.byteLength, file.size)
