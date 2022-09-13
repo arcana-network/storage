@@ -22,7 +22,7 @@ import {wrapInstance} from "./sentry";
 import { requiresLocking } from './locking';
 import { errorCodes } from './errors';
 
-function generateCounterFromPartNumber (value: number) {
+function convertByteCounterToAESCounter (value: number) {
   if (value === 0) {
     return new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   }
@@ -220,7 +220,7 @@ export class Uploader {
         if (!params.publicFile) {
           chunk = await window.crypto.subtle.encrypt(
             {
-              counter: generateCounterFromPartNumber(uploadedParts),
+              counter: convertByteCounterToAESCounter(counter),
               length: 64,
               name: 'AES-CTR',
             },

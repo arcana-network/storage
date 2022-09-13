@@ -31,5 +31,6 @@ export let errorCodes: IHash = {
     "DID_NFT_are_already_linked": "DID and NFT are already linked. No need to link again.",
     "NFT_owner_DID_owner_mismatch": "NFT owner and did owner are not matching.",
     "already_in_UI_mode": "Already in UI mode. No need to set again.",
-    "duplicate_can't_be_removed": "File has already been uploaded with duplicate tag, once you upload a file as duplicate you can turn it off."
+    "duplicate_can't_be_removed": "A file has already been uploaded with this hash, turn on the duplicate boolean field to upload with a randomly generated DID.",
+    "reserved_did_prefix": "DIDs with reserved prefixes (anything other than 0x01, 0x02 or 0x03) are undefined."
 };
