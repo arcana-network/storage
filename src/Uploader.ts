@@ -62,38 +62,6 @@ export class Uploader {
     console.log('Error', err);
   };
 
-  onUpload = async (host: string, token: string, did: string) => {
-    if (host) {
-      let res;
-      for (let i = 0; i < 8; i++) {
-        try {
-          res = await this.api.get(`${host}api/v1/hash`, { headers: { Authorization: `Bearer ${token}` } });
-          break;
-        } catch {
-          await new Promise((r) => setTimeout(r, 500));
-          console.log('retrying to fetch tx hash');
-        }
-      }
-      try {
-        const tx = await this.provider.getTransaction(
-          res.data.hash.substring(0, 2) == '0x' ? res.data.hash : '0x' + res.data.hash,
-        );
-        await tx.wait();
-        await this.onSuccess();
-      } catch (e) {
-        if (e.reason) {
-          if (e.reason.includes('file_already_uploaded')) {
-            throw customError('TRANSACTION', `File already exist. DID: ${did}`);
-          } else {
-            throw customError('TRANSACTION', e.reason);
-          }
-        } else {
-          throw customError('', e.error);
-        }
-      }
-    }
-  };
-
   @requiresLocking
   async upload (fileRaw: File, params: UploadParams = {chunkSize: 10 * 2 ** 20, duplicate: false, publicFile: false}) {
     const file: File = fileRaw;
@@ -193,6 +161,8 @@ export class Uploader {
       }
     }
 
+    let completeResp
+
     try {
       const endpoint = new URL(host)
       endpoint.pathname = '/api/v2/file/' + did
@@ -246,14 +216,31 @@ export class Uploader {
 
       endpoint.pathname = `/api/v2/file/${did}/complete`
       // 3. Complete the upload
-      await axios({
+      completeResp = (await axios({
         method: 'PATCH',
         url: endpoint.href,
         headers
-      })
-      this.onSuccess()
+      })).data
     } catch (e) {
       this.onError(e)
+    }
+
+    try {
+      const tx = await this.provider.getTransaction(
+        completeResp.hash.substring(0, 2) === '0x' ? completeResp.hash : '0x' + completeResp.hash,
+      );
+      await tx.wait();
+      await this.onSuccess();
+    } catch (e) {
+      if (e.reason) {
+        if (e.reason.includes('file_already_uploaded')) {
+          throw customError('TRANSACTION', `File already exist. DID: ${did}`);
+        } else {
+          throw customError('TRANSACTION', e.reason);
+        }
+      } else {
+        throw customError('', e.error);
+      }
     }
 
     return did.replace("0x" , "");
