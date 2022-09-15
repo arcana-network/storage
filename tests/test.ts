@@ -112,7 +112,9 @@ async function nockSetup() {
       .persist()
       .defaultReplyHeaders(nockOptions)
       .patch((p) => p.startsWith('/api/v2/file/'))
-      .reply(200, {})
+      .reply(200, {
+          hash: '0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e'
+      })
       .post((p) => p.startsWith('/api/v2/file/'))
       .reply(200, {})
 }
@@ -224,31 +226,49 @@ test.serial("Upload file", async (t) => {
 
     meta_tx_nock(undefined);
 
-    const arcanaInstance = await createStorageInstance(arcanaWallet);
+    const arcanaInstance = await createStorageInstance(arcanaWallet, (req, res, next, end) => {
+        if (req.method === 'eth_getTransactionByHash') {
+            res.result = {
+                "blockHash": "0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e",
+                "blockNumber": "0xf4240",
+                "hash": "0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e",
+                "chainId": "0x0",
+                "from": "0x32be343b94f860124dc4fee278fdcbd38c102d88",
+                "gas": "0xc350",
+                "gasPrice": "0xdf8475800",
+                "input": "0x",
+                "nonce": "0x43eb",
+                "r": "0x3b08715b4403c792b8c7567edea634088bedcd7f60d9352b1f16c69830f3afd5",
+                "s": "0x10b9afb67d2ec8b956f0e1dbc07eb79152904f3a7bf789fc869db56320adfe09",
+                "to": "0xdf190dc7190dfba737d7777a163445b7fff16133",
+                "transactionIndex": "0x1",
+                "type": "0x0",
+                "v": "0x1c",
+                "value": "0x6113a84987be800"
+            }
+        } else if (req.method === 'eth_getTransactionReceipt') {
+            res.result = {
+                "transactionHash": "0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e",
+                "blockHash": "0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e",
+                "blockNumber": "0xf4240",
+                "logs": [],
+                "contractAddress": null,
+                "effectiveGasPrice": "0xdf8475800",
+                "cumulativeGasUsed": "0xc444",
+                "from": "0x32be343b94f860124dc4fee278fdcbd38c102d88",
+                "gasUsed": "0x5208",
+                "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                "status": "0x1",
+                "to": "0xdf190dc7190dfba737d7777a163445b7fff16133",
+                "transactionIndex": "0x1",
+                "type": "0x0"
+            }
+        }
+        end()
+    });
 
     const upload = await arcanaInstance.getUploader();
-    // error DetailedError: tus: failed to upload chunk at offset 0, caused by
-    // TypeError: value.arrayBuffer is not a function, originated from request (method: PATCH,
-    // let sucesss = 0;
-
-    // upload.onSuccess = () => {
-    //   t.pass()
-    //   sucesss = 1;
-    // };
-
-    // upload.onError = (err) => {
-    //     console.log("error",err);
-    //     t.pass()
-    //     sucesss = 2;
-    // }
-
     await t.notThrowsAsync(upload.upload(file));
-
-    // while(true) {
-    //     if(sucesss > 0) break;
-    //     await sleep(2000);
-    // }
-
 })
 
 test.skip("Download file", async t => {
