@@ -13,7 +13,7 @@
 
 ## Prerequisites
 
-Arcana Storage SDK provides data privacy and access control through blockchain transactions powered by the Arcana Network. To use the Storage SDK, you need to ensure that you have access to a Web3 wallet `provider`.  A provider is required for signing blockchain transactions.
+Arcana Storage SDK provides data privacy and access control through blockchain transactions powered by the Arcana Network. To use the Storage SDK, you need to ensure that you have access to a Web3 wallet provider. A provider is required for signing blockchain transactions.
 
 You can obtain a Web3 wallet provider by integrating with the Arcana Auth SDK and accessing the `window.arcana.provider`.  
 
