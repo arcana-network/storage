@@ -42,7 +42,7 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 ## Initialize Storage
 
 ```ts
-import { StorageProvider } from '@arcana/storage'
+import { StorageProvider } from '@arcana/storage'; // required only once per .ts or .js file
 
 dAppStorageProvider = await StorageProvider.init({
   appId: ARCANA_APP_ID, // Get appId via Dashboard after registering and configuring dApp
@@ -63,7 +63,7 @@ This *Singleton* usage is recommended as a best practice.
 The Storage SDK deals with data in a `file` format. The `file` object must be an instance of a `Blob` or a descendant (`File`, etc.). You cannot upload a file by providing its URL.
 
 ```ts
-dAppStorageProvider.upload(
+await dAppStorageProvider.upload(
   file, (bytesUploaded, bytesTotal) => {
     console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')
   }
@@ -73,7 +73,7 @@ dAppStorageProvider.upload(
 ## Download File
 
 ```ts
-dAppStorageProvider.download(
+await dAppStorageProvider.download(
   did, (bytesDownloaded, bytesTotal) => {
     console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')
   }
@@ -133,7 +133,7 @@ let [consumed, total] = await dAppStorageProvider.files.getDownloadLimit();
 This method lists the files shared with the current user.
 
 ```ts
-import { AccessTypeEnum } from '@arcana/storage'
+import { AccessTypeEnum } from '@arcana/storage'; // required only once per .ts or .js file
 let files = await dAppStorageProvider.files.list(AccessTypeEnum.SHARED_FILES);
 ```
 
@@ -182,7 +182,7 @@ let metadata = await dAppStorageProvider.makeMetadataURL(
   did,
   file,
 );
-console.log(metadata)
+console.log(metadata);
 // https://test-storage.arcana.network:9000/api/v1/metadata/0x129d1438ff3bf014e9b9094b3a5d410f691c208ed5305b0844307b761c0e295e
 ```
 
@@ -200,7 +200,7 @@ let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a7608
 During file upload operations, if there are any errors, dApp developers should address those by catching the exceptions raised by the Storage SDK:
 
 ```ts
-import { StorageProvider } from '@arcana/storage';
+import { StorageProvider } from '@arcana/storage'; // required only once per .ts or .js file
 
 dAppStorageProvider = await StorageProvider.init({
   appId: ARCANA_APP_ID, // Get appId via Dashboard after registering and configuring dApp
@@ -211,7 +211,7 @@ dAppStorageProvider = await StorageProvider.init({
   // or use 'window.ethereum' if using a third-party wallet
 });
 
-dAppStorageProvider.upload(
+await dAppStorageProvider.upload(
   file, (bytesUploaded, bytesTotal) => {
     console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')
   }
