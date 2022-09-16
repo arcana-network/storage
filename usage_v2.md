@@ -1,5 +1,18 @@
 # Arcana Storage Usage Guide
 
+**Contents**
+
+1. [Usage Flow](#usage-flow)
+2. [Initialize SDK](#initialize-sdk)
+3. [Upload File](#upload-file)
+4. [Download File](#download-file)
+5. [Access Control](#access-control)
+6. [Storage Usage Metrics](#storage-usage-metrics)
+7. [Download File by DID](#download-file-by-did)
+8. [Private NFT](#private-nft)
+9. [Callback Functions](#callback-functions)
+10. [Changing Network and Wallet Accounts](#changing-network-and-wallet-accounts)
+
 ## Prerequisites
 
 To use the Storage SDK, you need to ensure that you have access to a blockchain `provider`.  A provider is required for signing blockchain transactions that power storage operations pertaining to data privacy and access control in the Arcana Network protocol.
@@ -22,7 +35,7 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
    - Save file DID returned by the uploader
 5. Use `StorageProvider` and obtain the downloader using `getDownloader` method
    - Call `download` method of the downloader using file DID as input
-6. Use `StorageProvider` and obtain the `access` object via `getAccess` call before invoking any of the file methods that govern access control such as:
+6. Use `StorageProvider` and obtain the `access` object via `getAccess` call before invoking any of the file methods that govern access control:
    - `delete` a file by specifying its DID
    - `share` a file by specifying its DID and recipient's wallet address
    - `revoke` access to a file by specifying its DID and recipient's wallet address
@@ -57,33 +70,22 @@ import { StorageProvider } from '@arcana/storage';
 const storage = new StorageProvider({ appId, provider, email });
 ```
 
-## Upload a File object
+**Note:**
+It suffices to invoke `new` method to instantiate StorageProvider just once and use it across your dApp.
+This *Singleton* usage is recommended as a best practice.
+
+## Upload File
 
 The `file` object must be an instance of a `Blob` or a descendant (`File`, etc.).
 
-#### v0.3 (for simpler use cases)
-```javascript
-storage
- .upload(file, (bytesUploaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')})
- .then((did) => console.log('File successfully uploaded. DID:', did))
- .catch(e => console.error(e));
-```
-
-#### v0.2
 ```javascript
 const Uploader = storage.getUploader();
 Uploader.onProgress = (bytesUploaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')}
 Uploader.upload(file);
 ```
 
-## Download from a DID
+## Download File
 
-#### v0.3 (for simpler use cases)
-```javascript
-storage.download(did, (bytesDownloaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')});
-```
-
-#### v0.2
 ```javascript
 const Downloader = storage.getDownloader();
 Downloader.onProgress = (bytesDownloaded, bytesTotal) => { console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')}
@@ -92,25 +94,40 @@ Downloader.download(did);
 
 ## Access Control
 
+### Get Access
+
+```javascript
+const Access = await storage.getAccess();
+```
+
+### Share File
+
+```javascript
+// did: DID of file to be shared
+// address: recipients address
+// validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds
+await Access.share([did], [address]);
+```
+
 ### Revoke File Sharing
 
 ```javascript
 // did: DID of file from which access is removed
 // address: Address of the user who's access is getting revoked
-storage.files.revoke(did, address);
+await Access.revoke(did, address);
 ```
 
 ### Change File Ownership
 
 ```javascript
 // address: new owner's address
-storage.files.changeOwner(did, address);
+await Access.changeOwner(did, address);
 ```
 
 ### Delete a File
 
 ```javascript
-storage.files.delete(did);
+await Access.delete(did);
 ```
 
 ## Storage Usage Metrics
@@ -119,14 +136,14 @@ storage.files.delete(did);
 
 ```javascript
 //Get consumed and total storage of the current user
-let [consumed, total] = await storage.files.getUploadLimit();
+let [consumed, total] = await Access.getUploadLimit();
 ```
 
 ### Get Download Limit
 
 ```javascript
 //Get consumed and total bandwidth of the current user
-let [consumed, total] = await storage.files.getDownloadLimit();
+let [consumed, total] = await Access.getDownloadLimit();
 ```
 
 ### List of Files Shared
@@ -134,7 +151,7 @@ let [consumed, total] = await storage.files.getDownloadLimit();
 List files shared with the current user.
 
 ```javascript
-let files = await storage.files.list(AccessTypeEnum.SHARED_FILES);
+let files = await Access.list(AccessTypeEnum.SHARED_FILES);
 ```
 
 ### List of Files Uploaded
@@ -142,17 +159,7 @@ let files = await storage.files.list(AccessTypeEnum.SHARED_FILES);
 List files uploaded by the current user.
 
 ```javascript
-let files = await storage.files.list(AccessTypeEnum.MY_FILES);
-```
-
----
-
-### Old Access API
-
-Anything you can do with `storage.files` can also be done with the `Access` object returned by `storage.getAccess`.
-
-```javascript
-const Access = await storage.getAccess();
+let files = await Access.list(AccessTypeEnum.MY_FILES);
 ```
 
 ## Download File by DID
@@ -171,9 +178,7 @@ let storage = new arcana.storage.StorageProvider();
 await storage.downloadDID('<did of the file>');
 ```
 
----
-
-## Private NFT Creation
+## Private NFT
 
 Use the following Storage SDK functionality for minting private NFTs.
 
@@ -200,8 +205,6 @@ Once you have minted the NFT, to make it private and control access to it and ma
 let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
    await storage.linkNft(did, tokenId, nftContract, chainId);
 ```
-
----
 
 ## CallBack Functions
 

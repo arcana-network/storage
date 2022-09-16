@@ -25,10 +25,10 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 
 1. Install Storage SDK
 2. Import `StorageProvider` from the Storage SDK package in the dApp. Call `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appId` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
-3. Use `StorageProvider` to invoke:
-   - `upload` method to push file data into the Arcana Store. **Note:** Save file DID returned by upload.
-   - `download` method with file DID as input to retrieve a file from the Arcana Store.
-4. Use `StorageProvider.files` to invoke:
+3. Use `StorageProvider` to:
+   - `upload` and push file data into the Arcana Store. **Note:** Save file DID returned by upload.
+   - `download` a file from the Arcana Store using DID as input.
+4. Use `StorageProvider.files` to:
    - `delete` a file by specifying its DID.
    - `share` a file by specifying its DID and recipient's wallet address.
    - `revoke` access to a file by specifying its DID and recipient's wallet address.
@@ -55,7 +55,7 @@ dAppStorageProvider = await StorageProvider.init({
 ```
 
 **Note:**
-It suffices to invoke `init` method of StorageProvider just once and use the same in your dApp.
+It suffices to invoke `init` method of StorageProvider just once and use it across your dApp.
 This *Singleton* usage is recommended as a best practice.
 
 ## Upload File
