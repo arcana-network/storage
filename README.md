@@ -30,11 +30,11 @@ In the beta release, the storage nodes are operated by Arcana Networks. In the f
 
 It is super easy to integrate Arcana's Storage SDK with your dApp. Just install, add a few lines of code, and you are all set:
 
-```
+```ts
 import { StorageProvider } from '@arcana/storage';
-const storage = await StorageProvider.init({ appId, provider, email });
-let did = storage.upload(file)
-storage.download(did)
+const storage = await StorageProvider.init({ appId, provider });
+let did = await storage.upload(file)
+await storage.download(did)
 ```
 
 See [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage), for details.

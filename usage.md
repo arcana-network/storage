@@ -133,6 +133,7 @@ let [consumed, total] = await dAppStorageProvider.files.getDownloadLimit();
 This method lists the files shared with the current user.
 
 ```ts
+import { AccessTypeEnum } from '@arcana/storage'
 let files = await dAppStorageProvider.files.list(AccessTypeEnum.SHARED_FILES);
 ```
 
