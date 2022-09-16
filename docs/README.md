@@ -30,7 +30,7 @@ import { StorageProvider } from '@arcana/storage/dist/standalone/storage.umd';
 // provider: Web3provider (Eg: If you have installed metamask then window.ethereum will work)
 //           Default value of provider is window.ethereum
 // appId: This field is optional. If you want to download a file with just did then you won't require this field
-const arcanaInstance = new arcana.storage.StorageProvider({ appId, provider, email });
+const arcanaInstance = await arcana.storage.StorageProvider.init({ appId, provider, email });
 ```
 
 ### Get Uploader

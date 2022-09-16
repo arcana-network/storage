@@ -41,10 +41,10 @@ export function createAndDownloadBlobFile(body, filename) {
 }
 
 export class Downloader {
-  private provider: any;
+  private readonly provider: any;
   private hasher;
-  private api: AxiosInstance;
-  private appAddress: string;
+  private readonly api: AxiosInstance;
+  private readonly appAddress: string;
   private readonly lock: Mutex;
 
   constructor(appAddress: string, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
@@ -63,27 +63,29 @@ export class Downloader {
   onProgress = async (bytesDownloaded: number, bytesTotal: number): Promise<void> => {};
 
   @requiresLocking
-  async download (did) {
+  private async _download (did, accessType: 'view' | 'download'): Promise<void | Blob> {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
     const arcana = Arcana(this.appAddress, this.provider);
-    let file, txHash;
+    let file;
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     try {
       file = await getFile(did, this.provider);
     } catch (e) {
       throw customError('UNAUTHORIZED', "You can't download this file");
     }
-    let ephemeralWallet = await Wallet.createRandom();
-    let res = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [
+
+    const ephemeralWallet = await Wallet.createRandom();
+    const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [
       did,
       readHash,
       ephemeralWallet.address,
     ]);
-    txHash = res.txHash;
-    let shares = {};
+    const txHash = checkPermissionResp.txHash
+
+    const shares = {};
     const nodes = await getDKGNodes(this.provider);
     for (let i = 0; i < nodes.length; i++) {
-      let res = await axios.post('https://' + nodes[i].declaredIp + '/rpc', {
+      const res = await axios.post('https://' + nodes[i].declaredIp + '/rpc', {
         jsonrpc: '2.0',
         method: 'RetrieveKeyShare',
         id: 10,
@@ -93,29 +95,30 @@ export class Downloader {
         },
       });
       if(res.data.error) {
+        // tslint:disable-next-line:no-console
         console.log(res.data.error.message, "\n", res.data.error.data);
         continue
       }
-      let sh = res.data.result.share;
+      const sh = res.data.result.share;
       shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh));
     }
-    let decryptedKey = join(shares);
+    const decryptedKey = join(shares);
 
     const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt']);
 
     const fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)));
 
-    let Dec = new Decryptor(key);
+    const Dec = new Decryptor(key);
 
-    const fileWriter = new FileWriter(fileMeta.name);
+    const fileWriter = new FileWriter(fileMeta.name, accessType);
     const chunkSize = 10 * 2 ** 20;
     let downloaded = 0;
     for (let i = 0; i < fileMeta.size; i += chunkSize) {
-      const range = `bytes=${i}-${i + chunkSize - 1}`;
-      const download = await fetch(res.host + `files/${did}`, {
+      const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size)}`;
+      const download = await fetch(checkPermissionResp.host + `files/${did}`, {
         headers: {
           Range: range,
-          Authorization: `Bearer ${res.token}`,
+          Authorization: `Bearer ${checkPermissionResp.token}`,
         },
       });
       const buff = await download.arrayBuffer();
@@ -126,12 +129,27 @@ export class Downloader {
       await this.onProgress(downloaded, fileMeta.size);
     }
     const decryptedHash = hasher2Hex(this.hasher.digest());
-    const success = fileMeta.hash == decryptedHash;
+    const success = fileMeta.hash === decryptedHash;
     if (success) {
-      fileWriter.createDownload();
+      const out = await fileWriter.createDownload();
       await this.onSuccess();
+      return out
     } else {
-      throw new Error('Hash does not matches with uploaded file');
+      throw new Error('Hash does not match the uploaded file');
     }
   };
+
+  // TODO - Remove during API breaking changes
+  // @deprecated - Use downloadToFilesystem
+  public download (did) {
+    return this._download(did, 'download')
+  }
+
+  public downloadToFilesystem (did): Promise<void> {
+    return this._download(did, 'download') as Promise<void>
+  }
+
+  public getBlob (did): Promise<Blob> {
+    return this._download(did, 'view') as Promise<Blob>
+  }
 }

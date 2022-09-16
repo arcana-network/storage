@@ -12,8 +12,8 @@ export default class FileWriter {
   };
   public writing: boolean = false;
   public fileName: string;
-  private dbName: string;
-  private type: 'view' | 'download';
+  private readonly dbName: string;
+  private readonly type: 'view' | 'download';
   private DB: IDBDatabase;
   private count: number = 1000000;
   constructor(fileName: string, type: 'view' | 'download' = 'download') {
@@ -51,17 +51,18 @@ export default class FileWriter {
     });
   }
 
-  public createDownload(name?: string) {
+  public createDownload(name?: string): Promise<void | Blob> {
     return new Promise((resolve, reject) => {
       this.writing = true;
       const self = this;
       const transaction = this.DB.transaction([self.dbName], 'readonly');
       const request = transaction.objectStore(self.dbName).getAll();
       request.onsuccess = (event: any) => {
-        const objectUrl = URL.createObjectURL(new Blob(event.target.result));
+        const blob = new Blob(event.target.result)
         if (this.type === 'view') {
-          return resolve(objectUrl);
+          return resolve(blob);
         } else {
+          const objectUrl = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.download = name ? name : self.fileName;
           a.href = objectUrl;

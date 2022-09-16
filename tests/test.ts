@@ -1,11 +1,11 @@
 import test from 'ava';
 import sinon from 'sinon';
-import { ethers, Wallet } from 'ethers';
+import { BigNumber, ethers, Wallet } from 'ethers';
 
-import { createEngine } from './sub_provider'
+import { createEngine } from './sub_provider';
 import fs from 'fs';
 import nock from 'nock';
-import { utils as ethUtils, BigNumber } from 'ethers';
+import { Blob as nBlob } from 'blob-polyfill'
 import axios from 'axios';
 import httpAdapter from 'axios/lib/adapters/http';
 
@@ -14,8 +14,7 @@ import { providerFromEngine } from 'eth-json-rpc-middleware';
 //SDK imports
 import { StorageProvider } from '../src/index';
 import * as utils from '../src/Utils';
-import { Downloader } from '../src/Downloader';
-import { errorCodes } from "../src/errors";
+import { errorCodes } from '../src/errors';
 import { parseData } from './utils';
 
 //Load contract addresses
@@ -109,7 +108,15 @@ async function nockSetup() {
         .query({ appid: appId })
         .reply(200, { host: 'http://localhost:3000/', address: storage_node.address });
 
-
+    nock("http://localhost:3000")
+      .persist()
+      .defaultReplyHeaders(nockOptions)
+      .patch((p) => p.startsWith('/api/v2/file/'))
+      .reply(200, {
+          hash: '0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e'
+      })
+      .post((p) => p.startsWith('/api/v2/file/'))
+      .reply(200, {})
 }
 
 function sinonMockObjectSetup() {
@@ -158,9 +165,8 @@ function sinonMockObjectSetup() {
 
 async function mockFile() {
     // file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
-    let file = await (await fetch("https://picsum.photos/id/872/200/300")).blob();
     // file = new File([file], "picsum_img", { type: file.type });
-    return Promise.resolve(file);
+    return new nBlob([await (await fetch("https://picsum.photos/id/872/200/300")).arrayBuffer()])
 }
 
 //Wallet Setup
@@ -177,7 +183,7 @@ const deployer = ethers.Wallet.fromMnemonic(memonic, path + "0"),
 
 
 
-//shared fixture     
+//shared fixture
 let fixture;
 
 //Mock server & stub setup
@@ -194,7 +200,7 @@ test.serial.before(async (t) => {
 
 
 //TODO: get request handler in arrays
-async function createStrorageInstance( wallet:Wallet ,middleware?) {
+async function createStorageInstance( wallet:Wallet ,middleware?) {
 
     let engine = createEngine(wallet.address);
 
@@ -220,31 +226,49 @@ test.serial("Upload file", async (t) => {
 
     meta_tx_nock(undefined);
 
-    const arcanaInstance = await createStrorageInstance(arcanaWallet);
+    const arcanaInstance = await createStorageInstance(arcanaWallet, (req, res, next, end) => {
+        if (req.method === 'eth_getTransactionByHash') {
+            res.result = {
+                "blockHash": "0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e",
+                "blockNumber": "0xf4240",
+                "hash": "0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e",
+                "chainId": "0x0",
+                "from": "0x32be343b94f860124dc4fee278fdcbd38c102d88",
+                "gas": "0xc350",
+                "gasPrice": "0xdf8475800",
+                "input": "0x",
+                "nonce": "0x43eb",
+                "r": "0x3b08715b4403c792b8c7567edea634088bedcd7f60d9352b1f16c69830f3afd5",
+                "s": "0x10b9afb67d2ec8b956f0e1dbc07eb79152904f3a7bf789fc869db56320adfe09",
+                "to": "0xdf190dc7190dfba737d7777a163445b7fff16133",
+                "transactionIndex": "0x1",
+                "type": "0x0",
+                "v": "0x1c",
+                "value": "0x6113a84987be800"
+            }
+        } else if (req.method === 'eth_getTransactionReceipt') {
+            res.result = {
+                "transactionHash": "0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e",
+                "blockHash": "0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e",
+                "blockNumber": "0xf4240",
+                "logs": [],
+                "contractAddress": null,
+                "effectiveGasPrice": "0xdf8475800",
+                "cumulativeGasUsed": "0xc444",
+                "from": "0x32be343b94f860124dc4fee278fdcbd38c102d88",
+                "gasUsed": "0x5208",
+                "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                "status": "0x1",
+                "to": "0xdf190dc7190dfba737d7777a163445b7fff16133",
+                "transactionIndex": "0x1",
+                "type": "0x0"
+            }
+        }
+        end()
+    });
 
-    let upload = await arcanaInstance.getUploader();
-    // error DetailedError: tus: failed to upload chunk at offset 0, caused by 
-    // TypeError: value.arrayBuffer is not a function, originated from request (method: PATCH,
-    // let sucesss = 0;
-
-    // upload.onSuccess = () => {
-    //   t.pass()
-    //   sucesss = 1;
-    // };
-
-    // upload.onError = (err) => {
-    //     console.log("error",err);
-    //     t.pass()
-    //     sucesss = 2;
-    // }
-
+    const upload = await arcanaInstance.getUploader();
     await t.notThrowsAsync(upload.upload(file));
-
-    // while(true) {
-    //     if(sucesss > 0) break;
-    //     await sleep(2000);
-    // }
-
 })
 
 test.skip("Download file", async t => {
@@ -253,7 +277,7 @@ test.skip("Download file", async t => {
 })
 
 test.serial.skip("Metadata URL", async t => {
-    //Skipped because axios need additional transformation for nodejs env 
+    //Skipped because axios need additional transformation for nodejs env
     //refer: https://stackoverflow.com/questions/63938549/axios-data-should-be-a-string-buffer-or-uint8array
     nock("http://localhost:3000")
         .defaultReplyHeaders(nockOptions)
@@ -286,7 +310,7 @@ test.serial('Share file', async (t) => {
         end();
     }
 
-    const arcanaInstance = await createStrorageInstance(arcanaWallet ,middleware);
+    const arcanaInstance = await createStorageInstance(arcanaWallet ,middleware);
 
     let access = await arcanaInstance.getAccess();
 
@@ -302,8 +326,8 @@ test.serial('Share file', async (t) => {
         .reply(200, { data: 0 });
 
 
-    const receiverInstance = await createStrorageInstance(receiverWallet);
-         
+    const receiverInstance = await createStorageInstance(receiverWallet);
+
     let files = await receiverInstance.sharedFiles();
     t.is(files.length, 1);
     t.is(files[0]['did'], did.substring(2));
@@ -320,7 +344,7 @@ test.serial('Fail revoke transaction on unauthorized files', async (t) => {
             err: expected_errorCode
         })
 
-    const receiverInstance = await createStrorageInstance(receiverWallet);    
+    const receiverInstance = await createStorageInstance(receiverWallet);
 
     let access = await receiverInstance.getAccess();
     let err = await t.throwsAsync(access.revoke(did, arcanaWallet.address));
@@ -348,7 +372,7 @@ test.serial('Get consumed and total upload limit', async (t) => {
         end();
     }
 
-    const arcanaInstance = await createStrorageInstance(arcanaWallet, middleware);
+    const arcanaInstance = await createStorageInstance(arcanaWallet, middleware);
     const Access = await arcanaInstance.getAccess();
     let [consumed, total] = await Access.getUploadLimit();
     t.is(consumed, file.size);
@@ -375,7 +399,7 @@ test.serial('Get consumed and total download limit', async (t) => {
         end();
     }
 
-    const arcanaInstance = await createStrorageInstance(arcanaWallet, middleware);
+    const arcanaInstance = await createStorageInstance(arcanaWallet, middleware);
     const Access = await arcanaInstance.getAccess();
     let [consumed, total] = await Access.getDownloadLimit();
     t.is(consumed, file.size);
@@ -400,7 +424,7 @@ test.serial('Revoke', async (t) => {
         end();
     }
 
-    let arcanaInstance = await createStrorageInstance(arcanaWallet, middleware);
+    let arcanaInstance = await createStorageInstance(arcanaWallet, middleware);
 
     let access = await arcanaInstance.getAccess();
     nock(gateway).defaultReplyHeaders(nockOptions)
@@ -423,7 +447,7 @@ test.serial('Revoke', async (t) => {
 
     }
 
-    arcanaInstance = await createStrorageInstance(arcanaWallet, middleware),
+    arcanaInstance = await createStorageInstance(arcanaWallet, middleware),
     access = await arcanaInstance.getAccess();
 
     nock(gateway).defaultReplyHeaders(nockOptions)
@@ -442,7 +466,7 @@ test.serial('Revoke', async (t) => {
         .get("/files/shared/total/")
         .reply(200, { data: 0 });
 
-    let receiverInstance = await createStrorageInstance(receiverWallet);
+    let receiverInstance = await createStorageInstance(receiverWallet);
 
     let files = await receiverInstance.sharedFiles();
     t.is(files.length, 0);
@@ -460,12 +484,12 @@ test.serial('Delete File', async (t) => {
         .get("/files/total/")
         .reply(200, { data: 1 });
 
-    let arcanaInstance = await createStrorageInstance(arcanaWallet);
+    let arcanaInstance = await createStorageInstance(arcanaWallet);
 
     let access = await arcanaInstance.getAccess();
-    
+
     let files = await arcanaInstance.myFiles();
-     
+
     t.is(files.length, 1);
     t.is(files[0].did, did.substring(2));
 
@@ -477,7 +501,7 @@ test.serial('Delete File', async (t) => {
         .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
         .get("/files/total/")
         .reply(200, { data: 0 });
-        
+
     files = await arcanaInstance.myFiles();
 
     t.is(files.length, 0);
