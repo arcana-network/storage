@@ -26,7 +26,7 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 1. Install Storage SDK
 2. Import `StorageProvider` from the Storage SDK package in the dApp. Call `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appId` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
 3. Use `StorageProvider` to:
-   - `upload` and push file data into the Arcana Store. **Note:** Save file DID returned by upload.
+   - `upload` and push file data into the Arcana Store. **Note:** Save file DID obtained after file upload.
    - `download` a file from the Arcana Store using DID as input.
 4. Use `StorageProvider.files` to:
    - `delete` a file by specifying its DID.

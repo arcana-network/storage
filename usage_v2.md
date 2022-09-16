@@ -71,7 +71,7 @@ const storage = new StorageProvider({ appId, provider, email });
 ```
 
 **Note:**
-It suffices to invoke `new` method to instantiate StorageProvider just once and use it across your dApp.
+It suffices to invoke the `new` method to instantiate StorageProvider just once and use it across your dApp.
 This *Singleton* usage is recommended as a best practice.
 
 ## Upload File
@@ -275,9 +275,9 @@ uploader.upload(fileToUpload)
 
 This advanced error handling section is only meant for file upload to address special dApp use cases. It is **recommended** that dApp developers using *Exception handling - catch* mechanism, for handling file upload errors.
 
-Every user action to upload a file internally results in the Storage SDK splitting the file into multiple parts according to the [tus](https://tus.io/) protocol. These parts are uploaded to the Arcana Store. If any of the file segment fails to transmit, it is automatically retried until all file segments are transferred. The automatic retry counter is hard coded to '5' in the beta release and the dApp developer cannot change this configuration.
+Every user action to upload a file internally results in the Storage SDK splitting the file into multiple parts according to the [tus](https://tus.io/) protocol. These parts are uploaded to the Arcana Store. If any of the file segment fails to transmit, it is automatically retried until all file segments are transferred. The automatic retry counter is hard coded to '5' in the beta release, and the dApp developer cannot change this configuration.
 
-If the dApp developer is required to handle file upload error in case the retries fail, use `onError()` mechanism. After retrying for four times, in case of any segment upload fails for the fifth time, the Storage SDK invokes `onError()` callback to enable dApp developer to take appropriate action or delay file transfer to deal with intermittent network failures.
+If the dApp developer is required to handle file upload error in case the retries fail, use the `onError()` mechanism. After retrying for four times, in case of any segment upload fails for the fifth time, the Storage SDK invokes `onError()` callback to enable dApp developer to take appropriate action or delay file transfer to deal with intermittent network failures.
 
 ```js
 Uploader.onError = (err) => {

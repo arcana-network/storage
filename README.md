@@ -21,14 +21,14 @@
 
 The Arcana Storage SDK enables you to configure dApp and allow users to store files in a region enabled by the application, share it with other users, revoke access or transfer file ownership to another user.
 
-In the beta release, the storage nodes are operated by Arcana Networks. In the future, the storage subsystem will be fully decentralized and third party storage nodes can be plugged into the Arcana Network storage subsystem once they meet the Arcana storage QoS criteria.
+In the beta release, the storage nodes are operated by Arcana Networks. In the future, the storage subsystem will be fully decentralized, and third party storage nodes can be plugged into the Arcana Network storage subsystem once they meet the Arcana storage QoS criteria.
 
 | :warning: Caution: Arcana Network SDKs and apps (Beta Release), not meant for production usage. |
 |:------------------------------------------------------------------------------------------------|
 
 ## Simple to Integrate
 
-It is super easy to integrate Arcana's Storage SDK with your dApp. Just install, add a few lines of code and you are all set:
+It is super easy to integrate Arcana's Storage SDK with your dApp. Just install, add a few lines of code, and you are all set:
 
 ```
 import { StorageProvider } from '@arcana/storage';
@@ -38,7 +38,7 @@ let did = storage.upload(file)
 storage.download(did)
 ```
 
-See [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage) for details.
+See [Usage Guide](https://docs.beta.arcana.network/docs/stgsdk_usage), for details.
 
 # 💪 Key Features
 
@@ -63,7 +63,7 @@ npm i @arcana/storage
 yarn add @arcana/storage
 ```
 
-You can also use the standalone module which includes the polyfills.
+You can also use the standalone module, which includes the polyfills.
 
 ```html
 <script src="./dist/standalone/storage.umd.js"></script>
@@ -78,7 +78,7 @@ import { StorageProvider } from '@arcana/storage'
 
 Before you can start using the Arcana Storage SDK, you need to register your dApp using [Arcana Developer Dashboard](https://dashboard.beta.arcana.network/).
 
-A unique **AppId** will be assigned to your dApp and you need to provide this to Arcana Storage SDK in order to use the SDK functionality.
+A unique **AppId** will be assigned to your dApp. You need to provide this to Arcana Storage SDK in order to use the SDK functionality.
 
 # 📚 Documentation
 
@@ -126,4 +126,4 @@ Start running an HTTP server using one of these suggested methods:
 
 Arcana Storage is distributed under the [MIT License](https://fossa.com/blog/open-source-licenses-101-mit-license/).
 
-For details see [Arcana License](https://github.com/arcana-network/license/blob/main/LICENSE.md).
+For details, see [Arcana License](https://github.com/arcana-network/license/blob/main/LICENSE.md).
