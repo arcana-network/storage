@@ -9,6 +9,7 @@ import { Config, customError, getFile, getProvider, makeTx, parseHex } from './U
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant';
 import { wrapInstance } from './sentry';
 import { Mutex } from 'async-mutex';
+import { errorCodes } from './errors';
 
 export class StorageProvider {
   // private provider: providers.Web3Provider;
@@ -42,9 +43,16 @@ export class StorageProvider {
     // If provider is provided by the user, use that provider
     if (config.provider) {
       this.provider = getProvider(config.provider);
-    } else {
       // @ts-ignore
-      this.provider = getProvider(window.ethereum);
+    } else if (window.arcana?.provider != null) {
+      // @ts-ignore
+      this.provider = getProvider(window.arcana.provider)
+      // @ts-ignore
+    } else if (window.ethereum != null) {
+      // @ts-ignore
+      this.provider = getProvider(window.ethereum)
+    } else {
+      throw customError('INITIALIZATION', errorCodes.wallet_not_found)
     }
     this.email = config.email;
     this.appId = config.appId;
