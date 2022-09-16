@@ -142,6 +142,7 @@ let files = await dAppStorageProvider.files.list(AccessTypeEnum.SHARED_FILES);
 This method lists the files uploaded by the current user.
 
 ```ts
+import { AccessTypeEnum } from '@arcana/storage'; // required only once per .ts or .js file
 let files = await dAppStorageProvider.files.list(AccessTypeEnum.MY_FILES);
 ```
 ---
