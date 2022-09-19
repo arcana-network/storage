@@ -330,5 +330,15 @@ export class StorageProvider {
 
     return downloader.downloadToFilesystem(did)
   }
+
+  getBlob = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void> ): Promise<Blob> => {
+    const downloader = await this.getDownloader();
+
+    if (onProgress != null) {
+      downloader.onProgress = onProgress;
+    }
+
+    return downloader.getBlob(did)
+  }
 }
 export { AccessTypeEnum } from './fileAPI'
