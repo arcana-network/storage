@@ -17,7 +17,7 @@ Arcana Storage SDK provides data privacy and access control through blockchain t
 
 You can obtain a Web3 wallet provider by integrating with the Arcana Auth SDK and accessing the `window.arcana.provider`.  
 
-Alternately, you can choose to use MetaMask instead of the Arcana Auth SDK or one of the [supported third-party wallets](https://docs.beta.arcana.network/docs/config3pwallet). For third-party wallets, use the `window.ethereum` variable to access the provider.
+Alternatively, you can choose to use MetaMask instead of the Arcana Auth SDK or one of the [supported third-party wallets](https://docs.beta.arcana.network/docs/config3pwallet). For third-party wallets, use the `window.ethereum` variable to access the provider.
 
 Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.network/docs/stgsdk_qs) to understand how to integrate with the Storage SDK.
 
@@ -26,7 +26,7 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 1. Install Storage SDK
 2. Import `StorageProvider` from the Storage SDK package in the dApp. Call `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appId` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
 3. Use `StorageProvider` to:
-   - `upload` and push file data into the Arcana Store. **Note:** Save file DID obtained after file upload.
+   - `upload` and push file data into the Arcana Store. **Note:** Save file DID that is returned after file upload operation is successful.
    - `download` a file from the Arcana Store using DID as input.
 4. Use `StorageProvider.files` to:
    - `delete` a file by specifying its DID.
@@ -174,14 +174,14 @@ Use the following Storage SDK functionality for minting private NFTs.
 
 ### Create Metadata URL
 
-Use `makeMetadataURL` to obtain a URL that can be used to mint private NFT.
+Use `makeMetadataURL` to obtain a URL that can be used to mint a preview image of the actual private NFT. This preview image can be publicly listed in NFT marketplaces and can be transacted upon. Only the owner of the private NFT can download it from the Arcana Store and access it. Others can only view the publicly listed preview image. Arcana Network platform bridge entity tracks ownership changes corresponding to NFT transactions carried out in public marketplaces and updates the Arcana Store accordingly. For details, refer to the guide - [How to create private NFT](https://docs.beta.arcana.network/docs/mintpvtnft).
 
 ```ts
 let metadata = await dAppStorageProvider.makeMetadataURL(
   title,
   description,
-  did,
-  file,
+  did, // The DID of the private NFT file hosted in the Arcana Store
+  file, // The 'preview image' file corresponding to the private NFT, not the actual private NFT data file
 );
 console.log(metadata);
 // https://test-storage.arcana.network:9000/api/v1/metadata/0x129d1438ff3bf014e9b9094b3a5d410f691c208ed5305b0844307b761c0e295e
@@ -189,7 +189,7 @@ console.log(metadata);
 
 ### Link Minted NFT with DID
 
-Once you have minted the NFT, to make it private and control access to it and manage ownership, you need to link it with the DID.  
+Once you have minted the preview image corresponding to the private NFT in the Arcana Store, a token is assigned to the preview image as part of the minting process. This token must be linked with the actual private NFT file in the Arcana Store. This is required to track and manage ownership changes for the private NFT asset.  
 
 ```ts
 let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
