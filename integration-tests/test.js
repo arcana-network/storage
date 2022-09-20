@@ -8,6 +8,8 @@ const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
 const appId = 1;
 // const appId = 28;
+const delay = ms => new Promise(res => setTimeout(res, ms));
+
 
 const debug = false;
 const generateString = (length) => {
@@ -67,7 +69,7 @@ describe('Upload File', () => {
   before(async () => {
     file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 10, 'text/plain');
     file = new File([file], file.name, { type: file.type });
-    arcanaInstance = new arcana.storage.StorageProvider({
+    arcanaInstance = await arcana.storage.StorageProvider.init({
       appId,
       provider: window.ethereum,
       email: makeEmail(),
@@ -78,28 +80,12 @@ describe('Upload File', () => {
   });
 
    it('Should upload a duplicate file', async () => {
-    let upload = await arcanaInstance.getUploader();
-    let complete = false;
     let file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 10, 'text/plain');
-    upload.onSuccess = () => {
-      console.log('Completed file upload');
-      complete = true;
-      file_count += 1;
-    };
-    did = await upload.upload(file, {duplicate: true});
-    console.log('did', did);
-    while (!complete) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-    }
-
-    complete = false
-    did = await upload.upload(file, {duplicate: true});
-    console.log('did', did);
-    while (!complete) {
-      await new Promise((resolve) => setTimeout(resolve, 800));
-    }
-
+    did = await arcanaInstance.upload(file);
+    console.log('did 1', did);
+    // did = await arcanaInstance.upload(file, {duplicate: true});
+    // console.log('did 2', did); 
+    await arcanaInstance.download(did)
   });
-
-
+    
 });

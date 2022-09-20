@@ -115,7 +115,7 @@ export class Downloader {
     let downloaded = 0;
     for (let i = 0; i < fileMeta.size; i += chunkSize) {
       const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size)}`;
-      const download = await fetch(checkPermissionResp.host + `files/${did}`, {
+      const download = await fetch(checkPermissionResp.host + `api/v2/file/${did}`, {
         headers: {
           Range: range,
           Authorization: `Bearer ${checkPermissionResp.token}`,
