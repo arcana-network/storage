@@ -189,7 +189,7 @@ console.log(metadata);
 
 ### Link Minted NFT with DID
 
-Once you have minted the preview image corresponding to the private NFT in the Arcana Store, a token is assigned to the preview image as part of the minting process. This token must be linked with the actual private NFT file in the Arcana Store. This is required to track and manage ownership changes for the private NFT asset.  
+Once you have minted the NFT, to make it private and control access to it and manage ownership, you need to link it with the DID.
 
 ```ts
 let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
