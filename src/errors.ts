@@ -23,6 +23,7 @@ export let errorCodes: IHash = {
     "file_ownership_transfer_to_same_address": "New owner cannot be same as old owner while changing file owner.",
     "invalid_app_ID": "Make sure you specify the correct app ID assigned to dApp after configuration at the dashboard https://dashboard.arcana.network/",
     "app_not_found":  "Configure the app at https://dashboard.arcana.network/.",
+    "wallet_not_found": "No wallet was found in the environment, nor was one provided. Integrate your dApp with the Auth SDK to use Arcana wallet or install any supported third-party wallet.",
     "only_gateway_node":  "Only gateway node has access to the function.",
     "invalid_function_signature": "Meta-transaction failed. The function you are trying to call does not exist. Check the function signature.",
     "DID_NFT_linked": "DID is linked with NFT.Hence, ownership transfer of file cannot be done.",
@@ -30,5 +31,5 @@ export let errorCodes: IHash = {
     "DID_NFT_are_already_linked": "DID and NFT are already linked. No need to link again.",
     "NFT_owner_DID_owner_mismatch": "NFT owner and did owner are not matching.",
     "already_in_UI_mode": "Already in UI mode. No need to set again.",
-    "duplicate_can't_be_removed": "File has already been uploaded with duplicate tag, once you upload a file as duplicate you can turn it off." 
+    "duplicate_can't_be_removed": "File has already been uploaded with duplicate tag, once you upload a file as duplicate you can turn it off."
 };
