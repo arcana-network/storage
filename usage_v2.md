@@ -15,11 +15,11 @@
 
 ## Prerequisites
 
-To use the Storage SDK, you need to ensure that you have access to a blockchain `provider`.  A provider is required for signing blockchain transactions that power storage operations pertaining to data privacy and access control in the Arcana Network protocol.
+To use the Storage SDK, ensure that you have access to a Web3 wallet *provider*. The Storage SDK allows dApps to interact with the Arcana Network protocol. This protocol implements user data privacy and access control through blockchain transactions. A Web3 wallet provider is necessary for signing blockchain transactions.
 
-You can obtain the blockchain provider by integrating with the Arcana Auth SDK and accessing the `window.arcana.provider`.  
+A dApp developer can access a Web3 wallet provider by integrating with the Arcana Auth SDK and using the embedded Arcana wallet. By default, it stores the provider in the `window.arcana.provider` variable.   
 
-Alternately, if you choose to use MetaMask instead of the Arcana Auth SDK or one of the [supported third-party wallets](https://docs.beta.arcana.network/docs/config3pwallet), use the `window.ethereum` variable to access the provider.
+Alternatively, the Storage SDK can also work with any supported [third-party wallets](https://docs.beta.arcana.network/docs/config3pwallet) such as MetaMask instead of using the Arcana wallet offered by the Arcana Auth SDK. These supported third-party wallets store the provider in the `window.ethereum` variable.
 
 Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.network/docs/stgsdk_qs) to understand how to integrate with the Storage SDK.
 
@@ -28,19 +28,20 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 1. Install Storage SDK
 2. Import and initialize Storage SDK by creating a new `StorageProvider` for your dApp. Specify the blockchain `provider` and the `appId` as inputs to the new method. Note: Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
 3. Use `StorageProvider` to:
-   - Call `myFiles` method to obtain a list of file DIDs for the files uploaded by the user (file owner)
-   - Call `sharedFiles` method to obtain a list of files shared with the user
-4. Use `StorageProvider` and obtain the uploader using `getUploader` method first, and then:
-   - Call `upload` method of the uploader with file data as input
-   - Save file DID returned by the uploader
-5. Use `StorageProvider` and obtain the downloader using `getDownloader` method
-   - Call `download` method of the downloader using file DID as input
-6. Use `StorageProvider` and obtain the `access` object via `getAccess` call before invoking any of the file methods that govern access control:
+   - Call the `myFiles` method to obtain a list of file DIDs for the files uploaded by the user (file owner)
+   - Call the `sharedFiles` method to obtain a list of files shared with the user
+4. Use `StorageProvider`, obtain the uploader using the `getUploader` method first, and then:
+   - Call the `upload` method of the uploader with file data as input
+   - Save the DID assigned to the file after a successful upload
+   - Save the uploaded file's DID, which can be obtained from the returned Promise
+5. Use `StorageProvider` and obtain the downloader using the `getDownloader` method
+   - Call the` download` method of the downloader using file DID as input
+6. Use `StorageProvider` and obtain the `access` object via the `getAccess` call before invoking any of the file methods that govern access control:
    - `delete` a file by specifying its DID
-   - `share` a file by specifying its DID and recipient's wallet address
+   - `share` a file by specifying its DID and the recipient's wallet address
    - `revoke` access to a file by specifying its DID and recipient's wallet address
    - `changeFileOwner` of a file by specifying its DID and recipient's wallet address
-7. Use `access` object to also call any of the storage getter methods:
+7. Use the `access` object to also call any of the storage getter methods:
    - `getUploadLimit` set by the dApp
    - `getDownloadLimit` set by the dApp
    - `getSharedUsers` for a file with the specified DID
@@ -63,8 +64,9 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 // then `window.ethereum` variable is also configured to point to the provider.
 //
 // Web3provider:
-// Alternately, if you are not using Auth SDK but working with MetaMask wallet or any
-// other supported wallet, then the `window.ethereum` variable will point to the provider.
+// Alternately, if you are not using Auth SDK but working with MetaMask wallet or any other
+// supported third-party wallet, then the `window.ethereum` variable will point to the provider.
+
 import { StorageProvider } from '@arcana/storage';
 
 const storage = new StorageProvider({ appId, provider, email });
@@ -103,7 +105,7 @@ const Access = await storage.getAccess();
 ### Share File
 
 ```javascript
-// did: DID of file to be shared
+// did: DID of the file to be shared
 // address: recipients address
 // validity (optional): For how long will be the user able to download the file, e.g. [400] would mean 400 seconds
 await Access.share([did], [address]);
@@ -113,7 +115,7 @@ await Access.share([did], [address]);
 
 ```javascript
 // did: DID of file from which access is removed
-// address: Address of the user who's access is getting revoked
+// address: Address of the user for whom file access must be revoked
 await Access.revoke(did, address);
 ```
 
@@ -142,7 +144,7 @@ let [consumed, total] = await Access.getUploadLimit();
 ### Get Download Limit
 
 ```javascript
-//Get consumed and total bandwidth of the current user
+//Get consumed and the total bandwidth of the current user
 let [consumed, total] = await Access.getDownloadLimit();
 ```
 
@@ -273,11 +275,13 @@ uploader.upload(fileToUpload)
 
 ### Advanced Error Handling
 
-This advanced error handling section is only meant for file upload to address special dApp use cases. It is **recommended** that dApp developers using *Exception handling - catch* mechanism, for handling file upload errors.
+The advanced error handling section is meant only in case of some special file upload use cases.
 
-Every user action to upload a file internally results in the Storage SDK splitting the file into multiple parts according to the [tus](https://tus.io/) protocol. These parts are uploaded to the Arcana Store. If any of the file segment fails to transmit, it is automatically retried until all file segments are transferred. The automatic retry counter is hard coded to '5' in the beta release, and the dApp developer cannot change this configuration.
+If you are integrating your dApp with the Storage SDK, *Exception handling via catch mechanism* is recommended for handling file upload errors. 
 
-If the dApp developer is required to handle file upload error in case the retries fail, use the `onError()` mechanism. After retrying for four times, in case of any segment upload fails for the fifth time, the Storage SDK invokes `onError()` callback to enable dApp developer to take appropriate action or delay file transfer to deal with intermittent network failures.
+In response to every dApp user action for file upload, the Storage SDK splits the file into multiple segments, encrypts, and uploads them to the Arcana Store. SDK version 0.2 uses [tus](https://tus.io) protocol to upload the file segments. If any of the file segments fail to upload, it is automatically retried until all file segments are transferred.
+
+The automatic retry counter is hard coded to '5' in the Storage SDK v0.2 beta release, and the dApp developer cannot change this configuration. After the fifth retry attempt, the Storage SDK does not retry any further and invokes the 'onError()' method. The dApp developers must implement this method in the dApp to take appropriate action or delay file transfer in order to handle intermittent network failures.
 
 ```js
 Uploader.onError = (err) => {
@@ -290,14 +294,14 @@ Uploader.onError = (err) => {
 
 ### Change Network
 ```js
-// Below is default function, which can be modified by the developers
+// Below is default function, which can be modified by the dApp
 storage.onNetworkChange = (oldNetwork, newNetwork) => {
  window.location.reload()
 }
 ```
 ### Change Account
 ```js
-// Below is default function, which can be modified by the developers
+// Below is default function, which can be modified by the dApp
 storage.onAccountChange = (accounts) => {
  window.location.reload()
 }
