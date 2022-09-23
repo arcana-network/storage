@@ -1,145 +1,145 @@
 export default {
-  "abi": [
+  abi: [
     {
-      "inputs": [],
-      "stateMutability": "nonpayable",
-      "type": "constructor"
+      inputs: [],
+      stateMutability: 'nonpayable',
+      type: 'constructor'
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "components": [
+          components: [
             {
-              "internalType": "address",
-              "name": "from",
-              "type": "address"
+              internalType: 'address',
+              name: 'from',
+              type: 'address'
             },
             {
-              "internalType": "address",
-              "name": "to",
-              "type": "address"
+              internalType: 'address',
+              name: 'to',
+              type: 'address'
             },
             {
-              "internalType": "uint256",
-              "name": "value",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'value',
+              type: 'uint256'
             },
             {
-              "internalType": "uint256",
-              "name": "gas",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'gas',
+              type: 'uint256'
             },
             {
-              "internalType": "uint256",
-              "name": "nonce",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'nonce',
+              type: 'uint256'
             },
             {
-              "internalType": "bytes",
-              "name": "data",
-              "type": "bytes"
+              internalType: 'bytes',
+              name: 'data',
+              type: 'bytes'
             }
           ],
-          "internalType": "struct Forwarder.ForwardRequest",
-          "name": "req",
-          "type": "tuple"
+          internalType: 'struct Forwarder.ForwardRequest',
+          name: 'req',
+          type: 'tuple'
         },
         {
-          "internalType": "bytes",
-          "name": "signature",
-          "type": "bytes"
+          internalType: 'bytes',
+          name: 'signature',
+          type: 'bytes'
         }
       ],
-      "name": "execute",
-      "outputs": [
+      name: 'execute',
+      outputs: [
         {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
+          internalType: 'bool',
+          name: '',
+          type: 'bool'
         },
         {
-          "internalType": "bytes",
-          "name": "",
-          "type": "bytes"
+          internalType: 'bytes',
+          name: '',
+          type: 'bytes'
         }
       ],
-      "stateMutability": "nonpayable",
-      "type": "function"
+      stateMutability: 'nonpayable',
+      type: 'function'
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "internalType": "address",
-          "name": "from",
-          "type": "address"
+          internalType: 'address',
+          name: 'from',
+          type: 'address'
         }
       ],
-      "name": "getNonce",
-      "outputs": [
+      name: 'getNonce',
+      outputs: [
         {
-          "internalType": "uint256",
-          "name": "",
-          "type": "uint256"
+          internalType: 'uint256',
+          name: '',
+          type: 'uint256'
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function'
     },
     {
-      "inputs": [
+      inputs: [
         {
-          "components": [
+          components: [
             {
-              "internalType": "address",
-              "name": "from",
-              "type": "address"
+              internalType: 'address',
+              name: 'from',
+              type: 'address'
             },
             {
-              "internalType": "address",
-              "name": "to",
-              "type": "address"
+              internalType: 'address',
+              name: 'to',
+              type: 'address'
             },
             {
-              "internalType": "uint256",
-              "name": "value",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'value',
+              type: 'uint256'
             },
             {
-              "internalType": "uint256",
-              "name": "gas",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'gas',
+              type: 'uint256'
             },
             {
-              "internalType": "uint256",
-              "name": "nonce",
-              "type": "uint256"
+              internalType: 'uint256',
+              name: 'nonce',
+              type: 'uint256'
             },
             {
-              "internalType": "bytes",
-              "name": "data",
-              "type": "bytes"
+              internalType: 'bytes',
+              name: 'data',
+              type: 'bytes'
             }
           ],
-          "internalType": "struct Forwarder.ForwardRequest",
-          "name": "req",
-          "type": "tuple"
+          internalType: 'struct Forwarder.ForwardRequest',
+          name: 'req',
+          type: 'tuple'
         },
         {
-          "internalType": "bytes",
-          "name": "signature",
-          "type": "bytes"
+          internalType: 'bytes',
+          name: 'signature',
+          type: 'bytes'
         }
       ],
-      "name": "verify",
-      "outputs": [
+      name: 'verify',
+      outputs: [
         {
-          "internalType": "bool",
-          "name": "",
-          "type": "bool"
+          internalType: 'bool',
+          name: '',
+          type: 'bool'
         }
       ],
-      "stateMutability": "view",
-      "type": "function"
+      stateMutability: 'view',
+      type: 'function'
     }
-  ],
+  ]
 }
