@@ -114,7 +114,7 @@ export class Downloader {
     const chunkSize = 10 * 2 ** 20;
     let downloaded = 0;
     for (let i = 0; i < fileMeta.size; i += chunkSize) {
-      const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size)}`;
+      const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size)-1}`;
       const download = await fetch(checkPermissionResp.host + `api/v2/file/${did}`, {
         headers: {
           Range: range,

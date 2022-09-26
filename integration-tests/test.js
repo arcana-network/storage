@@ -80,7 +80,7 @@ describe('Upload File', () => {
   });
 
    it('Should upload a duplicate file', async () => {
-    let file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 10, 'text/plain');
+    let file = MockFile('aaaaaaaaaaaaa.txt', 20*2**20, 'text/plain');
     did = await arcanaInstance.upload(file);
     console.log('did 1', did);
     // did = await arcanaInstance.upload(file, {duplicate: true});

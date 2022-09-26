@@ -187,7 +187,7 @@ export class Uploader {
 
         const cipherText = await window.crypto.subtle.encrypt(
           {
-            counter: generateCounterFromPartNumber(uploadedParts),
+            counter: generateCounterFromPartNumber(counter),
             length: 64,
             name: 'AES-CTR',
           },
