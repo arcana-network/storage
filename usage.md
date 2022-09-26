@@ -60,14 +60,29 @@ This *Singleton* usage is recommended as a best practice.
 
 ## Upload File
 
-The Storage SDK deals with data in a `file` format. The `file` object must be an instance of a `Blob` or a descendant (`File`, etc.). You cannot upload a file by providing its URL.
+The Storage SDK accepts `Blob`s as files. The `file` object passed must be an instance of a `Blob` or a descendant (`File`, etc.). You cannot upload a file by providing its URL.
+
+As of now, it supports uploading _private_ and _public_ files. They are identifiable by looking at the first byte of the DID. In hexadecimal format, 01 indicates it's a public file, and 02 indicates it's a private file.
+
+### Private Files
 
 ```ts
-await dAppStorageProvider.upload(
-  file, (bytesUploaded, bytesTotal) => {
-    console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')
+await dAppStorageProvider.upload(file, {
+  onProgress: (bytesUploaded, bytesTotal) => {
+     console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')
   }
-).then((did) => console.log('File successfully uploaded. DID:', did)).catch(e => console.error(e));
+}).then((did) => console.log('File successfully uploaded. DID:', did)).catch(e => console.error(e));
+```
+
+### Public Files
+
+```ts
+await dAppStorageProvider.upload(file, {
+  publicFile: true, // false by default
+  onProgress: (bytesUploaded, bytesTotal) => {
+     console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')
+  }
+}).then((did) => console.log('File successfully uploaded. DID:', did)).catch(e => console.error(e));
 ```
 
 ## Download File

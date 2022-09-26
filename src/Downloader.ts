@@ -13,6 +13,7 @@ import { Mutex } from 'async-mutex';
 
 import {wrapInstance} from "./sentry";
 import { requiresLocking } from './locking';
+import { errorCodes } from './errors';
 
 const downloadBlob = (blob, fileName) => {
   // @ts-ignore
@@ -65,69 +66,106 @@ export class Downloader {
   @requiresLocking
   private async _download (did, accessType: 'view' | 'download'): Promise<void | Blob> {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did;
-    const arcana = Arcana(this.appAddress, this.provider);
-    let file;
-    const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
-    try {
-      file = await getFile(did, this.provider);
-    } catch (e) {
-      throw customError('UNAUTHORIZED', "You can't download this file");
-    }
+    const didBytes = utils.arrayify(did)
+    const file = await getFile(did, this.provider);
 
-    const ephemeralWallet = await Wallet.createRandom();
-    const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [
-      did,
-      readHash,
-      ephemeralWallet.address,
-    ]);
-    const txHash = checkPermissionResp.txHash
-
-    const shares = {};
-    const nodes = await getDKGNodes(this.provider);
-    for (let i = 0; i < nodes.length; i++) {
-      const res = await axios.post('https://' + nodes[i].declaredIp + '/rpc', {
-        jsonrpc: '2.0',
-        method: 'RetrieveKeyShare',
-        id: 10,
-        params: {
-          tx_hash: txHash,
-          signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash: txHash }))),
-        },
-      });
-      if(res.data.error) {
-        // tslint:disable-next-line:no-console
-        console.log(res.data.error.message, "\n", res.data.error.data);
-        continue
-      }
-      const sh = res.data.result.share;
-      shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh));
-    }
-    const decryptedKey = join(shares);
-
-    const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt']);
-
-    const fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)));
-
-    const Dec = new Decryptor(key);
-
-    const fileWriter = new FileWriter(fileMeta.name, accessType);
     const chunkSize = 10 * 2 ** 20;
-    let downloaded = 0;
-    for (let i = 0; i < fileMeta.size; i += chunkSize) {
-      const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size)-1}`;
-      const download = await fetch(checkPermissionResp.host + `api/v2/file/${did}`, {
-        headers: {
-          Range: range,
-          Authorization: `Bearer ${checkPermissionResp.token}`,
-        },
-      });
-      const buff = await download.arrayBuffer();
-      const dec = await Dec.decrypt(buff, i);
-      await fileWriter.write(dec, i);
-      this.hasher.update(dec);
-      downloaded += dec.byteLength;
-      await this.onProgress(downloaded, fileMeta.size);
+    let fileMeta
+    let fileWriter
+
+    switch (didBytes[0]) {
+      // Public File
+      case 0x01: {
+        fileMeta = JSON.parse(Buffer.from(file.encryptedMetaData.slice(2), 'hex').toString('utf-8'))
+        fileWriter = new FileWriter(fileMeta.name, accessType);
+        const { data: { host: storageHost } } = await this.api.get('/get-region-endpoint/', {
+          params: {
+            address: this.appAddress
+          }
+        })
+
+        const u = new URL(storageHost);
+        u.pathname = '/api/v2/file/public/' + this.appAddress + '/' + did
+
+        let downloaded = 0
+        for (let i = 0; i < fileMeta.size; i += chunkSize) {
+          const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size)-1}`;
+          const { data } = await axios({
+            method: 'GET',
+            url: u.href,
+            headers: {
+              Range: range,
+              // Authorization: 'Bearer ' + checkPermissionResp.token
+            },
+            responseType: 'arraybuffer'
+          })
+          await fileWriter.write(data, i);
+          this.hasher.update(data);
+          downloaded += data.byteLength;
+          await this.onProgress(downloaded, fileMeta.size);
+        }
+        break
+      }
+      // Private file
+      case 0x02: {
+        const ephemeralWallet = await Wallet.createRandom();
+        const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [
+          did,
+          readHash,
+          ephemeralWallet.address,
+        ]);
+        const txHash = checkPermissionResp.txHash
+
+        const shares = {};
+        const nodes = await getDKGNodes(this.provider);
+        for (let i = 0; i < nodes.length; i++) {
+          const res = await axios.post('https://' + nodes[i].declaredIp + '/rpc', {
+            jsonrpc: '2.0',
+            method: 'RetrieveKeyShare',
+            id: 10,
+            params: {
+              tx_hash: txHash,
+              signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash: txHash }))),
+            },
+          });
+          if(res.data.error) {
+            // tslint:disable-next-line:no-console
+            console.log(res.data.error.message, "\n", res.data.error.data);
+            continue
+          }
+          const sh = res.data.result.share;
+          shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh));
+        }
+        const decryptedKey = join(shares);
+
+        const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt']);
+
+        fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)));
+        fileWriter = new FileWriter(fileMeta.name, accessType);
+        const Dec = new Decryptor(key);
+
+        let downloaded = 0;
+        for (let i = 0; i < fileMeta.size; i += chunkSize) {
+          const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size) - 1}`;
+          const download = await fetch(checkPermissionResp.host + `api/v2/file/${did}`, {
+            headers: {
+              Range: range,
+              Authorization: `Bearer ${checkPermissionResp.token}`,
+            },
+          });
+          const buff = await download.arrayBuffer();
+          const dec = await Dec.decrypt(buff, i);
+          await fileWriter.write(dec, i);
+          this.hasher.update(dec);
+          downloaded += dec.byteLength;
+          await this.onProgress(downloaded, fileMeta.size);
+        }
+        break
+      }
+      default:
+        throw customError('TRANSACTION', errorCodes.reserved_did_prefix)
     }
+
     const decryptedHash = hasher2Hex(this.hasher.digest());
     const success = fileMeta.hash === decryptedHash;
     if (success) {
