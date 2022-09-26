@@ -209,9 +209,9 @@ export class Uploader {
           data: cipherText
         })
 
+        this.onProgress(counter + chunk.byteLength, file.size)
         counter += chunkSize
         uploadedParts++
-        this.onProgress(counter, file.size)
       }
 
       endpoint.pathname = `/api/v2/file/${did}/complete`
