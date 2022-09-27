@@ -3,3 +3,5 @@ interface UploadParams {
     duplicate: boolean,
     publicFile: boolean
 }
+
+export type { UploadParams }
