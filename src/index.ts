@@ -242,6 +242,7 @@ export class StorageProvider {
     const signer = await this.provider.getSigner()
     const sig = await signer.signMessage(String(nonce))
     res = await axios.post(this.gateway + 'login/', {
+      appID: this.appId,
       signature: sig,
       email: this.email,
       address: accounts[0]
