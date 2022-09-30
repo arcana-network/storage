@@ -87,6 +87,22 @@ export class FileAPI {
     return data
   }
 
+  getPublicFileURL = async (did: string) => {
+    const _did = ethers.utils.arrayify(parseHex(did))
+    if (_did[0] !== 0x01) {
+      throw customError('TRANSACTION', 'Public URLs are only available for Public Files.')
+    }
+
+    const { data: { host: storageHost } } = await this.api.get('/get-region-endpoint/', {
+      params: {
+        address: this.appAddress
+      }
+    })
+    const u = new URL(storageHost)
+    u.pathname = '/api/v2/file/public/' + this.appAddress + '/' + ethers.utils.hexlify(_did)
+    return u.href
+  }
+
   list = (type: AccessTypeEnum, pageNumber: number = 1, pageSize: number = 20) => {
     if (typeof type !== 'number') {
       throw customError('TRANSACTION', 'Invalid argument passed to list. Type must be a number.')
