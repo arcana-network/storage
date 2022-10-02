@@ -86,9 +86,9 @@ export const toHexString = (bytes: ArrayBuffer): string =>
 
 export function ensureArray<T>(input: T[] | T): T[] {
   if (!Array.isArray(input)) {
-    return [input]
+    return [input];
   } else {
-    return input
+    return input;
   }
 }
 
@@ -100,7 +100,7 @@ interface encryptedI {
 }
 
 export const getProvider = (provider: any) => {
-  return new providers.Web3Provider(provider, "any");
+  return new providers.Web3Provider(provider, 'any');
 };
 
 export const Arcana = (address: string, provider): Contract => {
@@ -139,7 +139,7 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   let res = await api.post('meta-tx/', req);
   if (res.data.err) {
     const error = cleanMessage(res.data.err);
-    if(errorCodes[error] != undefined){
+    if (errorCodes[error] != undefined) {
       throw customError(error, errorCodes[error]);
     } else {
       //If error is not present in the errorCodes then error code and message will be same.
@@ -163,12 +163,12 @@ export const checkTxnStatus = async (provider, txHash: string) => {
 
     if (reason) {
       const error = cleanMessage(reason);
-      if(errorCodes[error] != undefined){
+      if (errorCodes[error] != undefined) {
         throw customError(error, errorCodes[error]);
       } else {
         customError(error, error);
       }
-     } else {
+    } else {
       throw customError(e.error, e.error);
     }
   }
@@ -231,11 +231,17 @@ export const getDKGNodes = async (provider): Promise<any[]> => {
 export const getFile = async (did: string, provider: Web3Provider): Promise<any> => {
   let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
   let file = await contract.getFile(parseHex(did));
-  return file
-}
+  return file;
+};
+
+export const getRuleSet = async (did: string, provider: Web3Provider): Promise<string> => {
+  let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
+  let rule = await contract.getRuleSet(parseHex(did));
+  return rule;
+};
 
 export const getAppAddress = async (did: string, provider: Web3Provider): Promise<string> => {
   let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
   let appAddress = (await contract.getFile(parseHex(did))).app;
-  return appAddress
-}
+  return appAddress;
+};

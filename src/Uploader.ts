@@ -18,11 +18,11 @@ import { randomBytes } from 'crypto-browserify';
 import { Mutex } from 'async-mutex';
 import sha3 from 'js-sha3';
 
-import {wrapInstance} from "./sentry";
+import { wrapInstance } from './sentry';
 import { requiresLocking } from './locking';
 import { errorCodes } from './errors';
 
-function convertByteCounterToAESCounter (value: number) {
+function convertByteCounterToAESCounter(value: number) {
   if (value === 0) {
     return new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
   }
@@ -50,7 +50,7 @@ export class Uploader {
     this.lock = lock;
 
     if (debug) {
-      wrapInstance(this)
+      wrapInstance(this);
     }
   }
 
@@ -63,12 +63,12 @@ export class Uploader {
   };
 
   @requiresLocking
-  async upload (fileRaw: File, params: UploadParams = {chunkSize: 10 * 2 ** 20, duplicate: false, publicFile: false}) {
+  async upload(fileRaw: File, params: UploadParams = { chunkSize: 10 * 2 ** 20, duplicate: false, publicFile: false }) {
     const file: File = fileRaw;
-    const chunkSize = params.chunkSize? params.chunkSize : 10 * 2 ** 20
-    const duplicate = params.duplicate ? params.duplicate: false
+    const chunkSize = params.chunkSize ? params.chunkSize : 10 * 2 ** 20;
+    const duplicate = params.duplicate ? params.duplicate : false;
     if (!(file instanceof Blob)) {
-      throw customError('TRANSACTION', 'File must be a Blob or a descendant of a Blob such as a File.')
+      throw customError('TRANSACTION', 'File must be a Blob or a descendant of a Blob such as a File.');
     }
 
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
@@ -80,34 +80,34 @@ export class Uploader {
     ]);
     // 0x01 -> Public File
     // 0x02 -> Private File (default)
-    const didPrefix = Uint8Array.from([params.publicFile ? 0x01 : 0x02])
-    let did = ethers.utils.hexlify(Buffer.concat([
-      didPrefix,
-      new Uint8Array(
-        sha3.keccak256.arrayBuffer(Buffer.from(hash + signHash, 'utf-8')).slice(0, 31)
-      )
-    ]));
+    const didPrefix = Uint8Array.from([params.publicFile ? 0x01 : 0x02]);
+    let did = ethers.utils.hexlify(
+      Buffer.concat([
+        didPrefix,
+        new Uint8Array(sha3.keccak256.arrayBuffer(Buffer.from(hash + signHash, 'utf-8')).slice(0, 31)),
+      ]),
+    );
 
     const prevFile = await getFile(did, this.provider);
     if (prevFile.owner) {
-        if (prevFile.duplicate && duplicate === true) {
-          did = ethers.utils.hexlify(Buffer.concat([didPrefix, ethers.utils.randomBytes(31)]))
-        }
-        if (prevFile.duplicate && duplicate === false) {
-          const error =  "duplicate_can't_be_removed"
-          throw customError(error, errorCodes[error])
-        }
+      if (prevFile.duplicate && duplicate === true) {
+        did = ethers.utils.hexlify(Buffer.concat([didPrefix, ethers.utils.randomBytes(31)]));
+      }
+      if (prevFile.duplicate && duplicate === false) {
+        const error = "duplicate_can't_be_removed";
+        throw customError(error, errorCodes[error]);
+      }
     }
 
-    let key
-    let host
-    let JWTToken
+    let key;
+    let host;
+    let JWTToken;
 
     const { data: nodeResp } = await this.api.get('/get-node-address/', {
       params: {
-        appid: this.appId.toString()
-      }
-    })
+        appid: this.appId.toString(),
+      },
+    });
     host = nodeResp.host;
 
     // If it's a private file, generate a key and store the shares in the DKG
@@ -140,7 +140,7 @@ export class Uploader {
         utils.toUtf8Bytes(encryptedMetaData),
         nodeResp.address,
         ephemeralWallet.address,
-        duplicate
+        duplicate,
       ]);
       JWTToken = res.token;
       const txHash = res.txHash;
@@ -153,7 +153,9 @@ export class Uploader {
       const quorum = nodes.length - Math.floor(nodes.length / 3);
       const shares = split(randomBytes, parts, quorum, new Uint8Array(aesRaw));
       for (let i = 0; i < parts; i++) {
-        const publicKey = nodes[i].pubKx._hex.replace('0x', '').padStart(64, '0') + nodes[i].pubKy._hex.replace('0x', '').padStart(64, '0');
+        const publicKey =
+          nodes[i].pubKx._hex.replace('0x', '').padStart(64, '0') +
+          nodes[i].pubKy._hex.replace('0x', '').padStart(64, '0');
         if (publicKey.length < 128) {
           console.log('public key is too short');
           continue;
@@ -169,7 +171,9 @@ export class Uploader {
           params: {
             tx_hash: txHash,
             encrypted_share: ciphertext,
-            signature: await ephemeralWallet.signMessage(ethers.utils.id(JSON.stringify({ tx_hash: txHash, encrypted_share: ciphertext }))),
+            signature: await ephemeralWallet.signMessage(
+              ethers.utils.id(JSON.stringify({ tx_hash: txHash, encrypted_share: ciphertext })),
+            ),
           },
         });
       }
@@ -179,43 +183,45 @@ export class Uploader {
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
-        utils.toUtf8Bytes(JSON.stringify({
-          name: 'name' in file ? file.name : did,
-          type: file.type,
-          size: file.size,
-          lastModified: 'lastModified' in file ? file.lastModified : new Date(),
-          hash,
-        })),
+        utils.toUtf8Bytes(
+          JSON.stringify({
+            name: 'name' in file ? file.name : did,
+            type: file.type,
+            size: file.size,
+            lastModified: 'lastModified' in file ? file.lastModified : new Date(),
+            hash,
+          }),
+        ),
         nodeResp.address,
         ephemeralWallet.address,
-        duplicate
+        duplicate,
       ]);
       JWTToken = res.token;
     }
 
-    let completeResp
+    let completeResp;
 
     try {
-      const endpoint = new URL(host)
-      endpoint.pathname = '/api/v2/file/' + did
+      const endpoint = new URL(host);
+      endpoint.pathname = '/api/v2/file/' + did;
       const headers = {
-        Authorization: 'Bearer ' + JWTToken
-      }
+        Authorization: 'Bearer ' + JWTToken,
+      };
 
       // 1. Create a file
       await axios({
         method: 'POST',
         url: endpoint.href,
-        headers
-      })
+        headers,
+      });
 
-      const parts = Math.ceil(file.size / chunkSize)
-      let uploadedParts = 0
-      let counter = 0
-      endpoint.pathname = `/api/v2/file/${did}`
+      const parts = Math.ceil(file.size / chunkSize);
+      let uploadedParts = 0;
+      let counter = 0;
+      endpoint.pathname = `/api/v2/file/${did}`;
       while (uploadedParts < parts) {
-        const slicedChunk = await file.slice(counter, Math.min(counter + chunkSize, file.size))
-        let chunk = await slicedChunk.arrayBuffer()
+        const slicedChunk = await file.slice(counter, Math.min(counter + chunkSize, file.size));
+        let chunk = await slicedChunk.arrayBuffer();
 
         if (!params.publicFile) {
           chunk = await window.crypto.subtle.encrypt(
@@ -234,29 +240,31 @@ export class Uploader {
           method: 'PATCH',
           url: endpoint.href,
           params: {
-            part: (uploadedParts + 1).toString()
+            part: (uploadedParts + 1).toString(),
           },
           headers: {
             ...headers,
-            'Content-Type': 'application/octet-stream'
+            'Content-Type': 'application/octet-stream',
           },
-          data: chunk
-        })
+          data: chunk,
+        });
 
-        this.onProgress(counter + chunk.byteLength, file.size)
-        counter += chunkSize
-        uploadedParts++
+        this.onProgress(counter + chunk.byteLength, file.size);
+        counter += chunkSize;
+        uploadedParts++;
       }
 
-      endpoint.pathname = `/api/v2/file/${did}/complete`
+      endpoint.pathname = `/api/v2/file/${did}/complete`;
       // 3. Complete the upload
-      completeResp = (await axios({
-        method: 'PATCH',
-        url: endpoint.href,
-        headers
-      })).data
+      completeResp = (
+        await axios({
+          method: 'PATCH',
+          url: endpoint.href,
+          headers,
+        })
+      ).data;
     } catch (e) {
-      this.onError(e)
+      this.onError(e);
     }
 
     try {
@@ -277,6 +285,6 @@ export class Uploader {
       }
     }
 
-    return did.replace("0x" , "");
-  };
+    return did.replace('0x', '');
+  }
 }

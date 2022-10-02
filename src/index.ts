@@ -26,10 +26,10 @@ export class StorageProvider {
 
   public files: FileAPI;
 
-  static async init (cfg: Config) {
-    const sp = new StorageProvider(cfg)
-    await sp.login()
-    return sp
+  static async init(cfg: Config) {
+    const sp = new StorageProvider(cfg);
+    await sp.login();
+    return sp;
   }
 
   constructor(cfg: Config) {
@@ -46,13 +46,13 @@ export class StorageProvider {
       // @ts-ignore
     } else if (window.arcana?.provider != null) {
       // @ts-ignore
-      this.provider = getProvider(window.arcana.provider)
+      this.provider = getProvider(window.arcana.provider);
       // @ts-ignore
     } else if (window.ethereum != null) {
       // @ts-ignore
-      this.provider = getProvider(window.ethereum)
+      this.provider = getProvider(window.ethereum);
     } else {
-      throw customError('INITIALIZATION', errorCodes.wallet_not_found)
+      throw customError('INITIALIZATION', errorCodes.wallet_not_found);
     }
     this.email = config.email;
     this.appId = config.appId;
@@ -62,12 +62,12 @@ export class StorageProvider {
       this.chainId = config.chainId;
     }
     if (!config.gateway) {
-      this.gateway = chainIdToGateway.get(this.chainId)
+      this.gateway = chainIdToGateway.get(this.chainId);
     } else {
-      this.gateway = new URL("/api/v1/",config.gateway).href;
+      this.gateway = new URL('/api/v1/', config.gateway).href;
     }
 
-    this.lock = new Mutex()
+    this.lock = new Mutex();
 
     if (config.debug) {
       SentryInit({
@@ -79,13 +79,13 @@ export class StorageProvider {
         ],
         tracesSampleRate: 0,
       });
-      wrapInstance(this)
-      this.debug = true
+      wrapInstance(this);
+      this.debug = true;
     } else {
-      this.debug = false
+      this.debug = false;
     }
 
-    this.provider.on("network", (newNetwork, oldNetwork) => {
+    this.provider.on('network', (newNetwork, oldNetwork) => {
       if (oldNetwork) {
         this.onNetworkChange(newNetwork, oldNetwork);
       }
@@ -93,19 +93,19 @@ export class StorageProvider {
 
     // call onAccountChange when the account changes
     // @ts-ignore
-    this.provider.provider.on("accountsChanged", (accounts) => {
+    this.provider.provider.on('accountsChanged', (accounts) => {
       this.onAccountChange(accounts);
-    })
+    });
   }
 
   onNetworkChange = (newNetwork, oldNetwork) => {
     window.location.reload();
-  }
+  };
 
   // Reload on account changed
   onAccountChange = (accounts) => {
     window.location.reload();
-  }
+  };
 
   downloadDID = async (did: string) => {
     await this.login();
@@ -132,10 +132,10 @@ export class StorageProvider {
 
   makeMetadataURL = async (title: string, description: string, did: string, file: File) => {
     await this.login();
-		// throw error if any input is empty
-		if (title === '' || description === '' || did === '' || file === null) {
-			throw new Error('Please fill in all the fields');
-		}
+    // throw error if any input is empty
+    if (title === '' || description === '' || did === '' || file === null) {
+      throw new Error('Please fill in all the fields');
+    }
     // get signer from provider
     const signer = this.provider.getSigner();
     const signature = await signer.signMessage(`Sign this message to attach NFT metadata with your did ${did}`);
@@ -153,13 +153,13 @@ export class StorageProvider {
       throw new Error('Error uploading image');
     }
 
-    let subDomain = ".";
-    switch ( this.chainId ) {
-      case 40405 :
-        subDomain += "beta";
+    let subDomain = '.';
+    switch (this.chainId) {
+      case 40405:
+        subDomain += 'beta';
         break;
-      case 40404 :
-        subDomain += "dev";
+      case 40404:
+        subDomain += 'dev';
         break;
     }
 
@@ -178,10 +178,10 @@ export class StorageProvider {
   login = () => {
     // Already initialised or initialisation in progress
     if (!this.initialisedPromise) {
-      this.initialisedPromise = this._login()
+      this.initialisedPromise = this._login();
     }
     return this.initialisedPromise;
-  }
+  };
 
   private _login = async () => {
     if (!this.provider) {
@@ -193,7 +193,7 @@ export class StorageProvider {
 
     // Fetch chain id from provider
     const network = await this.provider.getNetwork();
-    const hexChainID = '0x' + this.chainId.toString(16)
+    const hexChainID = '0x' + this.chainId.toString(16);
 
     // throw error if chain id is not equal to the chain id of the app
     if (this.chainId !== network.chainId) {
@@ -205,7 +205,7 @@ export class StorageProvider {
       } catch (e) {
         // This error code indicates that the chain has not been added to the wallet.
         if (e.code === 4902) {
-          const blockchainURL = chainIdToBlockchainExplorerURL.get(this.chainId)
+          const blockchainURL = chainIdToBlockchainExplorerURL.get(this.chainId);
           await this.provider.provider.request({
             method: 'wallet_addEthereumChain',
             params: [
@@ -216,17 +216,16 @@ export class StorageProvider {
                 rpcUrls: [chainIdToRPCURL.get(this.chainId)],
                 blockExplorerUrls: blockchainURL ? [blockchainURL] : [],
 
-
                 nativeCurrency: {
                   symbol: 'XAR',
                   // ?
-                  decimals: 18
-                }
-              }
-            ]
-          })
+                  decimals: 18,
+                },
+              },
+            ],
+          });
         } else {
-          throw e
+          throw e;
         }
       }
     }
@@ -261,84 +260,98 @@ export class StorageProvider {
       }
     }
 
-    this.files = new FileAPI(this.appAddress,this.appId, this.provider, this.api, this.lock, this.debug)
+    this.files = new FileAPI(this.appAddress, this.appId, this.provider, this.api, this.lock, this.debug);
   };
 
   // TODO: remove when breaking backward compatibility
   numOfMyFiles = async () => {
-    await this.login()
-    return this.files.numOfMyFiles()
-  }
+    await this.login();
+    return this.files.numOfMyFiles();
+  };
 
   numOfMyFilesPages = async (pageSize: number = 20) => {
-    await this.login()
-    return this.files.numOfMyFilesPages(pageSize)
-  }
+    await this.login();
+    return this.files.numOfMyFilesPages(pageSize);
+  };
 
   myFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
-    await this.login()
-    return this.files.myFiles(pageNumber, pageSize)
-  }
+    await this.login();
+    return this.files.myFiles(pageNumber, pageSize);
+  };
 
   numOfSharedFiles = async () => {
-    await this.login()
-    return this.files.numOfSharedFiles()
-  }
+    await this.login();
+    return this.files.numOfSharedFiles();
+  };
 
   numOfSharedFilesPages = async (pageSize: number = 20) => {
-    await this.login()
-    return this.files.numOfSharedFilesPages(pageSize)
-  }
+    await this.login();
+    return this.files.numOfSharedFilesPages(pageSize);
+  };
 
   sharedFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
-    await this.login()
-    return this.files.sharedFiles(pageNumber, pageSize)
-  }
+    await this.login();
+    return this.files.sharedFiles(pageNumber, pageSize);
+  };
 
-  linkNft = async (fileId:string, tokenId: number, nftContract:string, nftChainID: number) => {
+  linkNft = async (fileId: string, tokenId: number, nftContract: string, nftChainID: number) => {
     await this.login();
     fileId = parseHex(fileId);
     nftContract = parseHex(nftContract);
-    return await makeTx(this.appAddress, this.api, this.provider  , 'linkNFT', [fileId, tokenId, nftContract, nftChainID]);
-  }
+    return await makeTx(this.appAddress, this.api, this.provider, 'linkNFT', [
+      fileId,
+      tokenId,
+      nftContract,
+      nftChainID,
+    ]);
+  };
 
-  upload = async (fileRaw: any, params: UploadParams & {
-    onProgress: (bytesUploaded: number, bytesTotal: number) => void
-  } = {
-    onProgress: (bytesUploaded, bytesTotal) => null,
-    chunkSize: 10 * 2 ** 20,
-    duplicate: false,
-    publicFile: false
-  }): Promise<string> => {
+  upload = async (
+    fileRaw: any,
+    params: UploadParams & {
+      onProgress: (bytesUploaded: number, bytesTotal: number) => void;
+    } = {
+      onProgress: (bytesUploaded, bytesTotal) => null,
+      chunkSize: 10 * 2 ** 20,
+      duplicate: false,
+      publicFile: false,
+    },
+  ): Promise<string> => {
     const uploader = await this.getUploader();
     if (params.onProgress != null) {
-      uploader.onProgress = params.onProgress
+      uploader.onProgress = params.onProgress;
     }
 
     return new Promise((resolve, reject) => {
       uploader.onError = reject;
       uploader.upload(fileRaw, params).then(resolve).catch(reject);
     });
-  }
+  };
 
-  download = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void> ): Promise<void> => {
+  download = async (
+    did: any,
+    onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>,
+  ): Promise<void> => {
     const downloader = await this.getDownloader();
 
     if (onProgress != null) {
       downloader.onProgress = onProgress;
     }
 
-    return downloader.downloadToFilesystem(did)
-  }
+    return downloader.downloadToFilesystem(did);
+  };
 
-  getBlob = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void> ): Promise<Blob> => {
+  getBlob = async (
+    did: any,
+    onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>,
+  ): Promise<Blob> => {
     const downloader = await this.getDownloader();
 
     if (onProgress != null) {
       downloader.onProgress = onProgress;
     }
 
-    return downloader.getBlob(did)
-  }
+    return downloader.getBlob(did);
+  };
 }
-export { AccessTypeEnum } from './fileAPI'
+export { AccessTypeEnum } from './fileAPI';

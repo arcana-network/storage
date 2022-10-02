@@ -57,7 +57,7 @@ export async function signMetaTxRequest(signer: any, forwarder: Contract, input:
 }
 
 export async function sign(provider: any, arcana: Contract, forwarder: Contract, method: any, params: any) {
-	const signer = provider.getSigner();
+  const signer = provider.getSigner();
   const { request, signature } = await signMetaTxRequest(signer, forwarder, {
     from: await signer.getAddress(),
     to: arcana.address,

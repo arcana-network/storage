@@ -58,7 +58,7 @@ export default class FileWriter {
       const transaction = this.DB.transaction([self.dbName], 'readonly');
       const request = transaction.objectStore(self.dbName).getAll();
       request.onsuccess = (event: any) => {
-        const blob = new Blob(event.target.result)
+        const blob = new Blob(event.target.result);
         if (this.type === 'view') {
           return resolve(blob);
         } else {

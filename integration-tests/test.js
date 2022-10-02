@@ -1,12 +1,11 @@
 // const { expect } = require("chai");
-
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-// const gateway = 'http://localhost:9010/';
+const gateway = 'http://localhost:9010/';
 // const gateway = 'https://gateway01-testnet.arcana.network/';
-const gateway = 'https://gateway-dev.arcana.network/';
+// const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
-const appId = 1;
+const appId = 516;
 // const appId = 28;
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -79,13 +78,23 @@ describe('Upload File', () => {
     });
   });
 
-   it('Should upload a duplicate file', async () => {
-    let file = MockFile('aaaaaaaaaaaaa.txt', 20*2**20, 'text/plain');
-    did = await arcanaInstance.upload(file);
-    console.log('did 1', did);
-    // did = await arcanaInstance.upload(file, {duplicate: true});
-    // console.log('did 2', did); 
-    await arcanaInstance.download(did)
+  it('Upload and share', async () => {
+    // let file = MockFile('aaaaaaaaaaaaa.txt', 10, 'text/plain');
+    // did = await arcanaInstance.upload(file);
+    // console.log('did', did);
+    let did = "0257b566bc3fea825635298d1c8565d11c94bf6e5a697643c11b43c129b6c13b"
+    let address = "0x64b69590954570d63bb60b9bba4ab3814f1a3a23"
+    await arcanaInstance.files.share(did, address)
+    await arcanaInstance.files.revoke(did, address)
+    // await arcanaInstance.download(did)
   });
-    
+
+
+
+  // it('Upload public file', async () => {
+  //   let file = MockFile('aaaaaaaaaaaaa.txt', 4, 'text/plain');
+  //   did = await arcanaInstance.upload(file, {publicFile: true});
+  //   console.log('did', did);
+  //   await arcanaInstance.download(did)
+  // });    
 });
