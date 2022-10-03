@@ -96,7 +96,7 @@ await dAppStorageProvider.upload(file, {
 
 #### Get Public file URL
 
-After a file is successfully uploaded to the Arcana Store, it is assigned a unique DID and the owner or uploader can access the file using the DID. In case of public files, you can use this file DID to get a sharable URL for a public file by calling `getPublicFileURL` method. Anyone who has this URL can access and download the public file using any browser. 
+After a file is successfully uploaded to the Arcana Store, it is assigned a unique DID and the owner or uploader can access the file using the DID. In the case of public files, you can use this file DID to get a sharable URL for a public file by calling the `getPublicFileURL` method. Anyone who has this URL can access and download the public file. You can use any application to download it using this URL, for example, any browser.
 
 ```ts
 let shareURL = await dAppStorageProvider.files.getPublicFileURL(did);
