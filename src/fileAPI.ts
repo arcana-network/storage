@@ -1,8 +1,6 @@
 import { AxiosInstance } from 'axios';
 import { BigNumber, ethers } from 'ethers';
 import { Mutex } from 'async-mutex';
-
-import { readHash } from './constant';
 import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress, getRuleSet } from './Utils';
 import { wrapInstance } from './sentry';
 import { requiresLocking } from './locking';

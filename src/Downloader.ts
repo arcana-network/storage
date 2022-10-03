@@ -2,7 +2,6 @@ import Decryptor from './decrypt';
 import { Arcana, hasher2Hex, AESDecrypt, makeTx, customError, getDKGNodes, getFile } from './Utils';
 import { utils, Wallet } from 'ethers';
 import FileWriter from './FileWriter';
-import { readHash } from './constant';
 import Sha256 from './SHA256';
 import axios, { AxiosInstance } from 'axios';
 import { join } from 'shamir';
@@ -97,7 +96,6 @@ export class Downloader {
             url: u.href,
             headers: {
               Range: range,
-              // Authorization: 'Bearer ' + checkPermissionResp.token
             },
             responseType: 'arraybuffer',
           });
@@ -111,11 +109,12 @@ export class Downloader {
       // Private file
       case 0x02: {
         const ephemeralWallet = await Wallet.createRandom();
-        const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [
+        console.log("before download transaction")
+        const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'download', [
           did,
-          readHash,
           ephemeralWallet.address,
         ]);
+        console.log("done with download transaction")
         const txHash = checkPermissionResp.txHash;
 
         const shares = {};

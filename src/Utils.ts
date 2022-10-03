@@ -12,11 +12,11 @@ import { errorCodes } from './errors';
 
 export type Config = {
   appId: number;
-  provider: any;
+  provider: Web3Provider;
   email: string;
-  gateway: any;
-  debug: any;
-  chainId: any;
+  gateway: string;
+  debug: boolean;
+  chainId: number;
 };
 
 export class KeyGen {
@@ -99,7 +99,7 @@ interface encryptedI {
   mac: string;
 }
 
-export const getProvider = (provider: any) => {
+export const getProvider = (provider: providers.ExternalProvider) => {
   return new providers.Web3Provider(provider, 'any');
 };
 
@@ -205,7 +205,7 @@ export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
   return str;
 };
 
-export const isFileUploaded = async (address: string, fileId: string, provider: any): Promise<boolean> => {
+export const isFileUploaded = async (address: string, fileId: string, provider: Web3Provider): Promise<boolean> => {
   const arcana = Arcana(address, provider);
   const file = await arcana.files(fileId);
   return file.uploaded;
@@ -216,32 +216,41 @@ export const parseHex = (hex) => {
 };
 
 export const customError = (code: string, message: string): Error => {
-  const error: any = new Error(cleanMessage(message));
+  const error: CustomError = new Error(cleanMessage(message));
   error.code = code;
   return error;
 };
 
-export const getDKGNodes = async (provider): Promise<any[]> => {
+export const getDKGNodes = async (provider: Web3Provider): Promise<any[]> => {
   // Fetch DKG Node Details from dkg contract
   const dkg = DKG(localStorage.getItem('dkg'), provider);
   const nodes = await dkg.getCurrentEpochDetails();
   return nodes;
 };
 
+export const DIDContract = (provider: Web3Provider): Contract => {
+  return new Contract(localStorage.getItem('did'), DID.abi, provider)
+}
+
 export const getFile = async (did: string, provider: Web3Provider): Promise<any> => {
-  let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
+  let contract = DIDContract(provider);
   let file = await contract.getFile(parseHex(did));
   return file;
 };
 
 export const getRuleSet = async (did: string, provider: Web3Provider): Promise<string> => {
-  let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
+  let contract = DIDContract(provider);
   let rule = await contract.getRuleSet(parseHex(did));
   return rule;
 };
 
 export const getAppAddress = async (did: string, provider: Web3Provider): Promise<string> => {
-  let contract = new Contract(localStorage.getItem('did'), DID.abi, provider);
+  let contract = DIDContract(provider);
   let appAddress = (await contract.getFile(parseHex(did))).app;
   return appAddress;
 };
+
+export const checkDownladPermission = async(did:string, provider: Web3Provider) => {
+  let contract = DIDContract(provider)
+  contract
+}
