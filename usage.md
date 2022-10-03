@@ -5,11 +5,14 @@
 1. [Prerequisites](#prerequisites)
 2. [Usage Flow](#usage-flow)
 3. [Initialize Storage](#initialize-storage)
-4. [Access Control](#access-control)
-5. [Storage Usage Metrics](#storage-usage-metrics)
-6. [Download File by DID](#download-file-by-did)
-7. [Private NFT](#private-nft)
-8. [Managing Network and Wallet Account Changes](#managing-network-and-wallet-account-changes)
+4. [Upload File](#upload-file)
+5. [Download File](#download-file)
+6. [Access Control](#access-control)
+7. [Storage Usage Metrics](#storage-usage-metrics)
+8. [Download File by DID](#download-file-by-did)
+9. [Private NFT](#private-nft)
+10. [Error Handling](#error-handling)
+11. [Managing Network and Wallet Account Changes](#managing-network-and-wallet-account-changes)
 
 ## Prerequisites
 
@@ -76,6 +79,12 @@ await dAppStorageProvider.upload(file, {
 
 ### Public Files
 
+#### Upload Public File
+
+By default, any file that is uploaded to the Arcana Store using the Storage SDK is access controlled as a private file. Only the owner of the file can access it or share it.
+
+To upload a file that is accessible by anyone, specify the `publicFile` input parameter as `true`.
+
 ```ts
 await dAppStorageProvider.upload(file, {
   publicFile: true, // false by default
@@ -83,6 +92,14 @@ await dAppStorageProvider.upload(file, {
      console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')
   }
 }).then((did) => console.log('File successfully uploaded. DID:', did)).catch(e => console.error(e));
+```
+
+#### Get Public file URL
+
+After a file is successfully uploaded to the Arcana Store, it is assigned a unique DID and the owner or uploader can access the file using the DID. In case of public files, you can use this file DID to get a sharable URL for a public file by calling `getPublicFileURL` method. Anyone who has this URL can access and download the public file using any browser. 
+
+```ts
+let shareURL = await dAppStorageProvider.files.getPublicFileURL(did);
 ```
 
 ## Download File
