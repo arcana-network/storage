@@ -1,11 +1,9 @@
 import {
   KeyGen,
-  fromHexString,
   toHexString,
   makeTx,
   AESEncrypt,
   customError,
-  isFileUploaded,
   getDKGNodes,
   getFile,
 } from './Utils';
@@ -63,10 +61,9 @@ export class Uploader {
   };
 
   @requiresLocking
-  async upload(fileRaw: File, params: UploadParams = { chunkSize: 10 * 2 ** 20, duplicate: false, publicFile: false }) {
+  async upload(fileRaw: File, params: UploadParams = { chunkSize: 10 * 2 ** 20, publicFile: false }) {
     const file: File = fileRaw;
     const chunkSize = params.chunkSize ? params.chunkSize : 10 * 2 ** 20;
-    const duplicate = params.duplicate ? params.duplicate : false;
     if (!(file instanceof Blob)) {
       throw customError('TRANSACTION', 'File must be a Blob or a descendant of a Blob such as a File.');
     }
@@ -74,30 +71,10 @@ export class Uploader {
     const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     const hasher = new KeyGen(file, chunkSize);
     const hash = await hasher.getHash();
-    const signHash = await this.provider.send('personal_sign', [
-      `Sign this to proceed with the encryption of file with hash ${hash}`,
-      walletAddress,
-    ]);
     // 0x01 -> Public File
     // 0x02 -> Private File (default)
     const didPrefix = Uint8Array.from([params.publicFile ? 0x01 : 0x02]);
-    let did = ethers.utils.hexlify(
-      Buffer.concat([
-        didPrefix,
-        new Uint8Array(sha3.keccak256.arrayBuffer(Buffer.from(hash + signHash, 'utf-8')).slice(0, 31)),
-      ]),
-    );
-
-    const prevFile = await getFile(did, this.provider);
-    if (prevFile.owner) {
-      if (prevFile.duplicate && duplicate === true) {
-        did = ethers.utils.hexlify(Buffer.concat([didPrefix, ethers.utils.randomBytes(31)]));
-      }
-      if (prevFile.duplicate && duplicate === false) {
-        const error = "duplicate_can't_be_removed";
-        throw customError(error, errorCodes[error]);
-      }
-    }
+    let did = ethers.utils.hexlify(Buffer.concat([didPrefix, ethers.utils.randomBytes(31)]));
 
     let key;
     let host;
@@ -140,7 +117,6 @@ export class Uploader {
         utils.toUtf8Bytes(encryptedMetaData),
         nodeResp.address,
         ephemeralWallet.address,
-        duplicate,
       ]);
       JWTToken = res.token;
       const txHash = res.txHash;
@@ -194,7 +170,6 @@ export class Uploader {
         ),
         nodeResp.address,
         ephemeralWallet.address,
-        duplicate,
       ]);
       JWTToken = res.token;
     }

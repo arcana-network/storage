@@ -66,7 +66,7 @@ describe('Upload File', () => {
 
 
   before(async () => {
-    file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 10, 'text/plain');
+    file = MockFile('aaaaaaaaaaaaa.txt', 10, 'text/plain');
     file = new File([file], file.name, { type: file.type });
     arcanaInstance = await arcana.storage.StorageProvider.init({
       appId,
@@ -78,20 +78,27 @@ describe('Upload File', () => {
     });
   });
 
-  it('Upload and share', async () => {
+
+
+  it('Upload', async () => {
     let file = MockFile('aaaaaaaaaaaaa.txt', 10, 'text/plain');
     did = await arcanaInstance.upload(file);
     console.log('did', did);
+  });
+
+
+  it('Share', async () => {
     // let did = "0257b566bc3fea825635298d1c8565d11c94bf6e5a697643c11b43c129b6c13b"
     let address = "0x64b69590954570d63bb60b9bba4ab3814f1a3a23"
     // let address2 = "0x64b69590954570d63bb60b9bba4ab3814f1a3a22"
     await arcanaInstance.files.share(did, address)
     // await arcanaInstance.files.share(did, address2)
     // await arcanaInstance.files.revoke(did, address)
-    await arcanaInstance.download(did)
   });
 
-
+  it('Download', async () => {
+    await arcanaInstance.download(did)  
+  })
 
   // it('Upload public file', async () => {
   //   let file = MockFile('aaaaaaaaaaaaa.txt', 4, 'text/plain');

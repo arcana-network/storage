@@ -557,11 +557,6 @@ export default {
           "internalType": "address",
           "name": "_ephemeralAddress",
           "type": "address"
-        },
-        {
-          "internalType": "bool",
-          "name": "_duplicate",
-          "type": "bool"
         }
       ],
       "name": "uploadInit",

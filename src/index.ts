@@ -313,7 +313,6 @@ export class StorageProvider {
     } = {
       onProgress: (bytesUploaded, bytesTotal) => null,
       chunkSize: 10 * 2 ** 20,
-      duplicate: false,
       publicFile: false,
     },
   ): Promise<string> => {
