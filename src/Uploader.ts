@@ -1,56 +1,64 @@
-import { KeyGen, toHexString, makeTx, AESEncrypt, customError, getDKGNodes, getFile } from './Utils';
-import { utils, BigNumber, Wallet, ethers } from 'ethers';
-import axios, { AxiosInstance } from 'axios';
-import { split } from 'shamir';
-import { encrypt } from 'eciesjs';
+import {
+  KeyGen,
+  makeTx,
+  AESEncrypt,
+  customError,
+  getDKGNodes,
+} from './Utils'
+import { utils, BigNumber, Wallet, ethers } from 'ethers'
+import axios, { AxiosInstance } from 'axios'
+import { split } from 'shamir'
+import { encrypt } from 'eciesjs'
 
-import { randomBytes } from 'crypto-browserify';
-import { Mutex } from 'async-mutex';
-import sha3 from 'js-sha3';
+import { randomBytes } from 'crypto-browserify'
+import { Mutex } from 'async-mutex'
+import sha3 from 'js-sha3'
 
-import { wrapInstance } from './sentry';
-import { requiresLocking } from './locking';
-import { errorCodes } from './errors';
+import { wrapInstance } from './sentry'
+import { requiresLocking } from './locking'
+import { errorCodes } from './errors'
+import type { UploadParams } from './types'
 
 function convertByteCounterToAESCounter(value: number) {
   if (value === 0) {
-    return new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]);
+    return new Uint8Array([0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0])
   }
-  let counterValue = value / 16;
-  const counter = new Uint8Array(16);
+  let counterValue = value / 16
+  const counter = new Uint8Array(16)
   for (let index = 15; index >= 0; --index) {
-    counter[index] = counterValue % 256;
-    counterValue = Math.floor(counterValue / 256);
+    counter[index] = counterValue % 256
+    counterValue = Math.floor(counterValue / 256)
   }
-  return counter;
+  return counter
 }
 
 export class Uploader {
-  private readonly provider: any;
-  private readonly api: AxiosInstance;
-  private readonly appAddress: string;
-  private appId: number;
-  private readonly lock: Mutex;
+  private readonly provider: any
+  private readonly api: AxiosInstance
+  private readonly appAddress: string
+  private appId: number
+  private readonly lock: Mutex
 
-  constructor(appId: number, appAddress: string, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
-    this.provider = provider;
-    this.api = api;
-    this.appId = appId;
-    this.appAddress = appAddress;
-    this.lock = lock;
+  constructor (appId: number, appAddress: string, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
+    this.provider = provider
+    this.api = api
+    this.appId = appId
+    this.appAddress = appAddress
+    this.lock = lock
 
     if (debug) {
       wrapInstance(this);
     }
   }
 
-  onSuccess = () => {};
+  onSuccess = () => {}
 
-  onProgress = (bytesUploaded: number, bytesTotal: number): void => {};
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  onProgress = (bytesUploaded: number, bytesTotal: number): void => {}
 
   onError = (err) => {
-    console.log('Error', err);
-  };
+    console.log('Error', err)
+  }
 
   @requiresLocking
   async upload(fileRaw: File, params: UploadParams = { chunkSize: 10 * 2 ** 20, publicFile: false }) {
@@ -60,7 +68,6 @@ export class Uploader {
       throw customError('TRANSACTION', 'File must be a Blob or a descendant of a Blob such as a File.');
     }
 
-    const walletAddress = (await this.provider.send('eth_requestAccounts', []))[0];
     const hasher = new KeyGen(file, chunkSize);
     const hash = await hasher.getHash();
     // 0x01 -> Public File
@@ -74,23 +81,22 @@ export class Uploader {
 
     const { data: nodeResp } = await this.api.get('/get-node-address/', {
       params: {
-        appid: this.appId.toString(),
-      },
-    });
-    host = nodeResp.host;
+        appid: this.appId.toString()
+      }
+    })
+    host = nodeResp.host
 
     // If it's a private file, generate a key and store the shares in the DKG
     if (!params.publicFile) {
       key = await window.crypto.subtle.generateKey(
         {
           name: 'AES-CTR',
-          length: 256,
+          length: 256
         },
         true,
-        ['encrypt', 'decrypt'],
-      );
-      const aesRaw = await crypto.subtle.exportKey('raw', key);
-      const hexString = toHexString(aesRaw);
+        ['encrypt', 'decrypt']
+      )
+      const aesRaw = await crypto.subtle.exportKey('raw', key)
       const encryptedMetaData = await AESEncrypt(
         key,
         JSON.stringify({
@@ -98,40 +104,38 @@ export class Uploader {
           type: file.type,
           size: file.size,
           lastModified: 'lastModified' in file ? file.lastModified : new Date(),
-          hash,
-        }),
-      );
+          hash
+        })
+      )
 
-      const ephemeralWallet = await Wallet.createRandom();
+      const ephemeralWallet = await Wallet.createRandom()
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
         utils.toUtf8Bytes(encryptedMetaData),
         nodeResp.address,
         ephemeralWallet.address,
-      ]);
-      JWTToken = res.token;
-      const txHash = res.txHash;
+      ])
+      JWTToken = res.token
+      const txHash = res.txHash
 
       // Fetch DKG Node Details from dkg contract
-      const nodes = await getDKGNodes(this.provider);
+      const nodes = await getDKGNodes(this.provider)
       // Doing shamir secrete sharing
-      const parts = nodes.length;
+      const parts = nodes.length
       // At least 2/3rd nodes is required for share recovery
-      const quorum = nodes.length - Math.floor(nodes.length / 3);
-      const shares = split(randomBytes, parts, quorum, new Uint8Array(aesRaw));
+      const quorum = nodes.length - Math.floor(nodes.length / 3)
+      const shares = split(randomBytes, parts, quorum, new Uint8Array(aesRaw))
       for (let i = 0; i < parts; i++) {
-        const publicKey =
-          nodes[i].pubKx._hex.replace('0x', '').padStart(64, '0') +
-          nodes[i].pubKy._hex.replace('0x', '').padStart(64, '0');
+        const publicKey = nodes[i].pubKx._hex.replace('0x', '').padStart(64, '0') + nodes[i].pubKy._hex.replace('0x', '').padStart(64, '0')
         if (publicKey.length < 128) {
-          console.log('public key is too short');
-          continue;
+          console.log('public key is too short')
+          continue
         }
-        const ciphertextRaw = encrypt(publicKey, shares[i + 1]);
-        const ciphertext = ciphertextRaw.toString('hex');
-        localStorage.setItem('pk', ephemeralWallet.privateKey);
-        const url = 'https://' + nodes[i].declaredIp + '/rpc';
+        const ciphertextRaw = encrypt(publicKey, shares[i + 1])
+        const ciphertext = ciphertextRaw.toString('hex')
+        localStorage.setItem('pk', ephemeralWallet.privateKey)
+        const url = 'https://' + nodes[i].declaredIp + '/rpc'
         await axios.post(url, {
           jsonrpc: '2.0',
           method: 'StoreKeyShare',
@@ -139,27 +143,23 @@ export class Uploader {
           params: {
             tx_hash: txHash,
             encrypted_share: ciphertext,
-            signature: await ephemeralWallet.signMessage(
-              ethers.utils.id(JSON.stringify({ tx_hash: txHash, encrypted_share: ciphertext })),
-            ),
-          },
-        });
+            signature: await ephemeralWallet.signMessage(ethers.utils.id(JSON.stringify({ tx_hash: txHash, encrypted_share: ciphertext })))
+          }
+        })
       }
     } else {
       // Otherwise, generate a random address and create the uploadInit transaction
-      const ephemeralWallet = await Wallet.createRandom();
+      const ephemeralWallet = await Wallet.createRandom()
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
-        utils.toUtf8Bytes(
-          JSON.stringify({
-            name: 'name' in file ? file.name : did,
-            type: file.type,
-            size: file.size,
-            lastModified: 'lastModified' in file ? file.lastModified : new Date(),
-            hash,
-          }),
-        ),
+        utils.toUtf8Bytes(JSON.stringify({
+          name: 'name' in file ? file.name : did,
+          type: file.type,
+          size: file.size,
+          lastModified: 'lastModified' in file ? file.lastModified : new Date(),
+          hash
+        })),
         nodeResp.address,
         ephemeralWallet.address,
       ]);
@@ -195,11 +195,11 @@ export class Uploader {
             {
               counter: convertByteCounterToAESCounter(counter),
               length: 64,
-              name: 'AES-CTR',
+              name: 'AES-CTR'
             },
             key,
-            chunk,
-          );
+            chunk
+          )
         }
 
         // 2. Upload parts
@@ -236,22 +236,22 @@ export class Uploader {
 
     try {
       const tx = await this.provider.getTransaction(
-        completeResp.hash.substring(0, 2) === '0x' ? completeResp.hash : '0x' + completeResp.hash,
-      );
-      await tx.wait();
-      await this.onSuccess();
+        completeResp.hash.substring(0, 2) === '0x' ? completeResp.hash : '0x' + completeResp.hash
+      )
+      await tx.wait()
+      await this.onSuccess()
     } catch (e) {
       if (e.reason) {
         if (e.reason.includes('file_already_uploaded')) {
-          throw customError('TRANSACTION', `File already exist. DID: ${did}`);
+          throw customError('TRANSACTION', `File already exist. DID: ${did}`)
         } else {
-          throw customError('TRANSACTION', e.reason);
+          throw customError('TRANSACTION', e.reason)
         }
       } else {
-        throw customError('', e.error);
+        throw customError('', e.error)
       }
     }
 
-    return did.replace('0x', '');
-  }
+    return did.replace('0x', '')
+  };
 }

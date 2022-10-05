@@ -1,10 +1,12 @@
-import { AxiosInstance } from 'axios';
-import { BigNumber, ethers } from 'ethers';
-import { Mutex } from 'async-mutex';
-import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress, getRuleSet } from './Utils';
-import { wrapInstance } from './sentry';
-import { requiresLocking } from './locking';
-import { id } from 'ethers/lib/utils';
+import { AxiosInstance } from 'axios'
+import { BigNumber, ethers } from 'ethers'
+import { Mutex } from 'async-mutex'
+
+import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress, getRuleSet } from './Utils'
+import { wrapInstance } from './sentry'
+import { requiresLocking } from './locking'
+import { id } from 'ethers/lib/utils'
+import { Rule } from './types'
 
 export enum AccessTypeEnum {
   MY_FILES,
@@ -12,18 +14,18 @@ export enum AccessTypeEnum {
 }
 
 export class FileAPI {
-  private provider: any;
-  private api: AxiosInstance;
-  private appAddress: string;
-  private appId: number;
-  private readonly lock: Mutex;
+  private provider: any
+  private api: AxiosInstance
+  private appAddress: string
+  private appId: number
+  private readonly lock: Mutex
 
-  constructor(appAddress: string, appId: number, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
-    this.provider = provider;
-    this.api = api;
-    this.appAddress = appAddress;
-    this.appId = appId;
-    this.lock = lock;
+  constructor (appAddress: string, appId:number, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
+    this.provider = provider
+    this.api = api
+    this.appAddress = appAddress
+    this.appId = appId
+    this.lock = lock
 
     if (debug) {
       wrapInstance(this);
@@ -33,58 +35,74 @@ export class FileAPI {
   setAppAddress = async (did: string) => {
     // if app address is not set then fetch it from the did and set it
     if (!this.appAddress) {
-      this.appAddress = await getAppAddress(parseHex(did), this.provider);
+      this.appAddress = await getAppAddress(parseHex(did), this.provider)
     }
   };
 
   numOfMyFiles = async () => {
-    return (await this.api('files/total/')).data;
-  };
+    return (await this.api('files/total/')).data
+  }
 
   numOfMyFilesPages = async (pageSize: number = 20) => {
-    const numOfPages = (await this.numOfMyFiles()) / pageSize;
-    return Math.ceil(numOfPages);
-  };
+    const numOfPages = (await this.numOfMyFiles()) / pageSize
+    return Math.ceil(numOfPages)
+  }
 
   myFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
-    if (pageNumber > (await this.numOfMyFilesPages(pageSize))) {
-      throw new Error('invalid_page_number');
+    if (pageNumber > await this.numOfMyFilesPages(pageSize)) {
+      throw new Error('invalid_page_number')
     }
 
     const res = await this.api.get('list-files/', {
       params: {
         offset: (pageNumber - 1) * pageSize,
         count: pageSize,
-        appid: this.appId,
-      },
-    });
-    let data = [];
-    if (res.data) data = res.data;
-    return data;
-  };
+        appid: this.appId
+      }
+    })
+    let data = []
+    if (res.data) data = res.data
+    return data
+  }
 
   numOfSharedFiles = async () => {
-    return (await this.api('files/shared/total/')).data;
-  };
+    return (await this.api('files/shared/total/')).data
+  }
 
   numOfSharedFilesPages = async (pageSize: number = 20) => {
-    return Math.ceil((await this.numOfSharedFiles()) / pageSize);
-  };
+    return Math.ceil((await this.numOfSharedFiles()) / pageSize)
+  }
 
   sharedFiles = async (pageNumber: number = 1, pageSize: number = 20) => {
-    if (pageNumber > (await this.numOfSharedFilesPages(pageSize))) {
-      throw new Error('invalid_page_number');
+    if (pageNumber > await this.numOfSharedFilesPages(pageSize)) {
+      throw new Error('invalid_page_number')
     }
     const res = await this.api('shared-files/', {
       params: {
         offset: (pageNumber - 1) * pageSize,
-        count: pageSize,
-      },
-    });
-    let data = [];
-    if (res.data) data = res.data;
-    return data;
-  };
+        count: pageSize
+      }
+    })
+    let data = []
+    if (res.data) data = res.data
+    return data
+  }
+
+  getPublicFileURL = async (did: string) => {
+    const _did = ethers.utils.arrayify(parseHex(did))
+    if (_did[0] !== 0x01) {
+      throw customError('TRANSACTION', 'Public URLs are only available for Public Files.')
+    }
+
+    const { data: { host: storageHost } } = await this.api.get('/get-region-endpoint/', {
+      params: {
+        address: this.appAddress
+      }
+    })
+    const u = new URL(storageHost)
+    u.pathname = '/api/v2/file/public/' + this.appAddress + '/' + ethers.utils.hexlify(_did)
+    return u.href
+  }
 
   list = (type: AccessTypeEnum, pageNumber: number = 1, pageSize: number = 20) => {
     if (typeof type !== 'number') {
@@ -199,47 +217,46 @@ export class FileAPI {
   };
 
   @requiresLocking
-  async delete(did: string): Promise<string> {
-    await this.setAppAddress(did);
-    did = parseHex(did);
-    return await makeTx(this.appAddress, this.api, this.provider, 'deleteFile', [did]);
-  }
+  async delete (did: string): Promise<string> {
+    await this.setAppAddress(did)
+    did = parseHex(did)
+    return await makeTx(this.appAddress, this.api, this.provider, 'deleteFile', [did])
+  };
 
   deleteFile = (did: string): Promise<string> => {
     return this.delete(did);
   };
 
   @requiresLocking
-  async deleteAccount() {
-    return await makeTx(this.appAddress, this.api, this.provider, 'deleteAccount', []);
-  }
+  async deleteAccount () {
+    return await makeTx(this.appAddress, this.api, this.provider, 'deleteAccount', [])
+  };
 
   getAccountStatus = async () => {
-    const arcana = Arcana(this.appAddress, this.provider);
-    return arcana.status(await this.provider.getAddress());
-  };
+    const arcana = Arcana(this.appAddress, this.provider)
+    return arcana.status(await this.provider.getAddress())
+  }
 
   getUploadLimit = async (): Promise<[number, number]> => {
-    const arcana = Arcana(this.appAddress, this.provider);
-    let con = await arcana.consumption((await this.provider.listAccounts())[0]);
-    let limit = await arcana.limit((await this.provider.listAccounts())[0]);
-    let default_limit = await arcana.defaultLimit();
-    return [con.store.toNumber(), Math.max(limit.store.toNumber(), default_limit.store.toNumber())];
-  };
+    const arcana = Arcana(this.appAddress, this.provider)
+    const con = await arcana.consumption((await this.provider.listAccounts())[0])
+    const limit = await arcana.limit((await this.provider.listAccounts())[0])
+    const defaultLimit = await arcana.defaultLimit()
+    return [con.store.toNumber(), Math.max(limit.store.toNumber(), defaultLimit.store.toNumber())]
+  }
 
   getDownloadLimit = async (): Promise<[number, number]> => {
-    const arcana = Arcana(this.appAddress, this.provider);
-    let con = await arcana.consumption((await this.provider.listAccounts())[0]);
-    let limit = await arcana.limit((await this.provider.listAccounts())[0]);
-    let default_limit = await arcana.defaultLimit();
-    return [con.bandwidth.toNumber(), Math.max(limit.bandwidth.toNumber(), default_limit.bandwidth.toNumber())];
-  };
+    const arcana = Arcana(this.appAddress, this.provider)
+    const con = await arcana.consumption((await this.provider.listAccounts())[0])
+    const limit = await arcana.limit((await this.provider.listAccounts())[0])
+    const defaultLimit = await arcana.defaultLimit()
+    return [con.bandwidth.toNumber(), Math.max(limit.bandwidth.toNumber(), defaultLimit.bandwidth.toNumber())]
+  }
 
   getSharedUsers = async (did: string): Promise<string[]> => {
-    const realDID = parseHex(did);
-    await this.setAppAddress(realDID);
-    const arcana = Arcana(this.appAddress, this.provider);
-    const users = (await this.api.get('/shared-users/?did=' + realDID)).data;
-    return users.filter((d) => d !== ethers.constants.AddressZero);
-  };
+    const realDID = parseHex(did)
+    await this.setAppAddress(realDID)
+    const users = (await this.api.get('/shared-users/?did=' + realDID)).data
+    return users.filter((d) => d !== ethers.constants.AddressZero)
+  }
 }
