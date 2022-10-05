@@ -6,6 +6,7 @@ import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress, getR
 import { wrapInstance } from './sentry'
 import { requiresLocking } from './locking'
 import { id } from 'ethers/lib/utils'
+import { Rule } from './types'
 
 export enum AccessTypeEnum {
   MY_FILES,

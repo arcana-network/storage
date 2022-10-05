@@ -8,6 +8,7 @@ import { AxiosInstance } from 'axios'
 import DID from './contracts/DID'
 import { Web3Provider } from '@ethersproject/providers'
 import { errorCodes } from './errors'
+import { CustomError } from './types'
 
 export type Config = {
   appId: number;
