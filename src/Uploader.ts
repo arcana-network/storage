@@ -1,12 +1,4 @@
-import {
-  KeyGen,
-  toHexString,
-  makeTx,
-  AESEncrypt,
-  customError,
-  getDKGNodes,
-  getFile,
-} from './Utils';
+import { KeyGen, toHexString, makeTx, AESEncrypt, customError, getDKGNodes, getFile } from './Utils';
 import { utils, BigNumber, Wallet, ethers } from 'ethers';
 import axios, { AxiosInstance } from 'axios';
 import { split } from 'shamir';

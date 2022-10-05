@@ -109,12 +109,12 @@ export class Downloader {
       // Private file
       case 0x02: {
         const ephemeralWallet = await Wallet.createRandom();
-        console.log("before download transaction")
+        console.log('before download transaction');
         const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'download', [
           did,
           ephemeralWallet.address,
         ]);
-        console.log("done with download transaction")
+        console.log('done with download transaction');
         const txHash = checkPermissionResp.txHash;
 
         const shares = {};

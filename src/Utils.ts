@@ -229,8 +229,8 @@ export const getDKGNodes = async (provider: Web3Provider): Promise<any[]> => {
 };
 
 export const DIDContract = (provider: Web3Provider): Contract => {
-  return new Contract(localStorage.getItem('did'), DID.abi, provider)
-}
+  return new Contract(localStorage.getItem('did'), DID.abi, provider);
+};
 
 export const getFile = async (did: string, provider: Web3Provider): Promise<any> => {
   let contract = DIDContract(provider);
@@ -250,7 +250,7 @@ export const getAppAddress = async (did: string, provider: Web3Provider): Promis
   return appAddress;
 };
 
-export const checkDownladPermission = async(did:string, provider: Web3Provider) => {
-  let contract = DIDContract(provider)
-  contract
-}
+export const checkDownladPermission = async (did: string, provider: Web3Provider) => {
+  let contract = DIDContract(provider);
+  contract;
+};

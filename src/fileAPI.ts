@@ -140,7 +140,7 @@ export class FileAPI {
       }
     }
     let ruleHash: string = id(rawRule);
-    console.log({rawRule, ruleHash})
+    console.log({ rawRule, ruleHash });
     let res = await this.api.post('update-hash/', {
       did,
       hash: ruleHash,
