@@ -139,8 +139,8 @@ export class FileAPI {
         remove.push(address[i]);
       }
     }
-
-    let ruleHash: string = id(JSON.stringify(rawRule));
+    let ruleHash: string = id(rawRule);
+    console.log({rawRule, ruleHash})
     let res = await this.api.post('update-hash/', {
       did,
       hash: ruleHash,
