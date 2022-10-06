@@ -7,17 +7,17 @@ export default {
           indexed: false,
           internalType: 'bytes32',
           name: 'did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           indexed: false,
           internalType: 'address',
           name: 'user',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'DownloadViaRuleSet',
-      type: 'event',
+      type: 'event'
     },
     {
       anonymous: false,
@@ -26,30 +26,30 @@ export default {
           indexed: true,
           internalType: 'address',
           name: 'previousOwner',
-          type: 'address',
+          type: 'address'
         },
         {
           indexed: true,
           internalType: 'address',
           name: 'newOwner',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'OwnershipTransferred',
-      type: 'event',
+      type: 'event'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'addFile',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
@@ -58,35 +58,35 @@ export default {
         {
           internalType: 'bool',
           name: '',
-          type: 'bool',
-        },
+          type: 'bool'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'appFiles',
       outputs: [
         {
           internalType: 'address',
           name: 'owner',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'uint256',
           name: 'userVersion',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
@@ -95,53 +95,53 @@ export default {
         {
           internalType: 'uint8',
           name: '',
-          type: 'uint8',
-        },
+          type: 'uint8'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           internalType: 'address',
           name: '_newOwner',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'changeFileOwner',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'consumption',
       outputs: [
         {
           internalType: 'uint256',
           name: 'store',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'uint256',
           name: 'bandwidth',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
@@ -150,71 +150,71 @@ export default {
         {
           internalType: 'uint256',
           name: 'store',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'uint256',
           name: 'bandwidth',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'delegators',
       outputs: [
         {
           internalType: 'uint8',
           name: '',
-          type: 'uint8',
-        },
+          type: 'uint8'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           internalType: 'address',
           name: '_ephemeralWallet',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'download',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'uint8',
           name: '_appPermission',
-          type: 'uint8',
+          type: 'uint8'
         },
         {
           internalType: 'bool',
           name: '_add',
-          type: 'bool',
-        },
+          type: 'bool'
+        }
       ],
       name: 'editAppPermission',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
@@ -223,127 +223,127 @@ export default {
         {
           internalType: 'bytes32',
           name: '',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
       name: 'grantAppPermission',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '_factory',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'address',
           name: '_relayer',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'bool',
           name: '_aggregateLogin',
-          type: 'bool',
+          type: 'bool'
         },
         {
           internalType: 'address',
           name: '_handlerContract',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'address',
           name: '_did',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'bytes32',
           name: '_appConfigValue',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'initialize',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: 'forwarder',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'isTrustedForwarder',
       outputs: [
         {
           internalType: 'bool',
           name: '',
-          type: 'bool',
-        },
+          type: 'bool'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'limit',
       outputs: [
         {
           internalType: 'uint256',
           name: 'store',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'uint256',
           name: 'bandwidth',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           internalType: 'uint256',
           name: '_tokenId',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'address',
           name: '_nftContract',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'uint256',
           name: '_chainId',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       name: 'linkNFT',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
@@ -352,255 +352,255 @@ export default {
         {
           internalType: 'address',
           name: '',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'removeUserFile',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
       name: 'renounceOwnership',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
       name: 'revokeApp',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: 'appConfig',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'setAppConfig',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'uint256',
           name: '_store',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'uint256',
           name: '_bandwidth',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       name: 'setAppLevelLimit',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'uint256',
           name: '_store',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'uint256',
           name: '_bandwidth',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       name: 'setDefaultLimit',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
       name: 'setUiMode',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '_user',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'uint256',
           name: '_store',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'uint256',
           name: '_bandwidth',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       name: 'setUserLevelLimit',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: 'newOwner',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'transferOwnership',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '_delegator',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'uint8',
           name: '_control',
-          type: 'uint8',
+          type: 'uint8'
         },
         {
           internalType: 'bool',
           name: '_add',
-          type: 'bool',
-        },
+          type: 'bool'
+        }
       ],
       name: 'updateDelegator',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           internalType: 'bytes32',
           name: '_ruleHash',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'updateRuleSet',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'uploadClose',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           internalType: 'uint256',
           name: '_fileSize',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'bytes',
           name: '_encryptedMetaData',
-          type: 'bytes',
+          type: 'bytes'
         },
         {
           internalType: 'address',
           name: '_storageNode',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'address',
           name: '_ephemeralAddress',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'uploadInit',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'userAppPermission',
       outputs: [
         {
           internalType: 'uint8',
           name: '',
-          type: 'uint8',
-        },
+          type: 'uint8'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'userVersion',
       outputs: [
         {
           internalType: 'uint256',
           name: '',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
@@ -609,11 +609,11 @@ export default {
         {
           internalType: 'enum Arcana.WalletMode',
           name: '',
-          type: 'uint8',
-        },
+          type: 'uint8'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
-    },
-  ],
-};
+      type: 'function'
+    }
+  ]
+}

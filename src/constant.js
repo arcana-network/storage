@@ -1,4 +1,4 @@
-export const chainId = 40405;
+export const chainId = 40405
 
 export const chainIdToGateway = new Map([
   [40405, 'https://gateway001-testnet.arcana.network/api/v1/'],

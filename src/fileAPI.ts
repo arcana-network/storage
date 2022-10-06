@@ -221,7 +221,7 @@ export class FileAPI {
   async delete(did: string): Promise<string> {
     await this.setAppAddress(did);
     did = parseHex(did);
-    const didContract = await DIDContract(this.provider)
+    const didContract = await DIDContract(this.provider);
     return await makeTx(didContract.address, this.api, this.provider, 'deleteFile', [did]);
   }
 

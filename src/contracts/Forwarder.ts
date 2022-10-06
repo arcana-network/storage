@@ -3,7 +3,7 @@ export default {
     {
       inputs: [],
       stateMutability: 'nonpayable',
-      type: 'constructor',
+      type: 'constructor'
     },
     {
       inputs: [
@@ -12,78 +12,78 @@ export default {
             {
               internalType: 'address',
               name: 'from',
-              type: 'address',
+              type: 'address'
             },
             {
               internalType: 'address',
               name: 'to',
-              type: 'address',
+              type: 'address'
             },
             {
               internalType: 'uint256',
               name: 'value',
-              type: 'uint256',
+              type: 'uint256'
             },
             {
               internalType: 'uint256',
               name: 'gas',
-              type: 'uint256',
+              type: 'uint256'
             },
             {
               internalType: 'uint256',
               name: 'nonce',
-              type: 'uint256',
+              type: 'uint256'
             },
             {
               internalType: 'bytes',
               name: 'data',
-              type: 'bytes',
-            },
+              type: 'bytes'
+            }
           ],
           internalType: 'struct Forwarder.ForwardRequest',
           name: 'req',
-          type: 'tuple',
+          type: 'tuple'
         },
         {
           internalType: 'bytes',
           name: 'signature',
-          type: 'bytes',
-        },
+          type: 'bytes'
+        }
       ],
       name: 'execute',
       outputs: [
         {
           internalType: 'bool',
           name: '',
-          type: 'bool',
+          type: 'bool'
         },
         {
           internalType: 'bytes',
           name: '',
-          type: 'bytes',
-        },
+          type: 'bytes'
+        }
       ],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: 'from',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'getNonce',
       outputs: [
         {
           internalType: 'uint256',
           name: '',
-          type: 'uint256',
-        },
+          type: 'uint256'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
@@ -92,54 +92,54 @@ export default {
             {
               internalType: 'address',
               name: 'from',
-              type: 'address',
+              type: 'address'
             },
             {
               internalType: 'address',
               name: 'to',
-              type: 'address',
+              type: 'address'
             },
             {
               internalType: 'uint256',
               name: 'value',
-              type: 'uint256',
+              type: 'uint256'
             },
             {
               internalType: 'uint256',
               name: 'gas',
-              type: 'uint256',
+              type: 'uint256'
             },
             {
               internalType: 'uint256',
               name: 'nonce',
-              type: 'uint256',
+              type: 'uint256'
             },
             {
               internalType: 'bytes',
               name: 'data',
-              type: 'bytes',
-            },
+              type: 'bytes'
+            }
           ],
           internalType: 'struct Forwarder.ForwardRequest',
           name: 'req',
-          type: 'tuple',
+          type: 'tuple'
         },
         {
           internalType: 'bytes',
           name: 'signature',
-          type: 'bytes',
-        },
+          type: 'bytes'
+        }
       ],
       name: 'verify',
       outputs: [
         {
           internalType: 'bool',
           name: '',
-          type: 'bool',
-        },
+          type: 'bool'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
-    },
-  ],
-};
+      type: 'function'
+    }
+  ]
+}

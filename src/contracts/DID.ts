@@ -7,17 +7,17 @@ export default {
           indexed: false,
           internalType: 'address',
           name: 'previousAdmin',
-          type: 'address',
+          type: 'address'
         },
         {
           indexed: false,
           internalType: 'address',
           name: 'newAdmin',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'AdminChanged',
-      type: 'event',
+      type: 'event'
     },
     {
       anonymous: false,
@@ -26,11 +26,11 @@ export default {
           indexed: true,
           internalType: 'address',
           name: 'beacon',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'BeaconUpgraded',
-      type: 'event',
+      type: 'event'
     },
     {
       anonymous: false,
@@ -39,29 +39,29 @@ export default {
           indexed: true,
           internalType: 'bytes32',
           name: 'did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           indexed: true,
           internalType: 'uint8',
           name: 'control',
-          type: 'uint8',
+          type: 'uint8'
         },
         {
           indexed: true,
           internalType: 'address',
           name: 'app',
-          type: 'address',
+          type: 'address'
         },
         {
           indexed: false,
           internalType: 'address',
           name: 'user',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'FilePermission',
-      type: 'event',
+      type: 'event'
     },
     {
       anonymous: false,
@@ -70,17 +70,17 @@ export default {
           indexed: true,
           internalType: 'address',
           name: 'previousOwner',
-          type: 'address',
+          type: 'address'
         },
         {
           indexed: true,
           internalType: 'address',
           name: 'newOwner',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'OwnershipTransferred',
-      type: 'event',
+      type: 'event'
     },
     {
       anonymous: false,
@@ -89,11 +89,11 @@ export default {
           indexed: true,
           internalType: 'address',
           name: 'implementation',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'Upgraded',
-      type: 'event',
+      type: 'event'
     },
     {
       inputs: [],
@@ -102,193 +102,193 @@ export default {
         {
           internalType: 'bytes32',
           name: '',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           internalType: 'address',
           name: '_owner',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'changeFileOwner',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           internalType: 'uint8',
           name: '_control',
-          type: 'uint8',
+          type: 'uint8'
         },
         {
           internalType: 'address',
           name: '_requester',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'checkPermission',
       outputs: [
         {
           internalType: 'bool',
           name: '',
-          type: 'bool',
-        },
+          type: 'bool'
+        }
       ],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'completeUpload',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'deleteFile',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'getFile',
       outputs: [
         {
           internalType: 'uint256',
           name: '',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'bool',
           name: '',
-          type: 'bool',
+          type: 'bool'
         },
         {
           internalType: 'bytes',
           name: '',
-          type: 'bytes',
+          type: 'bytes'
         },
         {
           internalType: 'address',
           name: '',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'bool',
           name: '',
-          type: 'bool',
-        },
+          type: 'bool'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'getFileOwner',
       outputs: [
         {
           internalType: 'address',
           name: '',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'getRuleSet',
       outputs: [
         {
           internalType: 'bytes32',
           name: '',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '_relayer',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'initialize',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: 'forwarder',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'isTrustedForwarder',
       outputs: [
         {
           internalType: 'bool',
           name: '',
-          type: 'bool',
-        },
+          type: 'bool'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
@@ -297,11 +297,11 @@ export default {
         {
           internalType: 'contract IArcanaNFTHandler',
           name: '',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
@@ -310,11 +310,11 @@ export default {
         {
           internalType: 'address',
           name: '',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
@@ -323,136 +323,136 @@ export default {
         {
           internalType: 'bytes32',
           name: '',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       stateMutability: 'view',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [],
       name: 'renounceOwnership',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           internalType: 'address',
           name: '_owner',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'uint256',
           name: '_fileSize',
-          type: 'uint256',
+          type: 'uint256'
         },
         {
           internalType: 'bool',
           name: '_uploaded',
-          type: 'bool',
+          type: 'bool'
         },
         {
           internalType: 'bytes',
           name: '_encryptedMetaData',
-          type: 'bytes',
+          type: 'bytes'
         },
         {
           internalType: 'address',
           name: '_storageNode',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'bool',
           name: '_duplicate',
-          type: 'bool',
-        },
+          type: 'bool'
+        }
       ],
       name: 'setFile',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: '_nftHandler',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'setNFTHandler',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: 'newOwner',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'transferOwnership',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'bytes32',
           name: '_did',
-          type: 'bytes32',
+          type: 'bytes32'
         },
         {
           internalType: 'bytes32',
           name: '_ruleHash',
-          type: 'bytes32',
-        },
+          type: 'bytes32'
+        }
       ],
       name: 'updateRuleSet',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: 'newImplementation',
-          type: 'address',
-        },
+          type: 'address'
+        }
       ],
       name: 'upgradeTo',
       outputs: [],
       stateMutability: 'nonpayable',
-      type: 'function',
+      type: 'function'
     },
     {
       inputs: [
         {
           internalType: 'address',
           name: 'newImplementation',
-          type: 'address',
+          type: 'address'
         },
         {
           internalType: 'bytes',
           name: 'data',
-          type: 'bytes',
-        },
+          type: 'bytes'
+        }
       ],
       name: 'upgradeToAndCall',
       outputs: [],
       stateMutability: 'payable',
-      type: 'function',
-    },
-  ],
-};
+      type: 'function'
+    }
+  ]
+}

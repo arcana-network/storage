@@ -133,11 +133,11 @@ function hexToASCII(str1) {
 }
 
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
-  let contract: Contract
-  if (address != localStorage.getItem("did")) {
+  let contract: Contract;
+  if (address != localStorage.getItem('did')) {
     contract = Arcana(address, wallet);
   } else {
-    contract = DIDContract(wallet)
+    contract = DIDContract(wallet);
   }
   const forwarderContract: Contract = Forwarder(localStorage.getItem('forwarder'), wallet);
   const req = await sign(wallet, contract, forwarderContract, method, params);
@@ -232,7 +232,7 @@ export const getDKGNodes = async (provider: Web3Provider): Promise<any[]> => {
   return nodes;
 };
 
-export const DIDContract = (provider: Web3Provider| Wallet): Contract => {
+export const DIDContract = (provider: Web3Provider | Wallet): Contract => {
   return new Contract(localStorage.getItem('did'), DID.abi, provider);
 };
 
