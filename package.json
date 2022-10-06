@@ -14,7 +14,7 @@
     "build": "rimraf dist types && npm run build:ts && npm run build:web",
     "build:web": "webpack",
     "build:ts": "tsc --project tsconfig.json",
-    "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"  ",
+    "prettier": "prettier --write \"src/**/*.ts\" \"tests/**/*.ts\"  ",
     "docs": "typedoc --options typedoc.json",
     "htmldocs": "typedoc --options typedochtml.json",
     "lint": "eslint src/**/*.ts src/**/*.js",

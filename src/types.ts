@@ -9,5 +9,5 @@ export interface Rule {
 }
 
 export interface CustomError extends Error {
-    code?: string;
+  code?: string;
 }
