@@ -11,7 +11,8 @@ import { errorCodes } from './errors';
 import { CustomError } from './types';
 
 export type Config = {
-  appId: number;
+  appId?: number;
+  appAddress?: string;
   provider: any;
   email: string;
   gateway: string;

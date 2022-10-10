@@ -70,6 +70,7 @@ describe('Upload File', () => {
     file = new File([file], file.name, { type: file.type });
     arcanaInstance = await arcana.storage.StorageProvider.init({
       appId,
+      // appAddress: "445007f942f9Ba718953094Bbe3205B9484cAfd2",
       provider: window.ethereum,
       email: makeEmail(),
       chainId,

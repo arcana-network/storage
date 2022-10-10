@@ -57,6 +57,9 @@ export class StorageProvider {
     }
     this.email = config.email;
     this.appId = config.appId;
+    if (config.appAddress) {
+      this.appAddress = parseHex(config.appAddress);
+    }
     if (!config.chainId) {
       this.chainId = chainId;
     } else {
@@ -253,7 +256,7 @@ export class StorageProvider {
       },
     });
 
-    if (this.appId) {
+    if (this.appId && !this.appAddress) {
       // fetch app address
       res = await this.api.get(`get-address/?id=${this.appId}`);
       if (res.data.address) {

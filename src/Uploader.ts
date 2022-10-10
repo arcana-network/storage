@@ -36,7 +36,6 @@ export class Uploader {
   constructor(appId: number, appAddress: string, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
     this.provider = provider;
     this.api = api;
-    this.appId = appId;
     this.appAddress = appAddress;
     this.lock = lock;
 
@@ -72,13 +71,21 @@ export class Uploader {
     let key;
     let host;
     let JWTToken;
-
-    const { data: nodeResp } = await this.api.get('/get-node-address/', {
-      params: {
-        appid: this.appId.toString(),
-      },
-    });
-    host = nodeResp.host;
+    let nodeResp;
+    if (this.appId) {
+      nodeResp = (await this.api.get('/get-node-address/', {
+        params: {
+          appId: this.appId,
+        },
+      })).data;
+    } else {
+      nodeResp = (await this.api.get('/get-node-address/', {
+        params: {
+          address: this.appAddress,
+        },
+      })).data;
+    }
+   host = nodeResp.host;
 
     // If it's a private file, generate a key and store the shares in the DKG
     if (!params.publicFile) {

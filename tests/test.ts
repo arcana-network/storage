@@ -13,7 +13,6 @@ import { providerFromEngine } from 'eth-json-rpc-middleware';
 // SDK imports
 import { StorageProvider } from '../src/index';
 import * as utils from '../src/Utils';
-import { errorCodes } from '../src/errors';
 import { parseData } from './utils';
 import { CustomError } from '../src/types';
 
@@ -23,6 +22,7 @@ const oContracts = JSON.parse(sContracts);
 
 const gateway = 'http://localhost:9010/api/v1';
 const appId = 1;
+const appAddress = "445007f942f9Ba718953094Bbe3205B9484cAfd2";
 const debug = false;
 
 // To ignore strict http request/response rules
@@ -164,7 +164,7 @@ function sinonMockObjectSetup() {
 async function mockFile() {
   // file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
   // file = new File([file], "picsum_img", { type: file.type });
-  return new nBlob([await (await fetch('https://picsum.photos/id/872/200/300')).arrayBuffer()]);
+  // return new nBlob([await (await fetch('https://picsum.photos/id/872/200/300')).arrayBuffer()]);
 }
 
 // Wallet Setup
@@ -200,7 +200,7 @@ async function createStorageInstance(wallet: Wallet, middleware?) {
   }
 
   const instance = await StorageProvider.init({
-    appId,
+    appAddress,
     email: 'test@email.com',
     gateway: gateway + '/',
     debug,
@@ -278,7 +278,7 @@ test.serial.skip('Metadata URL', async (t) => {
     .post('/metadata/')
     .reply(201, Promise.resolve({ request: { responseURL: 'dummy.metadata.url' } }));
   const freader = await (await fetch('https://picsum.photos/id/872/200/300')).arrayBuffer();
-
+  const arcanaInstance = await createStorageInstance(arcanaWallet)
   const metadataURL = await arcanaInstance.makeMetadataURL('test', 'test description', did, file);
 
   t.is(metadataURL, 'dummy.metadata.url'.concat('/', did));
