@@ -1,6 +1,6 @@
 {
   "name": "@arcana/storage",
-  "version": "0.3.7",
+  "version": "0.3.8",
   "description": "Upload, Download, Share can be performed using this SDK",
   "main": "dist/index.js",
   "browser": "dist/index.js",
@@ -17,7 +17,7 @@
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.ts\"  ",
     "docs": "typedoc --options typedoc.json",
     "htmldocs": "typedoc --options typedochtml.json",
-    "lint": "eslint src/**/*.ts src/**/*.js",
+    "lint": "eslint 'src/**/*.ts' 'src/**/*.js'",
     "prepare": "npm run build",
     "prepublish": "npm run build",
     "postversion": "git push && git push --tags",

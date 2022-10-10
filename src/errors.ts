@@ -40,5 +40,5 @@ export const errorCodes: IHash = {
   already_in_UI_mode: 'Already in UI mode. No need to set again.',
   "duplicate_can't_be_removed":
     'A file has already been uploaded with this hash, turn on the duplicate boolean field to upload with a randomly generated DID.',
-  reserved_did_prefix: 'DIDs with reserved prefixes (anything other than 0x01, 0x02 or 0x03) are undefined.',
-};
+  reserved_did_prefix: 'DIDs with reserved prefixes (anything other than 0x01, 0x02 or 0x03) are undefined.'
+}
