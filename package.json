@@ -17,7 +17,7 @@
     "prettier": "prettier --write \"src/**/*.ts\" \"test/**/*.js\"  ",
     "docs": "typedoc --options typedoc.json",
     "htmldocs": "typedoc --options typedochtml.json",
-    "lint": "eslint src/**/*.ts src/**/*.js",
+    "lint": "eslint 'src/**/*.ts' 'src/**/*.js'",
     "prepare": "npm run build",
     "prepublish": "npm run build",
     "postversion": "git push && git push --tags",

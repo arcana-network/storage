@@ -99,7 +99,6 @@ export class Uploader {
     }
 
     let key
-    let host
     let JWTToken
 
     const { data: nodeResp } = await this.api.get('/get-node-address/', {
@@ -107,7 +106,7 @@ export class Uploader {
         appid: this.appId.toString()
       }
     })
-    host = nodeResp.host
+    const host = nodeResp.host
 
     // If it's a private file, generate a key and store the shares in the DKG
     if (!params.publicFile) {
