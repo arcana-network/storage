@@ -88,16 +88,26 @@ describe('Upload File', () => {
   });
 
 
-  it('Share', async () => {
+  it.skip('Share', async () => {
     // let did = "0257b566bc3fea825635298d1c8565d11c94bf6e5a697643c11b43c129b6c13b"
-    let address = "0x64b69590954570d63bb60b9bba4ab3814f1a3a23"
+    let address = "0xbd92a7c9BF0aE4CaaE3978f9177A696fe7eA179F"
     // let address2 = "0x64b69590954570d63bb60b9bba4ab3814f1a3a22"
     await arcanaInstance.files.share(did, address)
+    alert("change account")
     // await arcanaInstance.files.share(did, address2)
     // await arcanaInstance.files.revoke(did, address)
   });
 
   it('Download', async () => {
+    // let store = await arcana.storage.StorageProvider.init({
+    //   appId,
+    //   provider: window.ethereum,
+    //   email: makeEmail(),
+    //   chainId,
+    //   gateway,
+    //   debug,
+    // });
+    // await store.download(did)  
     await arcanaInstance.download(did)  
   })
 

@@ -228,7 +228,8 @@ export const customError = (code: string, message: string): Error => {
 
 export const getDKGNodes = async (provider: Web3Provider): Promise<any[]> => {
   // Fetch DKG Node Details from dkg contract
-  const dkg = DKG(localStorage.getItem('dkg'), provider)
+  // const dkg = DKG(localStorage.getItem('dkg'), provider)
+  const dkg = DKG("0x5Ae1c9058541629E9cEBaa7d54D83e8BFeD300c4", provider)
   const nodes = await dkg.getCurrentEpochDetails()
   return nodes
 }

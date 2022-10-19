@@ -118,7 +118,10 @@ export class Uploader {
       const txHash = res.txHash
 
       // Fetch DKG Node Details from dkg contract
-      const nodes = await getDKGNodes(this.provider)
+      let nodes = await getDKGNodes(this.provider)
+      nodes = nodes.map(n => {
+        return {...n, declaredIp: "localhost:" + n.declaredIp.split(":")[1]}
+      })
       // Doing shamir secrete sharing
       const parts = nodes.length
       // At least 2/3rd nodes is required for share recovery
@@ -135,7 +138,7 @@ export class Uploader {
         const ciphertextRaw = encrypt(publicKey, shares[i + 1])
         const ciphertext = ciphertextRaw.toString('hex')
         localStorage.setItem('pk', ephemeralWallet.privateKey)
-        const url = 'https://' + nodes[i].declaredIp + '/rpc'
+        const url = 'http://' + nodes[i].declaredIp + '/rpc'
         await axios.post(url, {
           jsonrpc: '2.0',
           method: 'StoreKeyShare',

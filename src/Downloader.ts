@@ -77,7 +77,7 @@ export class Downloader {
     switch (didBytes[0]) {
       // Public File
       case 0x01: {
-        fileMeta = JSON.parse(Buffer.from(file.encryptedMetaData.slice(2), 'hex').toString('utf-8'))
+        fileMeta = JSON.parse(Buffer.from(file[2].slice(2), 'hex').toString('utf-8'))
         fileWriter = new FileWriter(fileMeta.name, accessType)
         const {
           data: { host: storageHost }
@@ -119,15 +119,21 @@ export class Downloader {
         const txHash = checkPermissionResp.txHash
 
         const shares = {}
-        const nodes = await getDKGNodes(this.provider)
+        let nodes = await getDKGNodes(this.provider)
+        nodes = nodes.map(n => {
+          return {...n, declaredIp: "localhost:" + n.declaredIp.split(":")[1]}
+        })
+       
         for (let i = 0; i < nodes.length; i++) {
-          const res = await axios.post('https://' + nodes[i].declaredIp + '/rpc', {
+          const sigParams = JSON.stringify({ tx_hash: txHash })
+          const hash = id(sigParams)
+          const res = await axios.post('http://' + nodes[i].declaredIp + '/rpc', {
             jsonrpc: '2.0',
             method: 'RetrieveKeyShare',
             id: 10,
             params: {
               tx_hash: txHash,
-              signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash: txHash })))
+              signature: await ephemeralWallet.signMessage(hash)
             }
           })
           if (res.data.error) {
@@ -139,13 +145,11 @@ export class Downloader {
           shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh))
         }
         const decryptedKey = join(shares)
-
+        console.log({decryptedKey})
         const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt'])
-
-        fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)))
+        fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file[2])))
         fileWriter = new FileWriter(fileMeta.name, accessType)
         const Dec = new Decryptor(key)
-
         let downloaded = 0
         for (let i = 0; i < fileMeta.size; i += chunkSize) {
           const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size) - 1}`

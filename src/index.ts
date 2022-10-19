@@ -104,13 +104,13 @@ export class StorageProvider {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNetworkChange = (newNetwork, oldNetwork) => {
-    window.location.reload()
+    // window.location.reload()
   }
 
   // Reload on account changed
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onAccountChange = (accounts) => {
-    window.location.reload()
+    // window.location.reload()
   }
 
   downloadDID = async (did: string) => {
@@ -235,7 +235,6 @@ export class StorageProvider {
         }
       }
     }
-
     let res = (await axios.get(this.gateway + 'get-config/')).data
     localStorage.setItem('forwarder', res.Forwarder)
     localStorage.setItem('dkg', res.DKG)
