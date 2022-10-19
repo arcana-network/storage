@@ -102,7 +102,7 @@ async function buildRequest(forwarder: Contract, input: any) {
   return { nonce, ...input };
 }
 
-async function buildTypedData(forwarder: Contract, request: any, arcana: Contract, params: any[]): Promise<TypeddataType> {
+async function buildTypedData(forwarder: Contract, request: any, arcana: Contract, params: any[]): Promise<any> {
   const chainId = await forwarder.provider.getNetwork().then((n: { chainId: number }) => n.chainId);
   const typeData = getMetaTxTypeData(chainId, forwarder.address, request.method, arcana);
 

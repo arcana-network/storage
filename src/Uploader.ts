@@ -1,4 +1,4 @@
-import { KeyGen, makeTx, AESEncrypt, customError, getDKGNodes } from './Utils'
+import { KeyGen, makeTx, AESEncryptHex, customError, getDKGNodes } from './Utils'
 import { utils, BigNumber, Wallet, ethers } from 'ethers'
 import axios, { AxiosInstance } from 'axios'
 import { split } from 'shamir'
@@ -95,24 +95,25 @@ export class Uploader {
         ['encrypt', 'decrypt']
       )
       const aesRaw = await crypto.subtle.exportKey('raw', key)
-      const encryptedMetaData = await AESEncrypt(
-        key,
-        JSON.stringify({
-          name: 'name' in file ? file.name : did,
-          type: file.type,
-          size: file.size,
-          lastModified: 'lastModified' in file ? file.lastModified : new Date(),
-          hash
-        })
-      )
+      // const encryptedMetaData = await AESEncrypt(
+      //   key,
+      //   JSON.stringify({
+      //     name: 'name' in file ? file.name : did,
+      //     type: file.type,
+      //     size: file.size,
+      //     lastModified: 'lastModified' in file ? file.lastModified : new Date(),
+      //     hash
+      //   })
+      // )
+
+      console.log(hash, await AESEncryptHex(key, hash))
 
       const ephemeralWallet = await Wallet.createRandom()
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
         utils.id(file.name),
-        hash,
-        // utils.toUtf8Bytes(encryptedMetaData),
+        await AESEncryptHex(key,hash),
         nodeResp.address,
         ephemeralWallet.address
       ])

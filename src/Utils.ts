@@ -180,6 +180,21 @@ export const checkTxnStatus = async (provider, txHash: string) => {
   }
 }
 
+export const AESEncryptHex = async (key: CryptoKey, rawData: string) => {
+  const iv = new Uint8Array(16)
+  const encryptedContent = await window.crypto.subtle.encrypt(
+    {
+      name: 'AES-CTR',
+      counter: iv,
+      length: 128
+    },
+    key,
+    fromHexString(rawData)
+  )
+  return toHexString(encryptedContent)
+}
+
+
 export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
   const iv = new Uint8Array(16)
   const enc = new TextEncoder()
