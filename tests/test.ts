@@ -61,6 +61,9 @@ const did = '0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066'
 
 function meta_tx_nock (reply_data) {
   const nockMetaReply = async (uri, body: any) => {
+
+    console.log(body);
+
     return reply_data ?? { data: 'dummy data', token: 'dummy token' }
   }
 
@@ -210,7 +213,7 @@ async function createStorageInstance (wallet:Wallet, middleware?) {
   return Promise.resolve(instance)
 }
 
-test.serial('Upload file', async (t) => {
+test.serial.only('Upload file', async (t) => {
   meta_tx_nock(undefined)
 
   const arcanaInstance = await createStorageInstance(arcanaWallet, (req, res, next, end) => {

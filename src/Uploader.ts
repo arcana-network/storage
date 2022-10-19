@@ -134,10 +134,11 @@ export class Uploader {
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
-        utils.toUtf8Bytes(encryptedMetaData),
+        utils.id(file.name),
+        hash,
+        // utils.toUtf8Bytes(encryptedMetaData),
         nodeResp.address,
         ephemeralWallet.address,
-        duplicate
       ])
       JWTToken = res.token
       const txHash = res.txHash

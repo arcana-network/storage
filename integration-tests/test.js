@@ -6,7 +6,7 @@ const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567
 // const gateway = 'https://gateway01-testnet.arcana.network/';
 const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
-const appId = 1;
+const appId = 516;
 // const appId = 28;
 const delay = ms => new Promise(res => setTimeout(res, ms));
 

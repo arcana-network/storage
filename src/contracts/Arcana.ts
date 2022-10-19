@@ -42,7 +42,7 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_did",
+          "name": "did",
           "type": "bytes32"
         }
       ],
@@ -184,16 +184,34 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_did",
+          "name": "did",
           "type": "bytes32"
         },
         {
           "internalType": "address",
-          "name": "_ephemeralWallet",
+          "name": "ephemeralWallet",
           "type": "address"
         }
       ],
       "name": "download",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "bytes32",
+          "name": "did",
+          "type": "bytes32"
+        },
+        {
+          "internalType": "bytes32",
+          "name": "txHash",
+          "type": "bytes32"
+        }
+      ],
+      "name": "downloadClose",
       "outputs": [],
       "stateMutability": "nonpayable",
       "type": "function"
@@ -468,6 +486,25 @@ export default {
     {
       "inputs": [
         {
+          "internalType": "bytes32",
+          "name": "",
+          "type": "bytes32"
+        }
+      ],
+      "name": "txCounter",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function"
+    },
+    {
+      "inputs": [
+        {
           "internalType": "address",
           "name": "_delegator",
           "type": "address"
@@ -523,32 +560,32 @@ export default {
       "inputs": [
         {
           "internalType": "bytes32",
-          "name": "_did",
+          "name": "did",
           "type": "bytes32"
         },
         {
           "internalType": "uint256",
-          "name": "_fileSize",
+          "name": "fileSize",
           "type": "uint256"
         },
         {
           "internalType": "bytes32",
-          "name": "_name",
+          "name": "name",
           "type": "bytes32"
         },
         {
           "internalType": "bytes32",
-          "name": "_fileHash",
+          "name": "fileHash",
           "type": "bytes32"
         },
         {
           "internalType": "address",
-          "name": "_storageNode",
+          "name": "storageNode",
           "type": "address"
         },
         {
           "internalType": "address",
-          "name": "_ephemeralAddress",
+          "name": "ephemeralAddress",
           "type": "address"
         }
       ],
