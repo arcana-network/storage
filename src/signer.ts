@@ -15,7 +15,7 @@ const ForwardRequest = [
 ];
 
 const RequestTemplate = [
-  { name: "f", type: "ForwardRequest" },
+  { name: "tx", type: "ForwardRequest" },
   //will be decided dynamically based
   null
 ]
@@ -70,7 +70,7 @@ const typedMessageInstance = (contract: Contract, method: string, params: any[])
 function getMetaTxTypeData(chainId: number, verifyingContract: string, method: string, arcana: Contract) {
 
   let Request = RequestTemplate;
-  Request[1] = { name: "a", type: method }
+  Request[1] = { name: "details", type: method }
 
   let mtypedata: any = {
     types: {
@@ -108,12 +108,12 @@ async function buildTypedData(forwarder: Contract, request: any, arcana: Contrac
 
   //forward request
   typeData.message = {
-    f : {
+    tx : {
      ...request
     }
   }
 
-  typeData.message.a = typedMessageInstance(arcana, request.method, params);
+  typeData.message.details = typedMessageInstance(arcana, request.method, params);
 
   return typeData;
 }
