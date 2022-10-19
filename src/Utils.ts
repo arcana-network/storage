@@ -8,14 +8,16 @@ import { AxiosInstance } from 'axios'
 import DID from './contracts/DID'
 import { Web3Provider } from '@ethersproject/providers'
 import { errorCodes } from './errors'
+import { CustomError } from './types'
 
 export type Config = {
-  appId: number;
+  appId?: number;
+  appAddress?: string;
   provider: any;
   email: string;
-  gateway: any;
-  debug: any;
-  chainId: any;
+  gateway: string;
+  debug: boolean;
+  chainId: number;
 };
 
 export class KeyGen {
@@ -98,7 +100,7 @@ export function ensureArray<T> (input: T[] | T): T[] {
   mac: string;
 } */
 
-export const getProvider = (provider: any) => {
+export const getProvider = (provider: providers.ExternalProvider) => {
   return new providers.Web3Provider(provider, 'any')
 }
 
@@ -132,9 +134,14 @@ function hexToASCII (str1) {
 }
 
 export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
-  const arcana: Contract = Arcana(address, wallet)
+  let contract: Contract
+  if (address !== localStorage.getItem('did')) {
+    contract = Arcana(address, wallet)
+  } else {
+    contract = DIDContract(wallet)
+  }
   const forwarderContract: Contract = Forwarder(localStorage.getItem('forwarder'), wallet)
-  const req = await sign(wallet, arcana, forwarderContract, method, params)
+  const req = await sign(wallet, contract, forwarderContract, method, params)
   const res = await api.post('meta-tx/', req)
   if (res.data.err) {
     const error = cleanMessage(res.data.err)
@@ -203,7 +210,7 @@ export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
   return dec.decode(new Uint8Array(encryptedContent))
 }
 
-export const isFileUploaded = async (address: string, fileId: string, provider: any): Promise<boolean> => {
+export const isFileUploaded = async (address: string, fileId: string, provider: Web3Provider): Promise<boolean> => {
   const arcana = Arcana(address, provider)
   const file = await arcana.files(fileId)
   return file.uploaded
@@ -214,26 +221,37 @@ export const parseHex = (hex) => {
 }
 
 export const customError = (code: string, message: string): Error => {
-  const error: any = new Error(cleanMessage(message))
+  const error: CustomError = new Error(cleanMessage(message))
   error.code = code
   return error
 }
 
-export const getDKGNodes = async (provider): Promise<any[]> => {
+export const getDKGNodes = async (provider: Web3Provider): Promise<any[]> => {
   // Fetch DKG Node Details from dkg contract
-  const dkg = DKG(localStorage.getItem('dkg'), provider)
+  // const dkg = DKG(localStorage.getItem('dkg'), provider)
+  const dkg = DKG("0x5Ae1c9058541629E9cEBaa7d54D83e8BFeD300c4", provider)
   const nodes = await dkg.getCurrentEpochDetails()
   return nodes
 }
 
+export const DIDContract = (provider: Web3Provider | Wallet): Contract => {
+  return new Contract(localStorage.getItem('did'), DID.abi, provider)
+}
+
 export const getFile = async (did: string, provider: Web3Provider): Promise<any> => {
-  const contract = new Contract(localStorage.getItem('did'), DID.abi, provider)
+  const contract = DIDContract(provider)
   const file = await contract.getFile(parseHex(did))
   return file
 }
 
+export const getRuleSet = async (did: string, provider: Web3Provider): Promise<string> => {
+  const contract = DIDContract(provider)
+  const rule = await contract.getRuleSet(parseHex(did))
+  return rule
+}
+
 export const getAppAddress = async (did: string, provider: Web3Provider): Promise<string> => {
-  const contract = new Contract(localStorage.getItem('did'), DID.abi, provider)
+  const contract = DIDContract(provider)
   const appAddress = (await contract.getFile(parseHex(did))).app
   return appAddress
 }

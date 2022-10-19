@@ -57,6 +57,9 @@ export class StorageProvider {
     }
     this.email = config.email
     this.appId = config.appId
+    if (config.appAddress) {
+      this.appAddress = parseHex(config.appAddress)
+    }
     if (!config.chainId) {
       this.chainId = chainId
     } else {
@@ -101,13 +104,13 @@ export class StorageProvider {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNetworkChange = (newNetwork, oldNetwork) => {
-    window.location.reload()
+    // window.location.reload()
   }
 
   // Reload on account changed
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onAccountChange = (accounts) => {
-    window.location.reload()
+    // window.location.reload()
   }
 
   downloadDID = async (did: string) => {
@@ -158,10 +161,10 @@ export class StorageProvider {
 
     let subDomain = '.'
     switch (this.chainId) {
-      case 40405 :
+      case 40405:
         subDomain += 'beta'
         break
-      case 40404 :
+      case 40404:
         subDomain += 'dev'
         break
     }
@@ -232,7 +235,6 @@ export class StorageProvider {
         }
       }
     }
-
     let res = (await axios.get(this.gateway + 'get-config/')).data
     localStorage.setItem('forwarder', res.Forwarder)
     localStorage.setItem('dkg', res.DKG)
@@ -253,7 +255,7 @@ export class StorageProvider {
       }
     })
 
-    if (this.appId) {
+    if (this.appId && !this.appAddress) {
       // fetch app address
       res = await this.api.get(`get-address/?id=${this.appId}`)
       if (res.data.address) {
@@ -297,21 +299,28 @@ export class StorageProvider {
     return this.files.sharedFiles(pageNumber, pageSize)
   }
 
-  linkNft = async (fileId:string, tokenId: number, nftContract:string, nftChainID: number) => {
+  linkNft = async (fileId: string, tokenId: number, nftContract: string, nftChainID: number) => {
     await this.login()
     fileId = parseHex(fileId)
     nftContract = parseHex(nftContract)
-    return await makeTx(this.appAddress, this.api, this.provider, 'linkNFT', [fileId, tokenId, nftContract, nftChainID])
+    return await makeTx(this.appAddress, this.api, this.provider, 'linkNFT', [
+      fileId,
+      tokenId,
+      nftContract,
+      nftChainID
+    ])
   }
 
-  upload = async (fileRaw: any, params: UploadParams & {
-    onProgress: (bytesUploaded: number, bytesTotal: number) => void
-  } = {
-    onProgress: () => null,
-    chunkSize: 10 * 2 ** 20,
-    duplicate: false,
-    publicFile: false
-  }): Promise<string> => {
+  upload = async (
+    fileRaw: any,
+    params: UploadParams & {
+      onProgress: (bytesUploaded: number, bytesTotal: number) => void;
+    } = {
+      onProgress: () => null,
+      chunkSize: 10 * 2 ** 20,
+      publicFile: false
+    }
+  ): Promise<string> => {
     const uploader = await this.getUploader()
     if (params.onProgress != null) {
       uploader.onProgress = params.onProgress
@@ -323,7 +332,10 @@ export class StorageProvider {
     })
   }
 
-  download = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>): Promise<void> => {
+  download = async (
+    did: any,
+    onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>
+  ): Promise<void> => {
     const downloader = await this.getDownloader()
 
     if (onProgress != null) {
@@ -333,7 +345,10 @@ export class StorageProvider {
     return downloader.downloadToFilesystem(did)
   }
 
-  getBlob = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>): Promise<Blob> => {
+  getBlob = async (
+    did: any,
+    onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>
+  ): Promise<Blob> => {
     const downloader = await this.getDownloader()
 
     if (onProgress != null) {
