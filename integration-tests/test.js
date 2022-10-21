@@ -1,12 +1,11 @@
 // const { expect } = require("chai");
-
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
 // const gateway = 'http://localhost:9010/';
 // const gateway = 'https://gateway01-testnet.arcana.network/';
 const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
-const appId = 516;
+const appId = 1;
 // const appId = 28;
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -67,10 +66,11 @@ describe('Upload File', () => {
 
 
   before(async () => {
-    file = MockFile('aaaaaaaaaaaaa.txt', 2 ** 10, 'text/plain');
+    file = MockFile('aaaaaaaaaaaaa.txt', 10, 'text/plain');
     file = new File([file], file.name, { type: file.type });
     arcanaInstance = await arcana.storage.StorageProvider.init({
       appId,
+      // appAddress: "445007f942f9Ba718953094Bbe3205B9484cAfd2",
       provider: window.ethereum,
       email: makeEmail(),
       chainId,
@@ -79,13 +79,42 @@ describe('Upload File', () => {
     });
   });
 
-   it('Should upload a duplicate file', async () => {
-    let file = MockFile('aaaaaaaaaaaaa.txt', 20*2**20, 'text/plain');
+
+
+  it('Upload', async () => {
+    let file = MockFile('aaaaaaaaaaaaa.txt', 10, 'text/plain');
     did = await arcanaInstance.upload(file);
-    console.log('did 1', did);
-    // did = await arcanaInstance.upload(file, {duplicate: true});
-    // console.log('did 2', did); 
-    await arcanaInstance.download(did)
+    console.log('did', did);
   });
-    
+
+
+  it.skip('Share', async () => {
+    // let did = "0257b566bc3fea825635298d1c8565d11c94bf6e5a697643c11b43c129b6c13b"
+    let address = "0xbd92a7c9BF0aE4CaaE3978f9177A696fe7eA179F"
+    // let address2 = "0x64b69590954570d63bb60b9bba4ab3814f1a3a22"
+    await arcanaInstance.files.share(did, address)
+    alert("change account")
+    // await arcanaInstance.files.share(did, address2)
+    // await arcanaInstance.files.revoke(did, address)
+  });
+
+  it('Download', async () => {
+    // let store = await arcana.storage.StorageProvider.init({
+    //   appId,
+    //   provider: window.ethereum,
+    //   email: makeEmail(),
+    //   chainId,
+    //   gateway,
+    //   debug,
+    // });
+    // await store.download(did)  
+    await arcanaInstance.download(did)  
+  })
+
+  // it('Upload public file', async () => {
+  //   let file = MockFile('aaaaaaaaaaaaa.txt', 4, 'text/plain');
+  //   did = await arcanaInstance.upload(file, {publicFile: true});
+  //   console.log('did', did);
+  //   await arcanaInstance.download(did)
+  // });    
 });
