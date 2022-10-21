@@ -6,7 +6,7 @@ import { decrypt } from 'eciesjs'
 import { Mutex } from 'async-mutex'
 
 import Decryptor from './decrypt'
-import { hasher2Hex, makeTx, customError, getDKGNodes, getFile, AESDecryptHex } from './Utils'
+import { hasher2Hex, makeTx, customError, getDKGNodes, getFile, AESDecryptHex, AESDecrypt } from './Utils'
 import { utils, Wallet } from 'ethers'
 import FileWriter from './FileWriter'
 import Sha256 from './SHA256'
@@ -147,6 +147,7 @@ export class Downloader {
         if (fileMeta.name[0] === "0") {
           fileMeta.name =  parseBytes32String("0x"+fileMeta.name.substring(1)+"0")
         } else {
+          fileMeta.name = await AESDecrypt(key, ( await this.api.get(`/file-name/?did=${did}`)).data)
         }
         fileWriter = new FileWriter(fileMeta.name, accessType)
         const Dec = new Decryptor(key)

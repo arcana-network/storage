@@ -10,6 +10,7 @@ import { Mutex } from 'async-mutex'
 import { wrapInstance } from './sentry'
 import { requiresLocking } from './locking'
 import type { UploadParams } from './types'
+import { id } from 'ethers/lib/utils'
 
 function convertByteCounterToAESCounter (value: number) {
   if (value === 0) {
@@ -87,6 +88,7 @@ export class Uploader {
       ).data
     }
     const host = nodeResp.host
+    let name, gateway_name: string;
 
     // If it's a private file, generate a key and store the shares in the DKG
     if (!params.publicFile) {
@@ -99,16 +101,14 @@ export class Uploader {
         ['encrypt', 'decrypt']
       )
       const aesRaw = await crypto.subtle.exportKey('raw', key)
-      let name;
       try {
           let nameHex = ethers.utils.formatBytes32String(file.name)
           if (nameHex[65] != '0') throw Error()
           nameHex = "0" + nameHex.substring(2,65)
           name = "0x" + await AESEncryptHex(key, nameHex)
-          console.log(name, nameHex)
       } catch (e) {
-          console.log(e)
-          name = await AESEncrypt(key, name)
+          gateway_name = await AESEncrypt(key, file.name)
+          name = id(gateway_name)
       }
       // const encryptedMetaData = await AESEncrypt(
       //   key,
@@ -270,7 +270,9 @@ export class Uploader {
         throw customError('', e.error)
       }
     }
-
+    if (gateway_name) {
+      await this.api.post(`/file-name/?did=${did}&name=${gateway_name}`)
+    }
     return did.replace('0x', '')
   }
 }

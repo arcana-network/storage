@@ -1,9 +1,9 @@
 // const { expect } = require("chai");
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-// const gateway = 'http://localhost:9010/';
+const gateway = 'http://localhost:9010/';
 // const gateway = 'https://gateway01-testnet.arcana.network/';
-const gateway = 'https://gateway-dev.arcana.network/';
+// const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
 const appId = 1;
 // const appId = 28;
@@ -66,7 +66,7 @@ describe('Upload File', () => {
 
 
   before(async () => {
-    file = MockFile('aaaaaaaaaaaaa.txt', 10, 'text/plain');
+    file = MockFile('qwertyuiopasdfghjklzxcvbnmqwertyuiop.txt', 10, 'text/plain');
     file = new File([file], file.name, { type: file.type });
     arcanaInstance = await arcana.storage.StorageProvider.init({
       appId,
@@ -82,7 +82,6 @@ describe('Upload File', () => {
 
 
   it('Upload', async () => {
-    let file = MockFile('aaaaaaaaaaaaa.txt', 10, 'text/plain');
     did = await arcanaInstance.upload(file);
     console.log('did', did);
   });
