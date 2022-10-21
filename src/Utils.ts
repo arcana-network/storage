@@ -106,6 +106,10 @@ export const Arcana = (address: string, provider): Contract => {
   return new Contract(address, arcana.abi, provider) as Contract
 }
 
+export const DIDContract = (address: string, provider): Contract => {
+  return new Contract(address, DID.abi, provider) as Contract
+}
+
 export const DKG = (address: string, provider): Contract => {
   return new Contract(address, dkg.abi, provider) as Contract
 }
@@ -131,8 +135,8 @@ function hexToASCII (str1) {
   return str
 }
 
-export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
-  const arcana: Contract = Arcana(address, wallet)
+export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params, contract?:Contract) => {
+  const arcana: Contract = contract ?? Arcana(address, wallet)
   const forwarderContract: Contract = Forwarder(localStorage.getItem('forwarder'), wallet)
   const req = await sign(wallet, arcana, forwarderContract, method, params)
   const res = await api.post('meta-tx/', req)

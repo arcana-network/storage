@@ -3,7 +3,7 @@ import { BigNumber, ethers } from 'ethers'
 import { Mutex } from 'async-mutex'
 
 import { readHash } from './constant'
-import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress } from './Utils'
+import { makeTx, parseHex,DIDContract, Arcana, customError, ensureArray, getAppAddress } from './Utils'
 import { wrapInstance } from './sentry'
 import { requiresLocking } from './locking'
 
@@ -181,8 +181,20 @@ export class FileAPI {
   async delete (did: string): Promise<string> {
     await this.setAppAddress(did)
     did = parseHex(did)
-    return await makeTx(this.appAddress, this.api, this.provider, 'deleteFile', [did])
+    const contract = DIDContract(localStorage.getItem('did'),this.provider)
+    return await makeTx(this.appAddress, this.api, this.provider, 'deleteFile', [did],contract)
   };
+
+  @requiresLocking
+  async removeFile(did:string) : Promise<string> {
+    await this.setAppAddress(did);
+    did = parseHex(did)
+    return await makeTx(this.appAddress, this.api, this.provider, 'removeUserFile', [did])
+  }
+
+  removeFileFromApp = async (did: string) : Promise<string> => {
+    return this.removeFile(did);
+  }
 
   deleteFile = (did: string): Promise<string> => {
     return this.delete(did)
