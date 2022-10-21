@@ -108,8 +108,6 @@ export const Arcana = (address: string, provider): Contract => {
   return new Contract(address, arcana.abi, provider) as Contract
 }
 
-
-
 export const DKG = (address: string, provider): Contract => {
   return new Contract(address, dkg.abi, provider) as Contract
 }
@@ -266,7 +264,6 @@ export const getDKGNodes = async (provider: Web3Provider): Promise<any[]> => {
 export const DIDContract = (provider: Web3Provider | Wallet): Contract => {
   return new Contract(localStorage.getItem('did'), DID.abi, provider)
 }
-
 
 export const getFile = async (did: string, provider: Web3Provider): Promise<ContractFile> => {
   const contract = DIDContract(provider)
