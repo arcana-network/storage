@@ -128,7 +128,7 @@ export class FileAPI {
     isShare: boolean
   ): Promise<string> {
     const rule = await getRuleSet(did, this.provider)
-    let data: any[] = (await this.api.get(`get-hash-data/?hash=${rule}`)).data
+    let data: any[] = rule == ethers.constants.HashZero ? null : (await this.api.get(`get-hash-data/?hash=${rule}`)).data
     if (data === null) {
       data = []
     }
