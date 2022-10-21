@@ -268,11 +268,7 @@ export const DIDContract = (provider: Web3Provider | Wallet): Contract => {
 export const getFile = async (did: string, provider: Web3Provider): Promise<ContractFile> => {
   const contract = DIDContract(provider)
   const file = await contract.getFile(parseHex(did))
-  let name:string = file[2]
-  if (name[3] === "0") {
-    name = "0x"+name.substring(3)+"0"
-  } 
-  return { size: parseInt(file[0]), uploaded: file[1], name: name, hash: file[3], storageNode: file[4] }
+  return { size: parseInt(file[0]), uploaded: file[1], name: file[2], hash: file[3], storageNode: file[4] }
 }
 
 export const getRuleSet = async (did: string, provider: Web3Provider): Promise<string> => {

@@ -1,6 +1,6 @@
 import axios, { AxiosInstance } from 'axios'
 import { join } from 'shamir'
-import { id } from 'ethers/lib/utils'
+import { id, parseBytes32String } from 'ethers/lib/utils'
 import { decodeHex } from 'eciesjs/dist/utils'
 import { decrypt } from 'eciesjs'
 import { Mutex } from 'async-mutex'
@@ -144,6 +144,10 @@ export class Downloader {
         fileMeta = file
         fileMeta.hash = await AESDecryptHex(key, fileMeta.hash.replace('0x', ''))
         fileMeta.name = await AESDecryptHex(key, fileMeta.name.replace('0x', ''))
+        if (fileMeta.name[0] === "0") {
+          fileMeta.name =  parseBytes32String("0x"+fileMeta.name.substring(1)+"0")
+        } else {
+        }
         fileWriter = new FileWriter(fileMeta.name, accessType)
         const Dec = new Decryptor(key)
         let downloaded = 0
