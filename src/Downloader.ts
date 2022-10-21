@@ -1,15 +1,14 @@
 import axios, { AxiosInstance } from 'axios'
 import { join } from 'shamir'
-import { id } from 'ethers/lib/utils'
+import { id, parseBytes32String } from 'ethers/lib/utils'
 import { decodeHex } from 'eciesjs/dist/utils'
 import { decrypt } from 'eciesjs'
 import { Mutex } from 'async-mutex'
 
 import Decryptor from './decrypt'
-import { hasher2Hex, AESDecrypt, makeTx, customError, getDKGNodes, getFile } from './Utils'
+import { hasher2Hex, makeTx, customError, getDKGNodes, getFile, AESDecryptHex, AESDecrypt } from './Utils'
 import { utils, Wallet } from 'ethers'
 import FileWriter from './FileWriter'
-import { readHash } from './constant'
 import Sha256 from './SHA256'
 
 import { wrapInstance } from './sentry'
@@ -78,9 +77,11 @@ export class Downloader {
     switch (didBytes[0]) {
       // Public File
       case 0x01: {
-        fileMeta = JSON.parse(Buffer.from(file.encryptedMetaData.slice(2), 'hex').toString('utf-8'))
+        fileMeta = JSON.parse(Buffer.from(file[2].slice(2), 'hex').toString('utf-8'))
         fileWriter = new FileWriter(fileMeta.name, accessType)
-        const { data: { host: storageHost } } = await this.api.get('/get-region-endpoint/', {
+        const {
+          data: { host: storageHost }
+        } = await this.api.get('/get-region-endpoint/', {
           params: {
             address: this.appAddress
           }
@@ -97,7 +98,6 @@ export class Downloader {
             url: u.href,
             headers: {
               Range: range
-              // Authorization: 'Bearer ' + checkPermissionResp.token
             },
             responseType: 'arraybuffer'
           })
@@ -111,9 +111,8 @@ export class Downloader {
       // Private file
       case 0x02: {
         const ephemeralWallet = await Wallet.createRandom()
-        const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'checkPermission', [
+        const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'download', [
           did,
-          readHash,
           ephemeralWallet.address
         ])
         const txHash = checkPermissionResp.txHash
@@ -121,13 +120,15 @@ export class Downloader {
         const shares = {}
         const nodes = await getDKGNodes(this.provider)
         for (let i = 0; i < nodes.length; i++) {
+          const sigParams = JSON.stringify({ tx_hash: txHash })
+          const hash = id(sigParams)
           const res = await axios.post('https://' + nodes[i].declaredIp + '/rpc', {
             jsonrpc: '2.0',
             method: 'RetrieveKeyShare',
             id: 10,
             params: {
               tx_hash: txHash,
-              signature: await ephemeralWallet.signMessage(id(JSON.stringify({ tx_hash: txHash })))
+              signature: await ephemeralWallet.signMessage(hash)
             }
           })
           if (res.data.error) {
@@ -139,13 +140,17 @@ export class Downloader {
           shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh))
         }
         const decryptedKey = join(shares)
-
         const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt'])
-
-        fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file.encryptedMetaData)))
+        fileMeta = file
+        fileMeta.hash = await AESDecryptHex(key, fileMeta.hash.replace('0x', ''))
+        fileMeta.name = await AESDecryptHex(key, fileMeta.name.replace('0x', ''))
+        if (fileMeta.name[0] === '0') {
+          fileMeta.name = parseBytes32String('0x' + fileMeta.name.substring(1) + '0')
+        } else {
+          fileMeta.name = await AESDecrypt(key, (await this.api.get(`/file-name/?did=${did}`)).data)
+        }
         fileWriter = new FileWriter(fileMeta.name, accessType)
         const Dec = new Decryptor(key)
-
         let downloaded = 0
         for (let i = 0; i < fileMeta.size; i += chunkSize) {
           const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size) - 1}`
@@ -177,7 +182,7 @@ export class Downloader {
     } else {
       throw new Error('Hash does not match the uploaded file')
     }
-  };
+  }
 
   // TODO - Remove during API breaking changes
   // @deprecated - Use downloadToFilesystem
