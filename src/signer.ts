@@ -1,4 +1,4 @@
-import { Contract, BigNumber, Signer, ContractTransaction, utils } from 'ethers'
+import { Contract, BigNumber, Signer, ContractTransaction } from 'ethers'
 
 const EIP712Domain = [
   { name: 'name', type: 'string' },
@@ -26,7 +26,7 @@ const typedData = (contract: Contract, method: string, complexType?: string[]) =
   for (const input of fragment.inputs) {
     let { name, type } = input
 
-    if (type == 'tuple' && !!complexType) {
+    if (type === 'tuple' && !!complexType) {
       type = complexType[0]
       complexType.shift()
     }
@@ -35,20 +35,6 @@ const typedData = (contract: Contract, method: string, complexType?: string[]) =
   }
 
   return result
-}
-
-function generateTypeHash (contract: Contract, method: string): string {
-  const fragment = contract.interface.getFunction(method)
-  let typeHash = method + '('
-
-  for (let i = 0; i < fragment.inputs.length; i++) {
-    const { name, type } = fragment.inputs[i]
-
-    if (i > 0) typeHash = typeHash.concat(',')
-    typeHash = typeHash.concat(`${type} ${name}`)
-  }
-  typeHash = typeHash.concat(')')
-  return typeHash
 }
 
 const typedMessageInstance = (contract: Contract, method: string, params: any[]) => {

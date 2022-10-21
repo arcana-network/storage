@@ -88,7 +88,7 @@ export class Uploader {
       ).data
     }
     const host = nodeResp.host
-    let name, gateway_name: string;
+    let name, gatewayName: string
 
     // If it's a private file, generate a key and store the shares in the DKG
     if (!params.publicFile) {
@@ -102,24 +102,14 @@ export class Uploader {
       )
       const aesRaw = await crypto.subtle.exportKey('raw', key)
       try {
-          let nameHex = ethers.utils.formatBytes32String(file.name)
-          if (nameHex[65] != '0') throw Error()
-          nameHex = "0" + nameHex.substring(2,65)
-          name = "0x" + await AESEncryptHex(key, nameHex)
+        let nameHex = ethers.utils.formatBytes32String(file.name)
+        if (nameHex[65] !== '0') throw Error()
+        nameHex = '0' + nameHex.substring(2, 65)
+        name = '0x' + await AESEncryptHex(key, nameHex)
       } catch (e) {
-          gateway_name = await AESEncrypt(key, file.name)
-          name = id(gateway_name)
+        gatewayName = await AESEncrypt(key, file.name)
+        name = id(gatewayName)
       }
-      // const encryptedMetaData = await AESEncrypt(
-      //   key,
-      //   JSON.stringify({
-      //     name: 'name' in file ? file.name : did,
-      //     type: file.type,
-      //     size: file.size,
-      //     lastModified: 'lastModified' in file ? file.lastModified : new Date(),
-      //     hash
-      //   })
-      // )
 
       const ephemeralWallet = await Wallet.createRandom()
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
@@ -270,8 +260,8 @@ export class Uploader {
         throw customError('', e.error)
       }
     }
-    if (gateway_name) {
-      await this.api.post(`/file-name/?did=${did}&name=${gateway_name}`)
+    if (gatewayName) {
+      await this.api.post(`/file-name/?did=${did}&name=${gatewayName}`)
     }
     return did.replace('0x', '')
   }

@@ -144,10 +144,10 @@ export class Downloader {
         fileMeta = file
         fileMeta.hash = await AESDecryptHex(key, fileMeta.hash.replace('0x', ''))
         fileMeta.name = await AESDecryptHex(key, fileMeta.name.replace('0x', ''))
-        if (fileMeta.name[0] === "0") {
-          fileMeta.name =  parseBytes32String("0x"+fileMeta.name.substring(1)+"0")
+        if (fileMeta.name[0] === '0') {
+          fileMeta.name = parseBytes32String('0x' + fileMeta.name.substring(1) + '0')
         } else {
-          fileMeta.name = await AESDecrypt(key, ( await this.api.get(`/file-name/?did=${did}`)).data)
+          fileMeta.name = await AESDecrypt(key, (await this.api.get(`/file-name/?did=${did}`)).data)
         }
         fileWriter = new FileWriter(fileMeta.name, accessType)
         const Dec = new Decryptor(key)
