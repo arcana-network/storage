@@ -1,4 +1,4 @@
-import { KeyGen, makeTx, AESEncryptHex, customError, getDKGNodes } from './Utils'
+import { KeyGen, makeTx, AESEncryptHex, customError, getDKGNodes, AESEncrypt } from './Utils'
 import { utils, BigNumber, Wallet, ethers } from 'ethers'
 import axios, { AxiosInstance } from 'axios'
 import { split } from 'shamir'
@@ -70,17 +70,21 @@ export class Uploader {
     let JWTToken
     let nodeResp
     if (this.appId) {
-      nodeResp = (await this.api.get('/get-node-address/', {
-        params: {
-          appId: this.appId
-        }
-      })).data
+      nodeResp = (
+        await this.api.get('/get-node-address/', {
+          params: {
+            appId: this.appId
+          }
+        })
+      ).data
     } else {
-      nodeResp = (await this.api.get('/get-node-address/', {
-        params: {
-          address: this.appAddress
-        }
-      })).data
+      nodeResp = (
+        await this.api.get('/get-node-address/', {
+          params: {
+            address: this.appAddress
+          }
+        })
+      ).data
     }
     const host = nodeResp.host
 
@@ -95,6 +99,17 @@ export class Uploader {
         ['encrypt', 'decrypt']
       )
       const aesRaw = await crypto.subtle.exportKey('raw', key)
+      let name;
+      try {
+          let nameHex = ethers.utils.formatBytes32String(file.name)
+          if (nameHex[65] != '0') throw Error()
+          nameHex = "0" + nameHex.substring(2,65)
+          name = "0x" + await AESEncryptHex(key, nameHex)
+          console.log(name, nameHex)
+      } catch (e) {
+          console.log(e)
+          name = await AESEncrypt(key, name)
+      }
       // const encryptedMetaData = await AESEncrypt(
       //   key,
       //   JSON.stringify({
@@ -106,25 +121,19 @@ export class Uploader {
       //   })
       // )
 
-      console.log(hash, await AESEncryptHex(key, hash))
-
       const ephemeralWallet = await Wallet.createRandom()
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
-        utils.id(file.name),
-        await AESEncryptHex(key,hash),
+        name,
+        '0x' + (await AESEncryptHex(key, hash)),
         nodeResp.address,
         ephemeralWallet.address
       ])
       JWTToken = res.token
       const txHash = res.txHash
-
       // Fetch DKG Node Details from dkg contract
-      let nodes = await getDKGNodes(this.provider)
-      nodes = nodes.map(n => {
-        return {...n, declaredIp: "localhost:" + n.declaredIp.split(":")[1]}
-      })
+      const nodes = await getDKGNodes(this.provider)
       // Doing shamir secrete sharing
       const parts = nodes.length
       // At least 2/3rd nodes is required for share recovery
@@ -141,7 +150,7 @@ export class Uploader {
         const ciphertextRaw = encrypt(publicKey, shares[i + 1])
         const ciphertext = ciphertextRaw.toString('hex')
         localStorage.setItem('pk', ephemeralWallet.privateKey)
-        const url = 'http://' + nodes[i].declaredIp + '/rpc'
+        const url = 'https://' + nodes[i].declaredIp + '/rpc'
         await axios.post(url, {
           jsonrpc: '2.0',
           method: 'StoreKeyShare',

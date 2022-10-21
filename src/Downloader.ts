@@ -6,7 +6,7 @@ import { decrypt } from 'eciesjs'
 import { Mutex } from 'async-mutex'
 
 import Decryptor from './decrypt'
-import { hasher2Hex, AESDecrypt, makeTx, customError, getDKGNodes, getFile } from './Utils'
+import { hasher2Hex, makeTx, customError, getDKGNodes, getFile, AESDecryptHex } from './Utils'
 import { utils, Wallet } from 'ethers'
 import FileWriter from './FileWriter'
 import Sha256 from './SHA256'
@@ -111,7 +111,6 @@ export class Downloader {
       // Private file
       case 0x02: {
         const ephemeralWallet = await Wallet.createRandom()
-        console.log('before download transaction')
         const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'download', [
           did,
           ephemeralWallet.address
@@ -119,15 +118,11 @@ export class Downloader {
         const txHash = checkPermissionResp.txHash
 
         const shares = {}
-        let nodes = await getDKGNodes(this.provider)
-        nodes = nodes.map(n => {
-          return {...n, declaredIp: "localhost:" + n.declaredIp.split(":")[1]}
-        })
-       
+        const nodes = await getDKGNodes(this.provider)
         for (let i = 0; i < nodes.length; i++) {
           const sigParams = JSON.stringify({ tx_hash: txHash })
           const hash = id(sigParams)
-          const res = await axios.post('http://' + nodes[i].declaredIp + '/rpc', {
+          const res = await axios.post('https://' + nodes[i].declaredIp + '/rpc', {
             jsonrpc: '2.0',
             method: 'RetrieveKeyShare',
             id: 10,
@@ -145,9 +140,10 @@ export class Downloader {
           shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh))
         }
         const decryptedKey = join(shares)
-        console.log({decryptedKey})
         const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt'])
-        fileMeta = JSON.parse(await AESDecrypt(key, utils.toUtf8String(file[2])))
+        fileMeta = file
+        fileMeta.hash = await AESDecryptHex(key, fileMeta.hash.replace('0x', ''))
+        fileMeta.name = await AESDecryptHex(key, fileMeta.name.replace('0x', ''))
         fileWriter = new FileWriter(fileMeta.name, accessType)
         const Dec = new Decryptor(key)
         let downloaded = 0

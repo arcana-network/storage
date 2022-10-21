@@ -11,3 +11,11 @@ export interface Rule {
 export interface CustomError extends Error {
   code?: string;
 }
+
+export interface ContractFile {
+  size: number;
+  uploaded: boolean;
+  name: string;
+  hash: string;
+  storageNode: string;
+}

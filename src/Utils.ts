@@ -8,7 +8,7 @@ import { AxiosInstance } from 'axios'
 import DID from './contracts/DID'
 import { Web3Provider } from '@ethersproject/providers'
 import { errorCodes } from './errors'
-import { CustomError } from './types'
+import { CustomError, ContractFile } from './types'
 
 export type Config = {
   appId?: number;
@@ -194,6 +194,19 @@ export const AESEncryptHex = async (key: CryptoKey, rawData: string) => {
   return toHexString(encryptedContent)
 }
 
+export const AESDecryptHex = async (key: CryptoKey, rawData: string) => {
+  const iv = new Uint8Array(16)
+  const encryptedContent = await window.crypto.subtle.decrypt(
+    {
+      name: 'AES-CTR',
+      counter: iv,
+      length: 128
+    },
+    key,
+    fromHexString(rawData)
+  )
+  return toHexString(encryptedContent)
+}
 
 export const AESEncrypt = async (key: CryptoKey, rawData: string) => {
   const iv = new Uint8Array(16)
@@ -243,8 +256,7 @@ export const customError = (code: string, message: string): Error => {
 
 export const getDKGNodes = async (provider: Web3Provider): Promise<any[]> => {
   // Fetch DKG Node Details from dkg contract
-  // const dkg = DKG(localStorage.getItem('dkg'), provider)
-  const dkg = DKG("0x5Ae1c9058541629E9cEBaa7d54D83e8BFeD300c4", provider)
+  const dkg = DKG(localStorage.getItem('dkg'), provider)
   const nodes = await dkg.getCurrentEpochDetails()
   return nodes
 }
@@ -253,10 +265,14 @@ export const DIDContract = (provider: Web3Provider | Wallet): Contract => {
   return new Contract(localStorage.getItem('did'), DID.abi, provider)
 }
 
-export const getFile = async (did: string, provider: Web3Provider): Promise<any> => {
+export const getFile = async (did: string, provider: Web3Provider): Promise<ContractFile> => {
   const contract = DIDContract(provider)
   const file = await contract.getFile(parseHex(did))
-  return file
+  let name:string = file[2]
+  if (name[3] === "0") {
+    name = "0x"+name.substring(3)+"0"
+  } 
+  return { size: parseInt(file[0]), uploaded: file[1], name: name, hash: file[3], storageNode: file[4] }
 }
 
 export const getRuleSet = async (did: string, provider: Web3Provider): Promise<string> => {

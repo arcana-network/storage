@@ -1,11 +1,11 @@
 // const { expect } = require("chai");
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-const gateway = 'http://localhost:9010/';
+// const gateway = 'http://localhost:9010/';
 // const gateway = 'https://gateway01-testnet.arcana.network/';
-// const gateway = 'https://gateway-dev.arcana.network/';
+const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
-const appId = 516;
+const appId = 1;
 // const appId = 28;
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
