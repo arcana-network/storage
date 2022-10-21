@@ -15,7 +15,7 @@ import { StorageProvider } from '../src/index';
 import * as utils from '../src/Utils';
 import { parseData } from './utils';
 import { CustomError } from '../src/types';
-
+import DID from '../src/contracts/DID';
 // Load contract addresses
 const sContracts: any = fs.readFileSync('./tests/contracts.json');
 const oContracts = JSON.parse(sContracts);
@@ -61,9 +61,6 @@ const did = '0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066'
 
 function meta_tx_nock(reply_data) {
   const nockMetaReply = async (uri, body: any) => {
-
-    console.log(body);
-
     return reply_data ?? { data: 'dummy data', token: 'dummy token' }
   }
 
@@ -107,7 +104,7 @@ async function nockSetup() {
     .query(true)
     .reply(200, { address: oContracts.App }, { 'access-control-allow-headers': 'Authorization' })
     .get('/api/v1/get-node-address/')
-    .query({ appid: appId })
+    .query(true)
     .reply(200, { host: 'http://localhost:3000/', address: storage_node.address });
 
   nock('http://localhost:3000')
@@ -167,7 +164,7 @@ function sinonMockObjectSetup() {
 async function mockFile() {
   // file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
   // file = new File([file], "picsum_img", { type: file.type });
-  // return new nBlob([await (await fetch('https://picsum.photos/id/872/200/300')).arrayBuffer()]);
+   return new nBlob([await (await fetch('https://picsum.photos/id/872/200/300')).arrayBuffer()]);
 }
 
 // Wallet Setup
@@ -192,6 +189,7 @@ test.serial.before(async (t) => {
   sinonMockObjectSetup();
   // File prep
   file = await mockFile();
+  file.name = "test_file";
 });
 
 // TODO: get request handler in arrays
@@ -214,7 +212,7 @@ async function createStorageInstance(wallet: Wallet, middleware?) {
   return Promise.resolve(instance);
 }
 
-test.serial.only('Upload file', async (t) => {
+test.serial('Upload file', async (t) => {
   meta_tx_nock(undefined)
 
   const arcanaInstance = await createStorageInstance(arcanaWallet, (req, res, next, end) => {
@@ -292,10 +290,14 @@ test.serial('Share file', async (t) => {
   meta_tx_nock(undefined);
 
   const middleware = (req, res, next, end) => {
-    switch (req.method) {
-      case 'eth_call':
-        res.result = ethers.utils.defaultAbiCoder.encode(['uint'], [ethers.BigNumber.from('0')]);
-        break;
+    const data = parseData({
+      value: ethers.utils.parseEther('0'),
+      data: req.params[0].data,
+    },DID.abi );
+    
+    switch (data.name) {
+      case "getRuleSet" : 
+        res.result = ethers.constants.HashZero;
     }
     end();
   };
