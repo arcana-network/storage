@@ -364,13 +364,19 @@ export class StorageProvider {
     return downloader.getBlob(did)
   }
 
-  // check if user is eligible for operations at App
+  // grant permissions at App
   grantAppPermission = async () => {
-    await this.login()
-    if (!isPermissionRequired(this.appAddress, this.provider)) {
+    if (!(await this.checkPermission())) {
       throw new Error('Permission already granted for the app')
     }
     return await makeTx(this.appAddress, this.api, this.provider, 'grantAppPermission', [])
   }
+
+  //check app permissions
+  checkPermission = async () => {
+    await this.login();
+    return await isPermissionRequired(this.appAddress,this.provider) ;
+  }
+  
 }
 export { AccessTypeEnum } from './fileAPI'
