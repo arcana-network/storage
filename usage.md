@@ -269,3 +269,21 @@ dAppStorageProvider.onAccountChange = (accounts) => {
   window.location.reload()
 }
 ```
+
+
+## App permissions
+
+App might require to pass additional permissions for app delegates.
+
+### Grant App permissions
+
+```js
+await storage.grantAppPermission()
+```
+
+### Check whether user needs to grant permissions to the app. 
+returns `true` if required. 
+
+```js
+const isPermissionRequired = await storage.checkPermission() -> boolean
+```

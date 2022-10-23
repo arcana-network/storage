@@ -372,11 +372,10 @@ export class StorageProvider {
     return await makeTx(this.appAddress, this.api, this.provider, 'grantAppPermission', [])
   }
 
-  //check app permissions
+  // check app permissions
   checkPermission = async () => {
-    await this.login();
-    return await isPermissionRequired(this.appAddress,this.provider) ;
+    await this.login()
+    return await isPermissionRequired(this.appAddress, this.provider)
   }
-  
 }
 export { AccessTypeEnum } from './fileAPI'
