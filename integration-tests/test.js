@@ -5,7 +5,7 @@ const gateway = 'http://localhost:9010/';
 // const gateway = 'https://gateway01-testnet.arcana.network/';
 // const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
-const appId = 1;
+const appId = 581;
 // const appId = 28;
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -82,8 +82,11 @@ describe('Upload File', () => {
 
 
   it('Upload', async () => {
+    let my_file_old = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
     did = await arcanaInstance.upload(file);
     console.log('did', did);
+    let my_file_new = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
+    chai.expect(my_file_new.length - my_file_old.length).equal(1); 
   });
 
 
@@ -97,7 +100,7 @@ describe('Upload File', () => {
     // await arcanaInstance.files.revoke(did, address)
   });
 
-  it('Download', async () => {
+  it.skip('Download', async () => {
     // let store = await arcana.storage.StorageProvider.init({
     //   appId,
     //   provider: window.ethereum,
@@ -110,6 +113,12 @@ describe('Upload File', () => {
     await arcanaInstance.download(did)  
   })
 
+  it("Delete file", async () => {
+    let my_file_old = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
+    await arcanaInstance.files.delete(did)
+    let my_file_new = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
+    chai.expect(my_file_old.length - my_file_new.length).equal(1); 
+  })
   // it('Upload public file', async () => {
   //   let file = MockFile('aaaaaaaaaaaaa.txt', 4, 'text/plain');
   //   did = await arcanaInstance.upload(file, {publicFile: true});

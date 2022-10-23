@@ -282,3 +282,12 @@ export const getAppAddress = async (did: string, provider: Web3Provider): Promis
   const appAddress = (await contract.getFile(parseHex(did))).app
   return appAddress
 }
+
+export const isPermissionRequired = async (appAddress: string, provider: Web3Provider) => {
+  const arcana: Contract = Arcana(appAddress, provider)
+  const userAddress = await (await provider.getSigner()).getAddress()
+  const appLevelControl = await arcana.appLevelControl()
+  const userGrantedControl = await arcana.userAppPermission(userAddress)
+
+  return +appLevelControl !== +userGrantedControl
+}

@@ -7,7 +7,7 @@ import { Uploader } from './Uploader'
 import { Downloader } from './Downloader'
 import { FileAPI } from './fileAPI'
 import type { UploadParams } from './types'
-import { Config, customError, getProvider, makeTx, parseHex } from './Utils'
+import { Config, customError, getProvider, makeTx, parseHex, isPermissionRequired } from './Utils'
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant'
 import { wrapInstance } from './sentry'
 import { errorCodes } from './errors'
@@ -244,7 +244,11 @@ export class StorageProvider {
     const accounts = await this.provider.send('eth_requestAccounts', [])
     const nonce = (await axios.get(this.gateway + `get-nonce/?address=${accounts[0]}`)).data
     const signer = await this.provider.getSigner()
-    const sig = await signer.signMessage(`Welcome to Arcana Network!\n\nYou are about to use the Storage SDK.\n\nClick to sign in and accept the Arcana Network Terms of Service (https://bit.ly/3gqh6I7) and Privacy Policy (https://bit.ly/3MMpCgM).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nWallet address:\n${accounts[0]}\nNonce:\n${id(String(nonce)).substring(2, 42)}`)
+    const sig = await signer.signMessage(
+      `Welcome to Arcana Network!\n\nYou are about to use the Storage SDK.\n\nClick to sign in and accept the Arcana Network Terms of Service (https://bit.ly/3gqh6I7) and Privacy Policy (https://bit.ly/3MMpCgM).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nWallet address:\n${
+        accounts[0]
+      }\nNonce:\n${id(String(nonce)).substring(2, 42)}`
+    )
     res = await axios.post(this.gateway + 'login/', {
       signature: sig,
       email: this.email,
@@ -358,6 +362,20 @@ export class StorageProvider {
     }
 
     return downloader.getBlob(did)
+  }
+
+  // grant permissions at App
+  grantAppPermission = async () => {
+    if (!(await this.checkPermission())) {
+      throw new Error('Permission already granted for the app')
+    }
+    return await makeTx(this.appAddress, this.api, this.provider, 'grantAppPermission', [])
+  }
+
+  // check app permissions
+  checkPermission = async () => {
+    await this.login()
+    return await isPermissionRequired(this.appAddress, this.provider)
   }
 }
 export { AccessTypeEnum } from './fileAPI'
