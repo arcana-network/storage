@@ -1,6 +1,6 @@
 {
   "name": "@arcana/storage",
-  "version": "0.3.8",
+  "version": "0.3.11",
   "description": "Upload, Download, Share can be performed using this SDK",
   "main": "dist/index.js",
   "browser": "dist/index.js",

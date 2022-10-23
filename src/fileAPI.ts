@@ -165,7 +165,8 @@ export class FileAPI {
       did,
       hash: ruleHash,
       add,
-      remove
+      remove,
+      app_address: this.appAddress
     })
     if (res.data.err) {
       throw customError('TRANSACTION', res.data.err)
@@ -270,7 +271,10 @@ export class FileAPI {
   getSharedUsers = async (did: string): Promise<string[]> => {
     const realDID = parseHex(did)
     await this.setAppAddress(realDID)
-    const users = (await this.api.get('/shared-users/?did=' + realDID)).data
+    let users = (await this.api.get('/shared-users/?did=' + realDID)).data
+    if (users === null) {
+      users = []
+    }
     return users.filter((d) => d !== ethers.constants.AddressZero)
   }
 }
