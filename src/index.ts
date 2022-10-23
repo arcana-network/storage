@@ -7,7 +7,7 @@ import { Uploader } from './Uploader'
 import { Downloader } from './Downloader'
 import { FileAPI } from './fileAPI'
 import type { UploadParams } from './types'
-import { Config, customError, getProvider, makeTx, parseHex } from './Utils'
+import { Config, customError, getProvider, makeTx, parseHex,isPermissionRequired } from './Utils'
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant'
 import { wrapInstance } from './sentry'
 import { errorCodes } from './errors'
@@ -359,5 +359,15 @@ export class StorageProvider {
 
     return downloader.getBlob(did)
   }
+
+    // check if user is eligible for operations at App
+    grantAppPermission = async () => {
+      await this.login()
+      if (!isPermissionRequired(this.appAddress, this.provider)) {
+        throw new Error('Permission already granted for the app')
+      }
+      return await makeTx(this.appAddress, this.api, this.provider, 'grantAppPermission', [])
+    }
+
 }
 export { AccessTypeEnum } from './fileAPI'

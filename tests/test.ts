@@ -519,3 +519,25 @@ test.serial('Delete File', async (t) => {
   t.is(files.length, 0);
   t.truthy(tx);
 });
+
+test.serial('Grant app permission', async (t) => {
+  meta_tx_nock(null);
+
+  let middleware = (req, res, next, end) => {
+    const data = parseData({
+      value: ethers.utils.parseEther('0'),
+      data: req.params[0].data,
+    });
+    switch (data.name) {
+      case 'appLevelControl':
+        res.result =  ethers.utils.defaultAbiCoder.encode(["uint8"],[ 1]);
+        break;
+      case 'userAppPermission':
+        res.result =ethers.utils.defaultAbiCoder.encode(["uint8"], [0]);
+    }
+    end();
+  };
+
+  let arcanaInstance = await createStorageInstance(arcanaWallet, middleware);
+  await t.notThrowsAsync(arcanaInstance.grantAppPermission());
+});
