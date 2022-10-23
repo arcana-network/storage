@@ -128,7 +128,8 @@ export class FileAPI {
     isShare: boolean
   ): Promise<string> {
     const rule = await getRuleSet(did, this.provider)
-    let data: any[] = rule === ethers.constants.HashZero ? null : (await this.api.get(`get-hash-data/?hash=${rule}`)).data
+    let data: any[] =
+      rule === ethers.constants.HashZero ? null : (await this.api.get(`get-hash-data/?hash=${rule}`)).data
     if (data === null) {
       data = []
     }
@@ -226,13 +227,13 @@ export class FileAPI {
   }
 
   @requiresLocking
-  async removeFile (did:string) : Promise<string> {
+  async removeFile (did: string): Promise<string> {
     await this.setAppAddress(did)
     did = parseHex(did)
     return await makeTx(this.appAddress, this.api, this.provider, 'removeUserFile', [did])
   }
 
-  removeFileFromApp = async (did: string) : Promise<string> => {
+  removeFileFromApp = async (did: string): Promise<string> => {
     return this.removeFile(did)
   }
 

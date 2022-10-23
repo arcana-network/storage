@@ -105,7 +105,7 @@ export class Uploader {
         let nameHex = ethers.utils.formatBytes32String(file.name)
         if (nameHex[65] !== '0') throw Error()
         nameHex = '0' + nameHex.substring(2, 65)
-        name = '0x' + await AESEncryptHex(key, nameHex)
+        name = '0x' + (await AESEncryptHex(key, nameHex))
       } catch (e) {
         gatewayName = await AESEncrypt(key, file.name)
         name = id(gatewayName)
