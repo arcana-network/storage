@@ -1,10 +1,10 @@
 export const chainId = 40405
 
 export const chainIdToGateway = new Map([
-  [40405, 'https://gateway001-testnet.arcana.network/api/v1/'],
-  [40404, 'https://gateway-dev.arcana.network/api/v1/'],
+  [40405, 'https://gateway001-testnet.arcana.network/'],
+  [40404, 'https://gateway-dev.arcana.network/'],
   // Testing Chain, used locally
-  [100, 'http://localhost:9010']
+  [100, 'http://localhost:9010/']
 ])
 export const chainIdToRPCURL = new Map([
   [40405, 'https://blockchain001-testnet.arcana.network'],

@@ -142,7 +142,7 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   }
   const forwarderContract: Contract = Forwarder(localStorage.getItem('forwarder'), wallet)
   const req = await sign(wallet, contract, forwarderContract, method, params)
-  const res = await api.post('meta-tx/', req)
+  const res = await api.post('/api/v1/meta-tx/', req)
   if (res.data.err) {
     const error = cleanMessage(res.data.err)
     if (errorCodes[error] != null) {
