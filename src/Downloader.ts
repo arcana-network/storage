@@ -79,9 +79,7 @@ export class Downloader {
       case 0x01: {
         fileMeta = JSON.parse(Buffer.from(file[2].slice(2), 'hex').toString('utf-8'))
         fileWriter = new FileWriter(fileMeta.name, accessType)
-        const {
-          data: { host: storageHost }
-        } = await this.api.get('/get-region-endpoint/', {
+        const { data: { host: storageHost } } = await this.api.get('/api/v1/get-region-endpoint/', {
           params: {
             address: this.appAddress
           }
@@ -147,7 +145,12 @@ export class Downloader {
         if (fileMeta.name[0] === '0') {
           fileMeta.name = parseBytes32String('0x' + fileMeta.name.substring(1) + '0')
         } else {
-          fileMeta.name = await AESDecrypt(key, (await this.api.get(`/file-name/?did=${did}`)).data)
+          const { data: fileNameEncrypted } = await this.api.get('/api/v1/file-name/', {
+            params: {
+              did
+            }
+          })
+          fileMeta.name = await AESDecrypt(key, fileNameEncrypted)
         }
         fileWriter = new FileWriter(fileMeta.name, accessType)
         const Dec = new Decryptor(key)

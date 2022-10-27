@@ -40,7 +40,7 @@ export class FileAPI {
   }
 
   numOfMyFiles = async () => {
-    return (await this.api('files/total/')).data
+    return (await this.api('/api/v1/files/total/')).data
   }
 
   numOfMyFilesPages = async (pageSize: number = 20) => {
@@ -53,7 +53,7 @@ export class FileAPI {
       throw new Error('invalid_page_number')
     }
 
-    const res = await this.api.get('list-files/', {
+    const res = await this.api.get('/api/v1/list-files/', {
       params: {
         offset: (pageNumber - 1) * pageSize,
         count: pageSize,
@@ -66,7 +66,7 @@ export class FileAPI {
   }
 
   numOfSharedFiles = async () => {
-    return (await this.api('files/shared/total/')).data
+    return (await this.api('/api/v1/files/shared/total/')).data
   }
 
   numOfSharedFilesPages = async (pageSize: number = 20) => {
@@ -77,7 +77,7 @@ export class FileAPI {
     if (pageNumber > (await this.numOfSharedFilesPages(pageSize))) {
       throw new Error('invalid_page_number')
     }
-    const res = await this.api('shared-files/', {
+    const res = await this.api('/api/v1/shared-files/', {
       params: {
         offset: (pageNumber - 1) * pageSize,
         count: pageSize
@@ -94,9 +94,7 @@ export class FileAPI {
       throw customError('TRANSACTION', 'Public URLs are only available for Public Files.')
     }
 
-    const {
-      data: { host: storageHost }
-    } = await this.api.get('/get-region-endpoint/', {
+    const { data: { host: storageHost } } = await this.api.get('/api/v1/get-region-endpoint/', {
       params: {
         address: this.appAddress
       }
@@ -129,7 +127,13 @@ export class FileAPI {
   ): Promise<string> {
     const rule = await getRuleSet(did, this.provider)
     let data: any[] =
-      rule === ethers.constants.HashZero ? null : (await this.api.get(`get-hash-data/?hash=${rule}`)).data
+      rule === ethers.constants.HashZero
+        ? null
+        : (await this.api.get('/api/v1/get-hash-data/', {
+            params: {
+              hash: rule
+            }
+          })).data
     if (data === null) {
       data = []
     }
@@ -161,7 +165,7 @@ export class FileAPI {
       }
     }
     const ruleHash: string = id(rawRule)
-    const res = await this.api.post('update-hash/', {
+    const res = await this.api.post('/api/v1/update-hash/', {
       did,
       hash: ruleHash,
       add,
@@ -271,7 +275,11 @@ export class FileAPI {
   getSharedUsers = async (did: string): Promise<string[]> => {
     const realDID = parseHex(did)
     await this.setAppAddress(realDID)
-    let users = (await this.api.get('/shared-users/?did=' + realDID)).data
+    let users = (await this.api.get('/api/v1/shared-users/', {
+      params: {
+        did: realDID
+      }
+    })).data
     if (users === null) {
       users = []
     }

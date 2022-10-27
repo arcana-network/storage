@@ -11,7 +11,7 @@ import httpAdapter from 'axios/lib/adapters/http'
 import { providerFromEngine } from 'eth-json-rpc-middleware'
 
 // SDK imports
-import { StorageProvider } from '../src/index'
+import { StorageProvider } from '../src'
 import * as utils from '../src/Utils'
 import { parseData } from './utils'
 import { CustomError } from '../src/types'
@@ -20,7 +20,7 @@ import DID from '../src/contracts/DID'
 const sContracts: any = fs.readFileSync('./tests/contracts.json')
 const oContracts = JSON.parse(sContracts)
 
-const gateway = 'http://localhost:9010/api/v1'
+const gateway = 'http://localhost:9010/'
 const appId = 1
 const appAddress = '445007f942f9Ba718953094Bbe3205B9484cAfd2'
 const debug = false
@@ -66,9 +66,9 @@ function meta_tx_nock (reply_data) {
 
   nock(gateway)
     .defaultReplyHeaders(nockOptions)
-    .post('/meta-tx/')
+    .post('/api/v1/meta-tx/')
     .reply(200, nockMetaReply)
-    .intercept('/meta-tx/', 'OPTIONS')
+    .intercept('/api/v1/meta-tx/', 'OPTIONS')
     .reply(200, nockMetaReply, { 'access-control-allow-headers': 'Authorization' })
 }
 
@@ -203,7 +203,7 @@ async function createStorageInstance (wallet: Wallet, middleware?) {
   const instance = await StorageProvider.init({
     appAddress,
     email: 'test@email.com',
-    gateway: gateway + '/',
+    gateway,
     debug,
     chainId: 100,
     provider: providerFromEngine(engine)
@@ -276,9 +276,8 @@ test.serial.skip('Metadata URL', async (t) => {
     })
 
   nock(gateway)
-    .post('/metadata/')
+    .post('/api/v1/metadata')
     .reply(201, Promise.resolve({ request: { responseURL: 'dummy.metadata.url' } }))
-  const freader = await (await fetch('https://picsum.photos/id/872/200/300')).arrayBuffer()
   const arcanaInstance = await createStorageInstance(arcanaWallet)
   const metadataURL = await arcanaInstance.makeMetadataURL('test', 'test description', did, file)
 
@@ -312,14 +311,14 @@ test.serial('Share file', async (t) => {
   // Now check whether it showing in receipt user list
   nock(gateway)
     .defaultReplyHeaders(nockOptions)
-    .get('/shared-files/')
+    .get('/api/v1/shared-files/')
     .query(true)
     .reply(200, [{ did: did.substring(2), size: file.size }], { 'access-control-allow-headers': 'Authorization' })
-    .get('/files/shared/total/')
+    .get('/api/v1/files/shared/total/')
     .reply(200, { data: 0 })
-    .get('/get-hash-data/?hash=0x0000000000000000000000000000000000000000000000000000000000000000')
+    .get('/api/v1/get-hash-data/?hash=0x0000000000000000000000000000000000000000000000000000000000000000')
     .reply(200, null)
-    .post('/update-hash/')
+    .post('/api/v1/update-hash/')
     .reply(200, {})
 
   const tx = await access.share(did, [receiverWallet.address], [150])
@@ -338,11 +337,11 @@ test.serial('Fail revoke transaction on unauthorized files', async (t) => {
   const expected_errorCode = 'You dont have access to perform this operation'
   nock(gateway)
     .defaultReplyHeaders(nockOptions)
-    .post('/update-hash/')
+    .post('/api/v1/update-hash/')
     .reply(200, {
       err: expected_errorCode
     })
-    .get('/get-hash-data/')
+    .get('/api/v1/get-hash-data/')
     .query(true)
     .reply(200, null)
 
@@ -438,11 +437,11 @@ test.serial('Revoke', async (t) => {
   let access = await arcanaInstance.getAccess()
   nock(gateway)
     .defaultReplyHeaders(nockOptions)
-    .get('/shared-users/?did=' + did)
+    .get('/api/v1/shared-users/?did=' + did)
     .reply(200, [receiverWallet.address], { 'access-control-allow-headers': 'Authorization' })
-    .post('/update-hash/')
+    .post('/api/v1/update-hash/')
     .reply(200, {})
-    .get('/get-hash-data/')
+    .get('/api/v1/get-hash-data/')
     .query(true)
     .reply(200, null)
 
@@ -465,7 +464,7 @@ test.serial('Revoke', async (t) => {
 
   nock(gateway)
     .defaultReplyHeaders(nockOptions)
-    .get('/shared-users/?did=' + did)
+    .get('/api/v1/shared-users/?did=' + did)
     .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
   const afterRevokeUsers = await access.getSharedUsers(did)
 
@@ -475,10 +474,10 @@ test.serial('Revoke', async (t) => {
 
   await nock(gateway)
     .defaultReplyHeaders(nockOptions)
-    .get('/shared-files/')
+    .get('/api/v1/shared-files/')
     .query(true)
     .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
-    .get('/files/shared/total/')
+    .get('/api/v1/files/shared/total/')
     .reply(200, { data: 0 })
 
   const receiverInstance = await createStorageInstance(receiverWallet)
@@ -492,10 +491,10 @@ test.serial('Delete File', async (t) => {
 
   const scope = nock(gateway)
     .defaultReplyHeaders(nockOptions)
-    .get('/list-files/')
+    .get('/api/v1/list-files/')
     .query(true)
     .reply(200, [{ did: did.substring(2) }], { 'access-control-allow-headers': 'Authorization' })
-    .get('/files/total/')
+    .get('/api/v1/files/total/')
     .reply(200, { data: 1 })
 
   const arcanaInstance = await createStorageInstance(arcanaWallet)
@@ -511,10 +510,10 @@ test.serial('Delete File', async (t) => {
 
   nock(gateway)
     .defaultReplyHeaders(nockOptions)
-    .get('/list-files/')
+    .get('/api/v1/list-files/')
     .query(true)
     .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
-    .get('/files/total/')
+    .get('/api/v1/files/total/')
     .reply(200, { data: 0 })
 
   files = await arcanaInstance.myFiles()
