@@ -35,7 +35,7 @@ Below to be covered in Integration Tests
 -> Download  (due to tus client instance)
 */
 
-function sleep (ms) {
+function sleep(ms) {
   return new Promise((resolve) => {
     setTimeout(resolve, ms)
   })
@@ -59,7 +59,7 @@ let file
 // receiverInstance,
 const did = '0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066'
 
-function meta_tx_nock (reply_data) {
+function meta_tx_nock(reply_data) {
   const nockMetaReply = async (uri, body: any) => {
     return reply_data ?? { data: 'dummy data', token: 'dummy token' }
   }
@@ -72,7 +72,7 @@ function meta_tx_nock (reply_data) {
     .reply(200, nockMetaReply, { 'access-control-allow-headers': 'Authorization' })
 }
 
-function mock_dkg (reply_data) {
+function mock_dkg(reply_data) {
   nock('https://dkgnode1.arcana.network:443')
     .defaultReplyHeaders(nockOptions)
     .post('/rpc')
@@ -80,7 +80,7 @@ function mock_dkg (reply_data) {
     .reply(200, { jsonrpc: '2.0', result: { ok: true }, id: 10 })
 }
 
-async function nockSetup () {
+async function nockSetup() {
   nock('http://localhost:9010')
     .defaultReplyHeaders(nockOptions)
     .persist()
@@ -118,7 +118,7 @@ async function nockSetup () {
     .reply(200, {})
 }
 
-function sinonMockObjectSetup () {
+function sinonMockObjectSetup() {
   sinon.replace(utils, 'getDKGNodes', () => [
     {
       declaredIp: 'dkgnode1.arcana.network:443',
@@ -161,7 +161,7 @@ function sinonMockObjectSetup () {
   sinon.replace(utils, 'getFile', () => Promise.resolve({ app: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9' }))
 }
 
-async function mockFile () {
+async function mockFile() {
   // file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
   // file = new File([file], "picsum_img", { type: file.type });
   return new nBlob([await (await fetch('https://picsum.photos/id/872/200/300')).arrayBuffer()])
@@ -193,7 +193,7 @@ test.serial.before(async (t) => {
 })
 
 // TODO: get request handler in arrays
-async function createStorageInstance (wallet: Wallet, middleware?) {
+async function createStorageInstance(wallet: Wallet, middleware?) {
   const engine = createEngine(wallet.address)
 
   if (middleware) {
@@ -543,4 +543,43 @@ test.serial('Grant app permission', async (t) => {
 
   const arcanaInstance = await createStorageInstance(arcanaWallet, middleware)
   await t.notThrowsAsync(arcanaInstance.grantAppPermission())
+})
+
+test.serial("Add file to app", async (t) => {
+  t.plan(7)
+  meta_tx_nock(null)
+  let scope = nock(gateway)
+    .defaultReplyHeaders(nockOptions)
+    .get('/list-files/')
+    .query(true)
+    .reply(200, [{ did: did.substring(2) }], { 'access-control-allow-headers': 'Authorization' })
+    .get('/files/total/')
+    .reply(200, { data: 1 })
+
+    const arcanaInstance = await createStorageInstance(arcanaWallet)
+  
+    let files:any = await arcanaInstance.myFiles()
+
+    t.true(scope.isDone())
+    t.is(files.length, 1)
+    t.is(files[0].did, did.substring(2))
+
+    const did2 = "0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066"
+
+    const access = await arcanaInstance.getAccess();
+    await t.notThrowsAsync( access.addFile(did2));
+   
+    scope = nock(gateway)
+    .defaultReplyHeaders(nockOptions)
+    .get('/list-files/')
+    .query(true)
+    .reply(200, [{ did: did.substring(2) }, {did: did2.substring(2)}], { 'access-control-allow-headers': 'Authorization' })
+    .get('/files/total/')
+    .reply(200, { data: 2 })
+   
+    files = await arcanaInstance.myFiles()
+    t.true(scope.isDone())
+    t.is(files.length, 2)
+    t.is(files[1].did, did2.substring(2))
+
 })
