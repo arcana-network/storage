@@ -72,7 +72,7 @@ export class Uploader {
     let nodeResp
     if (this.appId) {
       nodeResp = (
-        await this.api.get('/get-node-address/', {
+        await this.api.get('/api/v1/get-node-address/', {
           params: {
             appId: this.appId
           }
@@ -80,7 +80,7 @@ export class Uploader {
       ).data
     } else {
       nodeResp = (
-        await this.api.get('/get-node-address/', {
+        await this.api.get('/api/v1/get-node-address/', {
           params: {
             address: this.appAddress
           }
@@ -261,7 +261,12 @@ export class Uploader {
       }
     }
     if (gatewayName) {
-      await this.api.post(`/file-name/?did=${did}&name=${gatewayName}`)
+      await this.api.post('/api/v1/file-name/', {}, {
+        params: {
+          did,
+          name: gatewayName
+        }
+      })
     }
     return did.replace('0x', '')
   }

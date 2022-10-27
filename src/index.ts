@@ -69,7 +69,8 @@ export class StorageProvider {
     if (!config.gateway) {
       this.gateway = chainIdToGateway.get(this.chainId)
     } else {
-      this.gateway = new URL('/api/v1/', config.gateway).href
+      // Normalize the URL
+      this.gateway = new URL(config.gateway).href
     }
 
     this.lock = new Mutex()
@@ -147,7 +148,11 @@ export class StorageProvider {
     // get signer from provider
     const signer = this.provider.getSigner()
     const signature = await signer.signMessage(`Sign this message to attach NFT metadata with your did ${did}`)
-    const node = await this.api.get('/get-node-address/?appid=' + this.appId)
+    const node = await this.api.get('/api/v1/get-node-address/', {
+      params: {
+        appid: this.appId
+      }
+    })
     const api = axios.create({
       baseURL: node.data.host,
       headers: {
@@ -156,7 +161,7 @@ export class StorageProvider {
     })
     const form = new FormData()
     form.append('file', file)
-    const res = await api.post('api/v1/nft', form)
+    const res = await api.post('/api/v1/nft', form)
     if (!res.data.success) {
       throw new Error('Error uploading image')
     }
@@ -237,35 +242,43 @@ export class StorageProvider {
         }
       }
     }
-    let res = (await axios.get(this.gateway + 'get-config/')).data
+
+    this.api = axios.create({
+      baseURL: this.gateway
+    })
+    let { data: res } = await this.api.get('/api/v1/get-config/')
     localStorage.setItem('forwarder', res.Forwarder)
     localStorage.setItem('dkg', res.DKG)
     localStorage.setItem('did', res.DID)
+
     const accounts = await this.provider.send('eth_requestAccounts', [])
-    const nonce = (await axios.get(this.gateway + `get-nonce/?address=${accounts[0]}`)).data
+    const { data: nonce } = await this.api.get('/api/v1/get-nonce/', {
+      params: {
+        address: accounts[0]
+      }
+    })
     const signer = await this.provider.getSigner()
     const sig = await signer.signMessage(
       `Welcome to Arcana Network!\n\nYou are about to use the Storage SDK.\n\nClick to sign in and accept the Arcana Network Terms of Service (https://bit.ly/3gqh6I7) and Privacy Policy (https://bit.ly/3MMpCgM).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nWallet address:\n${
         accounts[0]
       }\nNonce:\n${id(String(nonce)).substring(2, 42)}`
     )
-    res = await axios.post(this.gateway + 'login/', {
+    res = await this.api.post('/api/v1/login/', {
       signature: sig,
       email: this.email,
       address: accounts[0]
     })
-    this.api = axios.create({
-      baseURL: this.gateway,
-      headers: {
-        Authorization: `Bearer ${res.data.token}`
-      }
-    })
+    this.api.defaults.headers.Authorization = `Bearer ${res.data.token}`
 
     if (this.appId && !this.appAddress) {
       // fetch app address
-      res = await this.api.get(`get-address/?id=${this.appId}`)
+      res = await this.api.get('/api/v1/get-address/', {
+        params: {
+          id: this.appId
+        }
+      })
       if (res.data.address) {
-        this.appAddress = res.data.address.length === 40 ? '0x' + res.data.address : res.data.address
+        this.appAddress = parseHex(res.data.address)
       } else {
         throw new Error('app_not_found')
       }

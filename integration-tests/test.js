@@ -1,11 +1,11 @@
 // const { expect } = require("chai");
 const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 // const gateway = 'https://gateway-testnet.arcana.network/';
-// const gateway = 'http://localhost:9010/';
+const gateway = 'http://localhost:9010/';
 // const gateway = 'https://gateway01-testnet.arcana.network/';
-const gateway = 'https://gateway-dev.arcana.network/';
+// const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
-const appId = 589;
+const appId = 592;
 // const appId = 28;
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -98,9 +98,9 @@ describe('Upload File', () => {
     console.log({users})
     await arcanaInstance.files.share(did, address)
     // await arcanaInstance.files.revoke(did, address)
-    // alert("change account")
     users = await arcanaInstance.files.getSharedUsers(did)
     console.log({users})
+    alert("change account")
     // await arcanaInstance.files.share(did, address2)
     // await arcanaInstance.files.revoke(did, address)
   });
