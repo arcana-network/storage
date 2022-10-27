@@ -279,7 +279,7 @@ export class FileAPI {
   }
 
   @requiresLocking
-  private async _addFile(did:string) {
+  private async _addFile (did: string) {
     await this.setAppAddress(did)
     return await makeTx(this.appAddress, this.api, this.provider, 'addFile', [did])
   }
