@@ -145,7 +145,7 @@ export class Downloader {
         if (fileMeta.name[0] === '0') {
           fileMeta.name = parseBytes32String('0x' + fileMeta.name.substring(1) + '0')
         } else {
-          const { data: fileNameEncrypted } = await this.api.get('/api/v1/file-name', {
+          const { data: fileNameEncrypted } = await this.api.get('/api/v1/file-name/', {
             params: {
               did
             }
