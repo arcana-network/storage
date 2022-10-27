@@ -48,7 +48,7 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 import { StorageProvider } from '@arcana/storage'; // required only once per .ts or .js file
 
 dAppStorageProvider = await StorageProvider.init({
-  appId: ARCANA_APP_ID, // Get appId via Dashboard after registering and configuring dApp
+  appAddress: ARCANA_APP_ADDRESS, // Get appAddress via Dashboard after registering and configuring dApp
   email: user_email_string, //optional
   chainId: 100, //optional
   provider: window.arcana.provider //optional
@@ -190,7 +190,7 @@ let files = await dAppStorageProvider.files.list(AccessTypeEnum.MY_FILES);
 // Otherwise by default, the Storage SDK will choose window.ethereum
 
 dAppStorageProvider = await StorageProvider.init({
-  appId: ARCANA_APP_ID, // Get appId via Dashboard after registering and configuring dApp
+  appAddress: ARCANA_APP_ADDRESS, // Get appAddress via Dashboard after registering and configuring dApp
   email: user_email_string, //optional
   chainId: 100, //optional
   provider: window.arcana.provider //optional
@@ -234,9 +234,8 @@ During file upload operations, if there are any errors, dApp developers should a
 
 ```ts
 import { StorageProvider } from '@arcana/storage'; // required only once per .ts or .js file
-
 dAppStorageProvider = await StorageProvider.init({
-  appId: ARCANA_APP_ID, // Get appId via Dashboard after registering and configuring dApp
+  appAddress: ARCANA_APP_ADDRESS, // Get appAddress via Dashboard after registering and configuring dApp
   email: user_email_string, //optional
   chainId: 100, //optional
   provider: window.arcana.provider //optional
