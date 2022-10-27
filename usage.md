@@ -292,6 +292,12 @@ const isPermissionRequired = await storage.checkPermission() -> boolean
 Add an already uploaded file to selected app.
 
 ```js
-const access = await storage.getAccess();
-await access.addFile(<did>)
+await storage.files.addFile(<did>)
+```
+
+### Remove file from App 
+Removes file from selected app. Does **NOT** delete from arcana storage, use `delete` for that case.
+
+```js
+await storage.files.removeFileFromApp(<did>)
 ```

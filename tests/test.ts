@@ -583,3 +583,39 @@ test.serial("Add file to app", async (t) => {
     t.is(files[1].did, did2.substring(2))
 
 })
+
+test.serial("Remove file from app", async (t) => {
+  t.plan(6)
+  meta_tx_nock(null)
+  let scope = nock(gateway)
+    .defaultReplyHeaders(nockOptions)
+    .get('/list-files/')
+    .query(true)
+    .reply(200, [{ did: did.substring(2) }], { 'access-control-allow-headers': 'Authorization' })
+    .get('/files/total/')
+    .reply(200, { data: 1 })
+
+    const arcanaInstance = await createStorageInstance(arcanaWallet)
+  
+    let files:any = await arcanaInstance.myFiles()
+
+    t.true(scope.isDone())
+    t.is(files.length, 1)
+    t.is(files[0].did, did.substring(2))
+
+    const access = await arcanaInstance.getAccess();
+    await t.notThrowsAsync( access.removeFileFromApp(did));
+   
+    scope = nock(gateway)
+    .defaultReplyHeaders(nockOptions)
+    .get('/list-files/')
+    .query(true)
+    .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
+    .get('/files/total/')
+    .reply(200, { data: 0 })
+   
+    files = await arcanaInstance.myFiles()
+    t.true(scope.isDone())
+    t.is(files.length, 0)
+
+})
