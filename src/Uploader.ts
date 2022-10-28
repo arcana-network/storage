@@ -157,18 +157,22 @@ export class Uploader {
     } else {
       // Otherwise, generate a random address and create the uploadInit transaction
       const ephemeralWallet = await Wallet.createRandom()
+
+      try {
+        let nameHex = ethers.utils.formatBytes32String(file.name)
+        if (nameHex[65] !== '0') throw Error()
+        nameHex = '0' + nameHex.substring(2, 65)
+        name = '0x' + nameHex
+      } catch (e) {
+        gatewayName = file.name
+        name = id(gatewayName)
+      }
+
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
-        utils.toUtf8Bytes(
-          JSON.stringify({
-            name: 'name' in file ? file.name : did,
-            type: file.type,
-            size: file.size,
-            lastModified: 'lastModified' in file ? file.lastModified : new Date(),
-            hash
-          })
-        ),
+        name, 
+        "0x"+hash,
         nodeResp.address,
         ephemeralWallet.address
       ])
