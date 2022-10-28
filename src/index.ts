@@ -264,6 +264,7 @@ export class StorageProvider {
       }\nNonce:\n${id(String(nonce)).substring(2, 42)}`
     )
     res = await this.api.post('/api/v1/login/', {
+      appAddress: this.appAddress,
       signature: sig,
       email: this.email,
       address: accounts[0]

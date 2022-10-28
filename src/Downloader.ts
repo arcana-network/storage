@@ -71,14 +71,22 @@ export class Downloader {
     const file = await getFile(did, this.provider)
 
     const chunkSize = 10 * 2 ** 20
-    let fileMeta
     let fileWriter
 
     switch (didBytes[0]) {
       // Public File
       case 0x01: {
-        fileMeta = JSON.parse(Buffer.from(file[2].slice(2), 'hex').toString('utf-8'))
-        fileWriter = new FileWriter(fileMeta.name, accessType)
+        if (file.name[2] === '0') {
+          file.name = parseBytes32String('0x' + file.name.substring(2) + '0')
+        } else {
+          const { data: name } = await this.api.get('/api/v1/file-name/', {
+            params: {
+              did
+            }
+          })
+          file.name = name
+        }
+        fileWriter = new FileWriter(file.name, accessType)
         const { data: { host: storageHost } } = await this.api.get('/api/v1/get-region-endpoint/', {
           params: {
             address: this.appAddress
@@ -87,10 +95,9 @@ export class Downloader {
 
         const u = new URL(storageHost)
         u.pathname = '/api/v2/file/public/' + this.appAddress + '/' + did
-
         let downloaded = 0
-        for (let i = 0; i < fileMeta.size; i += chunkSize) {
-          const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size) - 1}`
+        for (let i = 0; i < file.size; i += chunkSize) {
+          const range = `bytes=${i}-${Math.min(i + chunkSize, file.size) - 1}`
           const { data } = await axios({
             method: 'GET',
             url: u.href,
@@ -102,7 +109,7 @@ export class Downloader {
           await fileWriter.write(data, i)
           this.hasher.update(data)
           downloaded += data.byteLength
-          await this.onProgress(downloaded, fileMeta.size)
+          await this.onProgress(downloaded, file.size)
         }
         break
       }
@@ -139,24 +146,23 @@ export class Downloader {
         }
         const decryptedKey = join(shares)
         const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt'])
-        fileMeta = file
-        fileMeta.hash = await AESDecryptHex(key, fileMeta.hash.replace('0x', ''))
-        fileMeta.name = await AESDecryptHex(key, fileMeta.name.replace('0x', ''))
-        if (fileMeta.name[0] === '0') {
-          fileMeta.name = parseBytes32String('0x' + fileMeta.name.substring(1) + '0')
+        file.hash = await AESDecryptHex(key, file.hash.replace('0x', ''))
+        file.name = await AESDecryptHex(key, file.name.replace('0x', ''))
+        if (file.name[0] === '0') {
+          file.name = parseBytes32String('0x' + file.name.substring(1) + '0')
         } else {
           const { data: fileNameEncrypted } = await this.api.get('/api/v1/file-name/', {
             params: {
               did
             }
           })
-          fileMeta.name = await AESDecrypt(key, fileNameEncrypted)
+          file.name = await AESDecrypt(key, fileNameEncrypted)
         }
-        fileWriter = new FileWriter(fileMeta.name, accessType)
+        fileWriter = new FileWriter(file.name, accessType)
         const Dec = new Decryptor(key)
         let downloaded = 0
-        for (let i = 0; i < fileMeta.size; i += chunkSize) {
-          const range = `bytes=${i}-${Math.min(i + chunkSize, fileMeta.size) - 1}`
+        for (let i = 0; i < file.size; i += chunkSize) {
+          const range = `bytes=${i}-${Math.min(i + chunkSize, file.size) - 1}`
           const download = await fetch(checkPermissionResp.host + `api/v2/file/${did}`, {
             headers: {
               Range: range,
@@ -168,7 +174,7 @@ export class Downloader {
           await fileWriter.write(dec, i)
           this.hasher.update(dec)
           downloaded += dec.byteLength
-          await this.onProgress(downloaded, fileMeta.size)
+          await this.onProgress(downloaded, file.size)
         }
         break
       }
@@ -177,12 +183,13 @@ export class Downloader {
     }
 
     const decryptedHash = hasher2Hex(this.hasher.digest())
-    const success = fileMeta.hash === decryptedHash
+    const success = file.hash.replace('0x', '') === decryptedHash
     if (success) {
       const out = await fileWriter.createDownload()
       await this.onSuccess()
       return out
     } else {
+      console.log(file.hash, decryptedHash)
       throw new Error('Hash does not match the uploaded file')
     }
   }

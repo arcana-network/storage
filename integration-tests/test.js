@@ -5,7 +5,7 @@ const gateway = 'http://localhost:9010/';
 // const gateway = 'https://gateway01-testnet.arcana.network/';
 // const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
-const appId = 592;
+const appId = 589;
 // const appId = 28;
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -81,12 +81,13 @@ describe('Upload File', () => {
 
 
 
-  it('Upload', async () => {
+  it.only('Upload', async () => {
     let my_file_old = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
     did = await arcanaInstance.upload(file);
     console.log('did', did);
     let my_file_new = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
     chai.expect(my_file_new.length - my_file_old.length).equal(1); 
+    console.log({my_file_new})
   });
 
 
@@ -105,7 +106,7 @@ describe('Upload File', () => {
     // await arcanaInstance.files.revoke(did, address)
   });
 
-  it('Download', async () => {
+  it.only('Download', async () => {
     let store = await arcana.storage.StorageProvider.init({
       appId,
       provider: window.ethereum,
