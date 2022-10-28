@@ -7,10 +7,11 @@ import { Uploader } from './Uploader'
 import { Downloader } from './Downloader'
 import { FileAPI } from './fileAPI'
 import type { UploadParams } from './types'
-import { Config, customError, getFile, getProvider, makeTx, parseHex } from './Utils'
+import { Config, customError, getProvider, makeTx, parseHex, isPermissionRequired } from './Utils'
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant'
 import { wrapInstance } from './sentry'
 import { errorCodes } from './errors'
+import { id } from 'ethers/lib/utils'
 
 export class StorageProvider {
   // private provider: providers.Web3Provider;
@@ -57,6 +58,9 @@ export class StorageProvider {
     }
     this.email = config.email
     this.appId = config.appId
+    if (config.appAddress) {
+      this.appAddress = parseHex(config.appAddress)
+    }
     if (!config.chainId) {
       this.chainId = chainId
     } else {
@@ -65,7 +69,8 @@ export class StorageProvider {
     if (!config.gateway) {
       this.gateway = chainIdToGateway.get(this.chainId)
     } else {
-      this.gateway = new URL('/api/v1/', config.gateway).href
+      // Normalize the URL
+      this.gateway = new URL(config.gateway).href
     }
 
     this.lock = new Mutex()
@@ -101,22 +106,23 @@ export class StorageProvider {
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onNetworkChange = (newNetwork, oldNetwork) => {
-    window.location.reload()
+    // window.location.reload()
   }
 
   // Reload on account changed
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onAccountChange = (accounts) => {
-    window.location.reload()
+    // window.location.reload()
   }
 
-  downloadDID = async (did: string) => {
-    await this.login()
-    const file = await getFile(did, this.provider)
-    this.appAddress = file.app
-    const downloader = new Downloader(this.appAddress, this.provider, this.api, this.lock, this.debug)
-    await downloader.download(did)
-  }
+  // TODO: Need to fix this function
+  // downloadDID = async (did: string) => {
+  //   await this.login()
+  //   const file = await getFile(did, this.provider)
+  //   this.appAddress = file.app
+  //   const downloader = new Downloader(this.appAddress, this.provider, this.api, this.lock, this.debug)
+  //   await downloader.download(did)
+  // }
 
   getUploader = async () => {
     await this.login()
@@ -142,7 +148,11 @@ export class StorageProvider {
     // get signer from provider
     const signer = this.provider.getSigner()
     const signature = await signer.signMessage(`Sign this message to attach NFT metadata with your did ${did}`)
-    const node = await this.api.get('/get-node-address/?appid=' + this.appId)
+    const node = await this.api.get('/api/v1/get-node-address/', {
+      params: {
+        appid: this.appId
+      }
+    })
     const api = axios.create({
       baseURL: node.data.host,
       headers: {
@@ -151,17 +161,17 @@ export class StorageProvider {
     })
     const form = new FormData()
     form.append('file', file)
-    const res = await api.post('api/v1/nft', form)
+    const res = await api.post('/api/v1/nft', form)
     if (!res.data.success) {
       throw new Error('Error uploading image')
     }
 
     let subDomain = '.'
     switch (this.chainId) {
-      case 40405 :
+      case 40405:
         subDomain += 'beta'
         break
-      case 40404 :
+      case 40404:
         subDomain += 'dev'
         break
     }
@@ -233,32 +243,43 @@ export class StorageProvider {
       }
     }
 
-    let res = (await axios.get(this.gateway + 'get-config/')).data
+    this.api = axios.create({
+      baseURL: this.gateway
+    })
+    let { data: res } = await this.api.get('/api/v1/get-config/')
     localStorage.setItem('forwarder', res.Forwarder)
     localStorage.setItem('dkg', res.DKG)
     localStorage.setItem('did', res.DID)
+
     const accounts = await this.provider.send('eth_requestAccounts', [])
-    const nonce = (await axios.get(this.gateway + `get-nonce/?address=${accounts[0]}`)).data
+    const { data: nonce } = await this.api.get('/api/v1/get-nonce/', {
+      params: {
+        address: accounts[0]
+      }
+    })
     const signer = await this.provider.getSigner()
-    const sig = await signer.signMessage(String(nonce))
-    res = await axios.post(this.gateway + 'login/', {
-      appID: this.appId,
+    const sig = await signer.signMessage(
+      `Welcome to Arcana Network!\n\nYou are about to use the Storage SDK.\n\nClick to sign in and accept the Arcana Network Terms of Service (https://bit.ly/3gqh6I7) and Privacy Policy (https://bit.ly/3MMpCgM).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nWallet address:\n${
+        accounts[0]
+      }\nNonce:\n${id(String(nonce)).substring(2, 42)}`
+    )
+    res = await this.api.post('/api/v1/login/', {
+      appAddress: this.appAddress,
       signature: sig,
       email: this.email,
       address: accounts[0]
     })
-    this.api = axios.create({
-      baseURL: this.gateway,
-      headers: {
-        Authorization: `Bearer ${res.data.token}`
-      }
-    })
+    this.api.defaults.headers.Authorization = `Bearer ${res.data.token}`
 
-    if (this.appId) {
+    if (this.appId && !this.appAddress) {
       // fetch app address
-      res = await this.api.get(`get-address/?id=${this.appId}`)
+      res = await this.api.get('/api/v1/get-address/', {
+        params: {
+          id: this.appId
+        }
+      })
       if (res.data.address) {
-        this.appAddress = res.data.address.length === 40 ? '0x' + res.data.address : res.data.address
+        this.appAddress = parseHex(res.data.address)
       } else {
         throw new Error('app_not_found')
       }
@@ -298,21 +319,28 @@ export class StorageProvider {
     return this.files.sharedFiles(pageNumber, pageSize)
   }
 
-  linkNft = async (fileId:string, tokenId: number, nftContract:string, nftChainID: number) => {
+  linkNft = async (fileId: string, tokenId: number, nftContract: string, nftChainID: number) => {
     await this.login()
     fileId = parseHex(fileId)
     nftContract = parseHex(nftContract)
-    return await makeTx(this.appAddress, this.api, this.provider, 'linkNFT', [fileId, tokenId, nftContract, nftChainID])
+    return await makeTx(this.appAddress, this.api, this.provider, 'linkNFT', [
+      fileId,
+      tokenId,
+      nftContract,
+      nftChainID
+    ])
   }
 
-  upload = async (fileRaw: any, params: UploadParams & {
-    onProgress: (bytesUploaded: number, bytesTotal: number) => void
-  } = {
-    onProgress: () => null,
-    chunkSize: 10 * 2 ** 20,
-    duplicate: false,
-    publicFile: false
-  }): Promise<string> => {
+  upload = async (
+    fileRaw: any,
+    params: UploadParams & {
+      onProgress: (bytesUploaded: number, bytesTotal: number) => void;
+    } = {
+      onProgress: () => null,
+      chunkSize: 10 * 2 ** 20,
+      publicFile: false
+    }
+  ): Promise<string> => {
     const uploader = await this.getUploader()
     if (params.onProgress != null) {
       uploader.onProgress = params.onProgress
@@ -324,7 +352,10 @@ export class StorageProvider {
     })
   }
 
-  download = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>): Promise<void> => {
+  download = async (
+    did: any,
+    onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>
+  ): Promise<void> => {
     const downloader = await this.getDownloader()
 
     if (onProgress != null) {
@@ -334,7 +365,10 @@ export class StorageProvider {
     return downloader.downloadToFilesystem(did)
   }
 
-  getBlob = async (did: any, onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>): Promise<Blob> => {
+  getBlob = async (
+    did: any,
+    onProgress: (bytesDownloaded: number, bytesTotal: number) => Promise<void>
+  ): Promise<Blob> => {
     const downloader = await this.getDownloader()
 
     if (onProgress != null) {
@@ -342,6 +376,20 @@ export class StorageProvider {
     }
 
     return downloader.getBlob(did)
+  }
+
+  // grant permissions at App
+  grantAppPermission = async () => {
+    if (!(await this.checkPermission())) {
+      throw new Error('Permission already granted for the app')
+    }
+    return await makeTx(this.appAddress, this.api, this.provider, 'grantAppPermission', [])
+  }
+
+  // check app permissions
+  checkPermission = async () => {
+    await this.login()
+    return await isPermissionRequired(this.appAddress, this.provider)
   }
 }
 export { AccessTypeEnum } from './fileAPI'

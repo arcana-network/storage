@@ -37,6 +37,74 @@ export default {
       inputs: [
         {
           indexed: true,
+          internalType: 'bytes32',
+          name: 'did',
+          type: 'bytes32'
+        },
+        {
+          indexed: true,
+          internalType: 'uint8',
+          name: 'control',
+          type: 'uint8'
+        },
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'app',
+          type: 'address'
+        },
+        {
+          indexed: false,
+          internalType: 'address',
+          name: 'user',
+          type: 'address'
+        }
+      ],
+      name: 'FilePermission',
+      type: 'event'
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
+          internalType: 'bytes32',
+          name: 'did',
+          type: 'bytes32'
+        },
+        {
+          indexed: true,
+          internalType: 'address',
+          name: 'user',
+          type: 'address'
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'chain_id',
+          type: 'uint256'
+        },
+        {
+          indexed: false,
+          internalType: 'uint256',
+          name: 'token_id',
+          type: 'uint256'
+        },
+        {
+          indexed: false,
+          internalType: 'address',
+          name: 'nftContract',
+          type: 'address'
+        }
+      ],
+      name: 'NFTDownload',
+      type: 'event'
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: true,
           internalType: 'address',
           name: 'previousOwner',
           type: 'address'
@@ -80,38 +148,6 @@ export default {
     {
       inputs: [
         {
-          internalType: 'address',
-          name: '',
-          type: 'address'
-        }
-      ],
-      name: 'Apps',
-      outputs: [
-        {
-          internalType: 'bool',
-          name: '',
-          type: 'bool'
-        }
-      ],
-      stateMutability: 'view',
-      type: 'function'
-    },
-    {
-      inputs: [],
-      name: 'NFTHandler',
-      outputs: [
-        {
-          internalType: 'contract IArcanaNFTHandler',
-          name: '',
-          type: 'address'
-        }
-      ],
-      stateMutability: 'view',
-      type: 'function'
-    },
-    {
-      inputs: [
-        {
           internalType: 'bytes32',
           name: '_did',
           type: 'bytes32'
@@ -124,6 +160,40 @@ export default {
       ],
       name: 'changeFileOwner',
       outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: '_did',
+          type: 'bytes32'
+        },
+        {
+          internalType: 'uint8',
+          name: '_control',
+          type: 'uint8'
+        },
+        {
+          internalType: 'address',
+          name: '_requester',
+          type: 'address'
+        }
+      ],
+      name: 'checkPermission',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool'
+        },
+        {
+          internalType: 'string',
+          name: '',
+          type: 'string'
+        }
+      ],
       stateMutability: 'nonpayable',
       type: 'function'
     },
@@ -157,59 +227,13 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '',
+          name: '_did',
           type: 'bytes32'
         }
       ],
-      name: 'files',
-      outputs: [
-        {
-          internalType: 'address',
-          name: 'owner',
-          type: 'address'
-        },
-        {
-          internalType: 'uint256',
-          name: 'fileSize',
-          type: 'uint256'
-        },
-        {
-          internalType: 'bool',
-          name: 'uploaded',
-          type: 'bool'
-        },
-        {
-          internalType: 'bytes',
-          name: 'encryptedMetaData',
-          type: 'bytes'
-        },
-        {
-          internalType: 'address',
-          name: 'storageNode',
-          type: 'address'
-        },
-        {
-          internalType: 'address',
-          name: 'app',
-          type: 'address'
-        },
-        {
-          internalType: 'uint256',
-          name: 'version',
-          type: 'uint256'
-        },
-        {
-          internalType: 'bool',
-          name: 'isPublic',
-          type: 'bool'
-        },
-        {
-          internalType: 'bool',
-          name: 'duplicate',
-          type: 'bool'
-        }
-      ],
-      stateMutability: 'view',
+      name: 'downloadNFT',
+      outputs: [],
+      stateMutability: 'nonpayable',
       type: 'function'
     },
     {
@@ -223,56 +247,29 @@ export default {
       name: 'getFile',
       outputs: [
         {
-          components: [
-            {
-              internalType: 'address',
-              name: 'owner',
-              type: 'address'
-            },
-            {
-              internalType: 'uint256',
-              name: 'fileSize',
-              type: 'uint256'
-            },
-            {
-              internalType: 'bool',
-              name: 'uploaded',
-              type: 'bool'
-            },
-            {
-              internalType: 'bytes',
-              name: 'encryptedMetaData',
-              type: 'bytes'
-            },
-            {
-              internalType: 'address',
-              name: 'storageNode',
-              type: 'address'
-            },
-            {
-              internalType: 'address',
-              name: 'app',
-              type: 'address'
-            },
-            {
-              internalType: 'uint256',
-              name: 'version',
-              type: 'uint256'
-            },
-            {
-              internalType: 'bool',
-              name: 'isPublic',
-              type: 'bool'
-            },
-            {
-              internalType: 'bool',
-              name: 'duplicate',
-              type: 'bool'
-            }
-          ],
-          internalType: 'struct IDID.File',
+          internalType: 'uint256',
           name: '',
-          type: 'tuple'
+          type: 'uint256'
+        },
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool'
+        },
+        {
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32'
+        },
+        {
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32'
+        },
+        {
+          internalType: 'address',
+          name: '',
+          type: 'address'
         }
       ],
       stateMutability: 'view',
@@ -298,8 +295,85 @@ export default {
       type: 'function'
     },
     {
-      inputs: [],
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: '_did',
+          type: 'bytes32'
+        }
+      ],
+      name: 'getRuleSet',
+      outputs: [
+        {
+          internalType: 'bytes32',
+          name: '',
+          type: 'bytes32'
+        }
+      ],
+      stateMutability: 'view',
+      type: 'function'
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: '_relayer',
+          type: 'address'
+        },
+        {
+          internalType: 'address',
+          name: '_factory',
+          type: 'address'
+        }
+      ],
       name: 'initialize',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
+      inputs: [
+        {
+          internalType: 'address',
+          name: 'forwarder',
+          type: 'address'
+        }
+      ],
+      name: 'isTrustedForwarder',
+      outputs: [
+        {
+          internalType: 'bool',
+          name: '',
+          type: 'bool'
+        }
+      ],
+      stateMutability: 'view',
+      type: 'function'
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: '_did',
+          type: 'bytes32'
+        },
+        {
+          internalType: 'uint256',
+          name: '_tokenId',
+          type: 'uint256'
+        },
+        {
+          internalType: 'address',
+          name: '_nftContract',
+          type: 'address'
+        },
+        {
+          internalType: 'uint256',
+          name: '_chainId',
+          type: 'uint256'
+        }
+      ],
+      name: 'linkNFT',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function'
@@ -360,40 +434,22 @@ export default {
           type: 'bool'
         },
         {
-          internalType: 'bytes',
-          name: '_encryptedMetaData',
-          type: 'bytes'
+          internalType: 'bytes32',
+          name: '_name',
+          type: 'bytes32'
+        },
+        {
+          internalType: 'bytes32',
+          name: '_fileHash',
+          type: 'bytes32'
         },
         {
           internalType: 'address',
           name: '_storageNode',
           type: 'address'
-        },
-        {
-          internalType: 'bool',
-          name: '_public',
-          type: 'bool'
-        },
-        {
-          internalType: 'bool',
-          name: '_duplicate',
-          type: 'bool'
         }
       ],
       name: 'setFile',
-      outputs: [],
-      stateMutability: 'nonpayable',
-      type: 'function'
-    },
-    {
-      inputs: [
-        {
-          internalType: 'address',
-          name: '_nftHandler',
-          type: 'address'
-        }
-      ],
-      name: 'setNFTHandler',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function'
@@ -407,6 +463,24 @@ export default {
         }
       ],
       name: 'transferOwnership',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
+      inputs: [
+        {
+          internalType: 'bytes32',
+          name: '_did',
+          type: 'bytes32'
+        },
+        {
+          internalType: 'bytes32',
+          name: '_ruleHash',
+          type: 'bytes32'
+        }
+      ],
+      name: 'updateRuleSet',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function'
