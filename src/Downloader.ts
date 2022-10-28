@@ -183,7 +183,7 @@ export class Downloader {
     }
 
     const decryptedHash = hasher2Hex(this.hasher.digest())
-    const success = file.hash.replace("0x","") === decryptedHash
+    const success = file.hash.replace('0x', '') === decryptedHash
     if (success) {
       const out = await fileWriter.createDownload()
       await this.onSuccess()

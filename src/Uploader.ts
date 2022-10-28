@@ -1,5 +1,5 @@
 import { KeyGen, makeTx, AESEncryptHex, customError, getDKGNodes, AESEncrypt } from './Utils'
-import { utils, BigNumber, Wallet, ethers } from 'ethers'
+import { BigNumber, Wallet, ethers } from 'ethers'
 import axios, { AxiosInstance } from 'axios'
 import { split } from 'shamir'
 import { encrypt } from 'eciesjs'
@@ -171,8 +171,8 @@ export class Uploader {
       const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
         did,
         BigNumber.from(file.size),
-        name, 
-        "0x"+hash,
+        name,
+        '0x' + hash,
         nodeResp.address,
         ephemeralWallet.address
       ])

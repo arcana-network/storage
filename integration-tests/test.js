@@ -83,7 +83,7 @@ describe('Upload File', () => {
 
   it.only('Upload', async () => {
     let my_file_old = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
-    did = await arcanaInstance.upload(file, {publicFile: true});
+    did = await arcanaInstance.upload(file);
     console.log('did', did);
     let my_file_new = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
     chai.expect(my_file_new.length - my_file_old.length).equal(1); 
