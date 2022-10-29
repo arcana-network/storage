@@ -269,33 +269,44 @@ dAppStorageProvider.onAccountChange = (accounts) => {
 }
 ```
 
+## Delegate Data Access Permissions
 
-## App permissions
+A delegate may perform data access operations as per the access rights granted to them by the data owner. For example, a moderator reviewing a stream of tweets for a decentralized dApp may be granted permissions to delete objectionable tweets, or simply flag them.
 
-App might require to pass additional permissions for app delegates.
+The following APIs support data access permission delegation and empowers the dApp users to own their data. The dApps can enable users to disallow the dApp from listing files that are owned by the user by calling removeFile. The dApp can also enable users to add files that are owned by the user and uploaded via a different dApp.
 
-### Grant App permissions
+**Note**
+In the current release, a dApp user can delegate data access permissions to a dApp developer, if they choose to. In the future, we may support third-party services that take on the delegation role.
+
+### Grant Delegator Permission to dApp
+
+This API can be used by a dApp to seek user's permission to get the role of a delegatee with data access control on behalf of the data owner. The user can choose what kind of data access actions can be performed by the delegatee.  For example, a delegatee may simply be allowed to delete the data but not download it.
 
 ```js
 await storage.grantAppPermission()
 ```
 
-### Check whether user needs to grant permissions to the app. 
-returns `true` if required. 
+### Check if dAPP requires Delegator Permission 
+
+The dApp can use this API to check if it needs to seek delegator permissions from the dApp user. It returns `true` if dApp requires permission. 
 
 ```js
 const isPermissionRequired = await storage.checkPermission() -> boolean
 ```
 
-### Add existing file to App
-Add an already uploaded file to selected app.
+### Add File to dApp
+
+A dApp user can upload files to the Arcana Store. User can also grant delegator permission to the dApp and allow the dApp to perform the granted actions on a set of files owned by the user. This API allows the user to add an already uploaded file to the list of files that the dApp can access as per the granted permissions.
 
 ```js
 await storage.files.addFile(<did>)
 ```
 
 ### Remove file from App 
-Removes file from selected app. Does **NOT** delete from arcana storage, use `delete` for that case.
+
+A dApp user can grant delegator permission to the dApp and add a list of data files that the dApp can access as per the granted permissions. Later, the dApp user can remove one or more such files from the list of files that the dApp has been granted delegator permission. 
+
+The removal of file(s) from the list of files a dApp is granted access to does **NOT** delete it from the Arcana storage. To delete the file, use `delete`  API.
 
 ```js
 await storage.files.removeFileFromApp(<did>)
