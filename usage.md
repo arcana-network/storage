@@ -27,9 +27,9 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 ## Usage Flow
 
 1. Install Storage SDK
-2. Import `StorageProvider` from the Storage SDK package in the dApp. Call `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appId` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
+2. Import `StorageProvider` from the Storage SDK package in the dApp. Call the `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appId` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
 3. Use `StorageProvider` to:
-   - `upload` and push file data into the Arcana Store. **Note:** Save file DID that is returned after file upload operation is successful.
+   - `upload` and push file data into the Arcana Store. **Note:** Save file DID that is returned after the successful file upload.
    - `download` a file from the Arcana Store using DID as input.
 4. Use `StorageProvider.files` to:
    - `delete` a file by specifying its DID.
@@ -65,7 +65,7 @@ This *Singleton* usage is recommended as a best practice.
 
 The Storage SDK accepts `Blob`s as files. The `file` object passed must be an instance of a `Blob` or a descendant (`File`, etc.). You cannot upload a file by providing its URL.
 
-As of now, it supports uploading _private_ and _public_ files. They are identifiable by looking at the first byte of the DID. In hexadecimal format, 01 indicates it's a public file, and 02 indicates it's a private file.
+As of now, it supports uploading _private_ and _public_ files. They are identifiable by looking at the first byte of the DID. In hexadecimal format, 01 indicates a public file, and 02 indicates a private file.
 
 ### Private Files
 
@@ -117,7 +117,7 @@ await dAppStorageProvider.download(
 ### Share a File
 
 ```ts
-// did: DID of file to be shared
+// did: DID of the file to be shared
 // address: recipient user's address
 // validity (optional): For how long will the user be able to download the file, e.g. [400] would mean 400 seconds
 await dAppStorageProvider.files.share([did], [address]);
@@ -127,7 +127,7 @@ await dAppStorageProvider.files.share([did], [address]);
 
 ```ts
 // did: DID of file from which access is removed
-// address: Address of the user for whom the access must be revoked
+// address: The address of the user for whom the access must be revoked
 await dAppStorageProvider.files.revoke(did, address);
 ```
 
@@ -156,7 +156,7 @@ let [consumed, total] = await dAppStorageProvider.files.getUploadLimit();
 ### Get Download Limit
 
 ```ts
-//Get consumed and total bandwidth of the current user
+//Get consumed and the total bandwidth of the current user
 let [consumed, total] = await dAppStorageProvider.files.getDownloadLimit();
 ```
 
@@ -183,7 +183,7 @@ let files = await dAppStorageProvider.files.list(AccessTypeEnum.MY_FILES);
 ```ts
 //The file DID is returned at the time of file upload and uniquely identifies the file in Arcana Store.
 
-//Note: No appID is required during initialization of the Storage SDK in order to
+//Note: No appID is required during the initialization of the Storage SDK to
 //download a file using the file DID.
 
 // Pass the provider during initialization of the Storage SDK, if required.
@@ -213,7 +213,7 @@ let metadata = await dAppStorageProvider.makeMetadataURL(
   title,
   description,
   did, // The DID of the private NFT file hosted in the Arcana Store
-  file, // The 'preview image' file corresponding to the private NFT, not the actual private NFT data file
+  file, // The 'preview image file corresponding to the private NFT, not the actual private NFT data file
 );
 console.log(metadata);
 // https://test-storage.arcana.network:9000/api/v1/metadata/0x129d1438ff3bf014e9b9094b3a5d410f691c208ed5305b0844307b761c0e295e
@@ -221,7 +221,7 @@ console.log(metadata);
 
 ### Link Minted NFT with DID
 
-Once you have minted the NFT, to make it private and control access to it and manage ownership, you need to link it with the DID.
+Once you have minted the NFT, you need to link it with the DID to make it private, control access, and manage ownership.
 
 ```ts
 let chainId = 80001,tokenId  = 3, nftContract = "0xE80FCAD702b72777f5036eF1a76086FD3f882E29"
@@ -273,14 +273,14 @@ dAppStorageProvider.onAccountChange = (accounts) => {
 
 A delegate may perform data access operations as per the access rights granted to them by the data owner. For example, a moderator reviewing a stream of tweets for a decentralized dApp may be granted permissions to delete objectionable tweets, or simply flag them.
 
-The following APIs support data access permission delegation and empowers the dApp users to own their data. The dApps can enable users to disallow the dApp from listing files that are owned by the user by calling removeFile. The dApp can also enable users to add files that are owned by the user and uploaded via a different dApp.
+The following APIs support data access permission delegation. 
 
 **Note**
 In the current release, a dApp user can delegate data access permissions to a dApp developer, if they choose to. In the future, we may support third-party services that take on the delegation role.
 
 ### Grant Delegator Permission to dApp
 
-This API can be used by a dApp to seek user's permission to get the role of a delegatee with data access control on behalf of the data owner. The user can choose what kind of data access actions can be performed by the delegatee.  For example, a delegatee may simply be allowed to delete the data but not download it.
+This API can be used by a dApp to seek the user's permission to get the role of a delegate with data access control on behalf of the data owner.
 
 ```js
 await storage.grantAppPermission()
@@ -294,19 +294,21 @@ The dApp can use this API to check if it needs to seek delegator permissions fro
 const isPermissionRequired = await storage.checkPermission() -> boolean
 ```
 
+## Inject/Eject Data
+
+The inject/eject APIs empower the dApp users to own their data. A dApp user can choose to upload data to the Arcana Store via a dApp that is integrated with the Arcana Storage SDK. Later, they can use another dApp integrated with the Storage SDK and access the same data uploaded using the previous dApp into the Arcana Store.  This is done by injecting or adding the data file into the new dApp context. Similarly, dApp users can eject or remove a data file that was uploaded using a dApp. If a data file is removed from the context of a dApp, the same user cannot access the file from that dApp.  The removal from a dApp context does not delete the file from the Arcana Store.
+
 ### Add File to dApp
 
-A dApp user can upload files to the Arcana Store. User can also grant delegator permission to the dApp and allow the dApp to perform the granted actions on a set of files owned by the user. This API allows the user to add an already uploaded file to the list of files that the dApp can access as per the granted permissions.
+A dApp user can upload files to the Arcana Store. To access the same file from a different dApp, the file must be injected in the new dApp context. Use this API to add an already uploaded file to a new dApp context.
 
 ```js
 await storage.files.addFile(<did>)
 ```
 
-### Remove file from App 
+### Remove File from dApp 
 
-A dApp user can grant delegator permission to the dApp and add a list of data files that the dApp can access as per the granted permissions. Later, the dApp user can remove one or more such files from the list of files that the dApp has been granted delegator permission. 
-
-The removal of file(s) from the list of files a dApp is granted access to does **NOT** delete it from the Arcana storage. To delete the file, use `delete`  API.
+Whenever a dApp user uploads a file using a dApp or uses the `addFile` API for an already uploaded file, the data file gets added to the dApp context. This enables a user to access a file uploaded using any dApp from more than one dApp context. To stop file access, the file must be ejected from the dApp's context. Use `removeFile` API to remove it from a dApp's context. The removal of the file(s) does **NOT** delete the file(s) from the Arcana storage. To delete the file, use the `delete`  API.
 
 ```js
 await storage.files.removeFileFromApp(<did>)
