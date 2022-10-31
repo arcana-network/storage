@@ -27,7 +27,7 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 ## Usage Flow
 
 1. Install Storage SDK
-2. Import `StorageProvider` from the Storage SDK package in the dApp. Call the `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appId` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
+2. Import `StorageProvider` from the Storage SDK package in the dApp. Call the `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appAddress` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the **App Address** from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp. In the earlier releases, **App Address** was referred to as **App ID** in the dashboard.
 3. Use `StorageProvider` to:
    - `upload` and push file data into the Arcana Store. **Note:** Save file DID that is returned after the successful file upload.
    - `download` a file from the Arcana Store using DID as input.
@@ -183,7 +183,8 @@ let files = await dAppStorageProvider.files.list(AccessTypeEnum.MY_FILES);
 ```ts
 //The file DID is returned at the time of file upload and uniquely identifies the file in Arcana Store.
 
-//Note: No appID is required during the initialization of the Storage SDK to
+//Note: No **App Address** needs to be specified during the initialization of the Storage SDK 
+//if a dApp only requires to
 //download a file using the file DID.
 
 // Pass the provider during initialization of the Storage SDK, if required.
