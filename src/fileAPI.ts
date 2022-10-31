@@ -285,4 +285,15 @@ export class FileAPI {
     }
     return users.filter((d) => d !== ethers.constants.AddressZero)
   }
+
+  @requiresLocking
+  private async _addFile (did: string) {
+    await this.setAppAddress(did)
+    return await makeTx(this.appAddress, this.api, this.provider, 'addFile', [did])
+  }
+
+  addFile = async (did: string) => {
+    const realDID = parseHex(did)
+    return this._addFile(realDID)
+  }
 }
