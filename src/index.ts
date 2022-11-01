@@ -251,23 +251,23 @@ export class StorageProvider {
     localStorage.setItem('dkg', res.DKG)
     localStorage.setItem('did', res.DID)
 
-    const accounts = await this.provider.send('eth_requestAccounts', [])
+    const signer = await this.provider.getSigner()
+    const addr = await signer.getAddress()
     const { data: nonce } = await this.api.get('/api/v1/get-nonce/', {
       params: {
-        address: accounts[0]
+        address: addr
       }
     })
-    const signer = await this.provider.getSigner()
     const sig = await signer.signMessage(
       `Welcome to Arcana Network!\n\nYou are about to use the Storage SDK.\n\nClick to sign in and accept the Arcana Network Terms of Service (https://bit.ly/3gqh6I7) and Privacy Policy (https://bit.ly/3MMpCgM).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nWallet address:\n${
-        accounts[0]
+        addr
       }\nNonce:\n${id(String(nonce)).substring(2, 42)}`
     )
     res = await this.api.post('/api/v1/login/', {
       appAddress: this.appAddress,
       signature: sig,
       email: this.email,
-      address: accounts[0]
+      address: addr
     })
     this.api.defaults.headers.Authorization = `Bearer ${res.data.token}`
 
