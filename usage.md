@@ -269,6 +269,11 @@ dAppStorageProvider.onAccountChange = (accounts) => {
 }
 ```
 
+### List all files of an app for delegates
+```ts
+let allFiles = await dAppStorageProvider.files.all()
+console.log({allFiles})
+```
 
 ## App permissions
 

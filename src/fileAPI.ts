@@ -40,11 +40,28 @@ export class FileAPI {
   }
 
   numOfMyFiles = async () => {
-    return (await this.api('/api/v1/files/total/')).data
+    return (await this.api('/api/v1/files/total/', {
+      params: {
+        address: this.appAddress
+      }
+    })).data
+  }
+
+  numOfAllFiles = async () => {
+    return (await this.api('/api/v1/files/all-users/total/', {
+      params: {
+        address: this.appAddress
+      }
+    })).data
   }
 
   numOfMyFilesPages = async (pageSize: number = 20) => {
     const numOfPages = (await this.numOfMyFiles()) / pageSize
+    return Math.ceil(numOfPages)
+  }
+
+  numOfAllPages = async (pageSize: number = 20) => {
+    const numOfPages = (await this.numOfAllFiles()) / pageSize
     return Math.ceil(numOfPages)
   }
 
@@ -284,5 +301,22 @@ export class FileAPI {
       users = []
     }
     return users.filter((d) => d !== ethers.constants.AddressZero)
+  }
+
+  all = async (pageNumber: number = 1, pageSize: number = 20): Promise<string[]> => {
+    if (pageNumber > (await this.numOfAllPages(pageSize))) {
+      throw new Error('invalid_page_number')
+    }
+
+    const res = await this.api.get('/api/v1/files/all-users/', {
+      params: {
+        offset: (pageNumber - 1) * pageSize,
+        count: pageSize,
+        address: this.appAddress
+      }
+    })
+    let data = []
+    if (res.data) data = res.data
+    return data
   }
 }

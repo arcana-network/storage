@@ -5,7 +5,7 @@ const gateway = 'http://localhost:9010/';
 // const gateway = 'https://gateway01-testnet.arcana.network/';
 // const gateway = 'https://gateway-dev.arcana.network/';
 const chainId = 40404;
-const appId = 589;
+const appId = 613;
 // const appId = 28;
 const delay = ms => new Promise(res => setTimeout(res, ms));
 
@@ -77,6 +77,8 @@ describe('Upload File', () => {
       gateway,
       debug,
     });
+    let allFiles = await arcanaInstance.files.all()
+    console.log({allFiles})
   });
 
 
@@ -107,18 +109,18 @@ describe('Upload File', () => {
   });
 
   it.only('Download', async () => {
-    let store = await arcana.storage.StorageProvider.init({
-      appId,
-      provider: window.ethereum,
-      email: makeEmail(),
-      chainId,
-      gateway,
-      debug,
-    });
-    let files = await store.files.list(arcana.storage.AccessTypeEnum.SHARED_FILES)
-    console.log({files})
-    await store.download(did)  
-    // await arcanaInstance.download(did)  
+    // let store = await arcana.storage.StorageProvider.init({
+    //   appId,
+    //   provider: window.ethereum,
+    //   email: makeEmail(),
+    //   chainId,
+    //   gateway,
+    //   debug,
+    // });
+    // let files = await store.files.list(arcana.storage.AccessTypeEnum.SHARED_FILES)
+    // console.log({files})
+    // await store.download(did)  
+    await arcanaInstance.download(did)  
   })
 
   it.skip("Delete file", async () => {
