@@ -77,7 +77,7 @@ await dAppStorageProvider.upload(file, {
 }).then((did) => console.log('File successfully uploaded. DID:', did)).catch(e => console.error(e));
 ```
 
-### Public Files
+<!-- ### Public Files
 
 #### Upload Public File
 
@@ -100,7 +100,7 @@ After a file is successfully uploaded to the Arcana Store, it is assigned a uniq
 
 ```ts
 let shareURL = await dAppStorageProvider.files.getPublicFileURL(did);
-```
+``` -->
 
 ## Download File
 
