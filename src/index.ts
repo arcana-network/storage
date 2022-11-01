@@ -250,9 +250,9 @@ export class StorageProvider {
     localStorage.setItem('forwarder', res.Forwarder)
     localStorage.setItem('dkg', res.DKG)
     localStorage.setItem('did', res.DID)
-
+    await this.provider.send('eth_requestAccounts', []) // triggers wallet to connect to current page
     const signer = await this.provider.getSigner()
-    const addr = (await signer.getAddress()).toLocaleLowerCase()
+    const addr = await signer.getAddress()
     const { data: nonce } = await this.api.get('/api/v1/get-nonce/', {
       params: {
         address: addr
