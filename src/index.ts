@@ -252,7 +252,7 @@ export class StorageProvider {
     localStorage.setItem('did', res.DID)
 
     const signer = await this.provider.getSigner()
-    const addr = await signer.getAddress()
+    const addr = (await signer.getAddress()).toLocaleLowerCase()
     const { data: nonce } = await this.api.get('/api/v1/get-nonce/', {
       params: {
         address: addr

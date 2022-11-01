@@ -495,6 +495,7 @@ test.serial('Delete File', async (t) => {
     .query(true)
     .reply(200, [{ did: did.substring(2) }], { 'access-control-allow-headers': 'Authorization' })
     .get('/api/v1/files/total/')
+    .query(true)
     .reply(200, { data: 1 })
 
   const arcanaInstance = await createStorageInstance(arcanaWallet)
@@ -514,6 +515,7 @@ test.serial('Delete File', async (t) => {
     .query(true)
     .reply(200, [], { 'access-control-allow-headers': 'Authorization' })
     .get('/api/v1/files/total/')
+    .query(true)
     .reply(200, { data: 0 })
 
   files = await arcanaInstance.myFiles()
