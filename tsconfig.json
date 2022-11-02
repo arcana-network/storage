@@ -11,6 +11,7 @@
     "sourceMap": true,
     "noImplicitAny": false,
     "moduleResolution": "Node",
+    "experimentalDecorators": true,
     "downlevelIteration": true,
     "esModuleInterop": true,
     "lib": ["es2018"]
