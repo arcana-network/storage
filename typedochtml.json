@@ -6,6 +6,7 @@
   "excludeProtected": true,
   "excludeInternal": true,
   "excludeExternals": true,
+  "includeVersion": true,
   "footerDate": true,
   "footerTime": true,
   "plugin": ["typedoc-plugin-extras", "typedoc-plugin-missing-exports"]
