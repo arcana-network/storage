@@ -267,7 +267,7 @@ dAppStorageProvider.onAccountChange = (accounts) => {
   window.location.reload()
 }
 ```
-
+<!-- 
 ### List all files of an app for delegates
 ```ts
 let allFiles = await dAppStorageProvider.files.all()
@@ -289,4 +289,4 @@ returns `true` if required.
 
 ```js
 const isPermissionRequired = await storage.checkPermission() -> boolean
-```
+``` -->
