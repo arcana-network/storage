@@ -1,6 +1,6 @@
 {
   "name": "@arcana/storage",
-  "version": "0.3.14",
+  "version": "0.3.16",
   "description": "Upload, Download, Share can be performed using this SDK",
   "main": "dist/index.js",
   "browser": "dist/index.js",
@@ -83,6 +83,7 @@
     "whatwg-fetch": "^3.6.2"
   },
   "dependencies": {
+    "@arcana/storage": "^0.3.15",
     "@sentry/browser": "^6.15.0",
     "@sentry/tracing": "^6.15.0",
     "assert": "^2.0.0",

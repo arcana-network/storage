@@ -165,7 +165,7 @@ export class FileAPI {
     const add: Rule[] = []
     const remove: string[] = []
     data.forEach((element) => {
-      if (!(!isShare && !address.includes(element.address))) {
+      if (!(!isShare && address.includes(element.address))) {
         rawRule += element.address + element.validity
       }
     })
