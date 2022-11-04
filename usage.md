@@ -27,9 +27,9 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 ## Usage Flow
 
 1. Install Storage SDK
-2. Import `StorageProvider` from the Storage SDK package in the dApp. Call `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appId` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the appId from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
+2. Import `StorageProvider` from the Storage SDK package in the dApp. Call the `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appAddress` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the App Address from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
 3. Use `StorageProvider` to:
-   - `upload` and push file data into the Arcana Store. **Note:** Save file DID that is returned after file upload operation is successful.
+   - `upload` and push file data into the Arcana Store. **Note:** Save file DID that is returned after the file upload operation is successful.
    - `download` a file from the Arcana Store using DID as input.
 4. Use `StorageProvider.files` to:
    - `delete` a file by specifying its DID.
@@ -48,7 +48,7 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 import { StorageProvider } from '@arcana/storage'; // required only once per .ts or .js file
 
 dAppStorageProvider = await StorageProvider.init({
-  appAddress: ARCANA_APP_ADDRESS, // Get appAddress via Dashboard after registering and configuring dApp
+  appAddress: ARCANA_APP_ADDRESS, // Get App Address via Dashboard after registering and configuring dApp
   email: user_email_string, //optional
   chainId: 100, //optional
   provider: window.arcana.provider //optional
@@ -58,12 +58,12 @@ dAppStorageProvider = await StorageProvider.init({
 ```
 
 **Note:**
-It suffices to invoke `init` method of StorageProvider just once and use it across your dApp.
+It suffices to invoke the `init` method of StorageProvider just once and use it across your dApp.
 This *Singleton* usage is recommended as a best practice.
 
 ## Upload File
 
-The Storage SDK accepts `Blob`s as files. The `file` object passed must be an instance of a `Blob` or a descendant (`File`, etc.). You cannot upload a file by providing its URL.
+The Storage SDK accepts `Blobs` as files. The `file` object passed must be an instance of a `Blob` or a descendant (`File`, etc.). You cannot upload a file by providing its URL.
 
 As of now, it supports uploading _private_ and _public_ files. They are identifiable by looking at the first byte of the DID. In hexadecimal format, 01 indicates it's a public file, and 02 indicates it's a private file.
 
@@ -117,7 +117,7 @@ await dAppStorageProvider.download(
 ### Share a File
 
 ```ts
-// did: DID of file to be shared
+// did: DID of the file to be shared
 // address: recipient user's address
 // validity (optional): For how long will the user be able to download the file, e.g. [400] would mean 400 seconds
 await dAppStorageProvider.files.share([did], [address]);
@@ -127,7 +127,7 @@ await dAppStorageProvider.files.share([did], [address]);
 
 ```ts
 // did: DID of file from which access is removed
-// address: Address of the user for whom the access must be revoked
+// address: The address of the user for whom the access must be revoked
 await dAppStorageProvider.files.revoke(did, address);
 ```
 
@@ -154,7 +154,7 @@ let [consumed, total] = await dAppStorageProvider.files.getUploadLimit();
 ### Get Download Limit
 
 ```ts
-//Get consumed and total bandwidth of the current user
+//Get consumed and the total bandwidth of the current user
 let [consumed, total] = await dAppStorageProvider.files.getDownloadLimit();
 ```
 
@@ -181,15 +181,15 @@ let files = await dAppStorageProvider.files.list(AccessTypeEnum.MY_FILES);
 ```ts
 //The file DID is returned at the time of file upload and uniquely identifies the file in Arcana Store.
 
-//Note: It is not essential to use the appID during Storage SDK initialization if you wish to use the method `downloadDID`.
+//Note: It is not essential to use the App Address during Storage SDK initialization if you wish to use the method `downloadDID`.
 
-// You can provide blockchain provider during initialization of the Storage SDK.
+// You can provide a blockchain provider during the initialization of the Storage SDK.
 // Provider can be obtained by installing and initializing the Auth SDK or a third-party provider.
 // If you do not specify a provider during Storage SDK initialization, then by default,
-// the Storage SDK will utilize `window.ethereum` setting.
+// the Storage SDK will utilize the `window.ethereum` setting.
 
 dAppStorageProvider = await StorageProvider.init({
-  appAddress: ARCANA_APP_ADDRESS, // Get appAddress via Dashboard after registering and configuring dApp
+  appAddress: ARCANA_APP_ADDRESS, // Get App Address via Dashboard after registering and configuring dApp
   email: user_email_string, //optional
   chainId: 100, //optional
   provider: window.arcana.provider //optional
@@ -276,7 +276,7 @@ console.log({allFiles})
 
 ## App permissions
 
-App might require to pass additional permissions for app delegates.
+The app might require to pass additional permissions for app delegates.
 
 ### Grant App permissions
 
@@ -284,7 +284,7 @@ App might require to pass additional permissions for app delegates.
 await storage.grantAppPermission()
 ```
 
-### Check whether user needs to grant permissions to the app. 
+### Check whether the user needs to grant permissions to the app. 
 returns `true` if required. 
 
 ```js
