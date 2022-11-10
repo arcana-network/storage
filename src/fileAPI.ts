@@ -1,12 +1,12 @@
-import { AxiosInstance } from 'axios'
-import { BigNumber, ethers } from 'ethers'
-import { Mutex } from 'async-mutex'
+import { BigNumber, Contract, ethers } from 'ethers'
 
-import { makeTx, parseHex, Arcana, customError, ensureArray, getAppAddress, getRuleSet, DIDContract } from './Utils'
+import { customError, ensureArray, makeTx, metaTxRaw, metaTxTargets, parseHex } from './Utils'
 import { wrapInstance } from './sentry'
 import { requiresLocking } from './locking'
-import { id } from 'ethers/lib/utils'
 import { Rule } from './types'
+import type { StateContainer } from './state'
+
+import ArcanaABI from './contracts/Arcana'
 
 export enum AccessTypeEnum {
   MY_FILES,
@@ -14,18 +14,12 @@ export enum AccessTypeEnum {
 }
 
 export class FileAPI {
-  private provider: any
-  private api: AxiosInstance
-  private appAddress: string
-  private appId: number
-  private readonly lock: Mutex
+  // may be overridden
+  private appContract: Contract
+  private readonly state: StateContainer
 
-  constructor (appAddress: string, appId: number, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
-    this.provider = provider
-    this.api = api
-    this.appAddress = appAddress
-    this.appId = appId
-    this.lock = lock
+  constructor (state: StateContainer, debug: boolean) {
+    this.state = state
 
     if (debug) {
       wrapInstance(this)
@@ -34,23 +28,25 @@ export class FileAPI {
 
   setAppAddress = async (did: string) => {
     // if app address is not set then fetch it from the did and set it
-    if (!this.appAddress) {
-      this.appAddress = await getAppAddress(parseHex(did), this.provider)
+    if (!this.state.appContract) {
+      const a = await this.state.didContract.getFile(parseHex(did)).app
+
+      this.appContract = new ethers.Contract(a, ArcanaABI.abi, this.state.provider)
     }
   }
 
   numOfMyFiles = async () => {
-    return (await this.api('/api/v1/files/total/', {
+    return (await this.state.api('/api/v1/files/total/', {
       params: {
-        address: this.appAddress
+        address: this.state.appAddr
       }
     })).data
   }
 
   numOfAllFiles = async () => {
-    return (await this.api('/api/v1/files/all-users/total/', {
+    return (await this.state.api('/api/v1/files/all-users/total/', {
       params: {
-        address: this.appAddress
+        address: this.state.appAddr
       }
     })).data
   }
@@ -70,11 +66,11 @@ export class FileAPI {
       throw new Error('invalid_page_number')
     }
 
-    const res = await this.api.get('/api/v1/list-files/', {
+    const res = await this.state.api.get('/api/v1/list-files/', {
       params: {
         offset: (pageNumber - 1) * pageSize,
         count: pageSize,
-        appid: this.appId
+        appid: this.state.appID
       }
     })
     let data = []
@@ -83,7 +79,7 @@ export class FileAPI {
   }
 
   numOfSharedFiles = async () => {
-    return (await this.api('/api/v1/files/shared/total/')).data
+    return (await this.state.api('/api/v1/files/shared/total/')).data
   }
 
   numOfSharedFilesPages = async (pageSize: number = 20) => {
@@ -94,7 +90,7 @@ export class FileAPI {
     if (pageNumber > (await this.numOfSharedFilesPages(pageSize))) {
       throw new Error('invalid_page_number')
     }
-    const res = await this.api('/api/v1/shared-files/', {
+    const res = await this.state.api('/api/v1/shared-files/', {
       params: {
         offset: (pageNumber - 1) * pageSize,
         count: pageSize
@@ -111,13 +107,13 @@ export class FileAPI {
       throw customError('TRANSACTION', 'Public URLs are only available for Public Files.')
     }
 
-    const { data: { host: storageHost } } = await this.api.get('/api/v1/get-region-endpoint/', {
+    const { data: { host: storageHost } } = await this.state.api.get('/api/v1/get-region-endpoint/', {
       params: {
-        address: this.appAddress
+        address: this.state.appAddr
       }
     })
     const u = new URL(storageHost)
-    u.pathname = '/api/v2/file/public/' + this.appAddress + '/' + ethers.utils.hexlify(_did)
+    u.pathname = '/api/v2/file/public/' + this.state.appAddr + '/' + ethers.utils.hexlify(_did)
     return u.href
   }
 
@@ -142,11 +138,11 @@ export class FileAPI {
     validity: number[] | null,
     isShare: boolean
   ): Promise<string> {
-    const rule = await getRuleSet(did, this.provider)
+    const rule = await this.state.didContract.getRuleSet(parseHex(did))
     let data: any[] =
       rule === ethers.constants.HashZero
         ? null
-        : (await this.api.get('/api/v1/get-hash-data/', {
+        : (await this.state.api.get('/api/v1/get-hash-data/', {
             params: {
               hash: rule
             }
@@ -181,18 +177,18 @@ export class FileAPI {
         remove.push(address[i])
       }
     }
-    const ruleHash: string = id(rawRule)
-    const res = await this.api.post('/api/v1/update-hash/', {
+    const ruleHash: string = ethers.utils.id(rawRule)
+    const res = await this.state.api.post('/api/v1/update-hash/', {
       did,
       hash: ruleHash,
       add,
       remove,
-      app_address: this.appAddress
+      app_address: this.state.appAddr
     })
     if (res.data.err) {
       throw customError('TRANSACTION', res.data.err)
     }
-    return await makeTx(this.appAddress, this.api, this.provider, 'updateRuleSet', [did, ruleHash])
+    return await makeTx(this.state, metaTxTargets.APPLICATION, 'updateRuleSet', [did, ruleHash])
   }
 
   @requiresLocking
@@ -233,7 +229,7 @@ export class FileAPI {
     did = parseHex(did)
     await this.setAppAddress(did)
     newOwnerAddress = parseHex(newOwnerAddress)
-    return await makeTx(this.appAddress, this.api, this.provider, 'changeFileOwner', [did, newOwnerAddress])
+    return metaTxRaw(this.appContract, this.state.forwarderContract, this.state.api, this.state.provider, 'changeFileOwner', [did, newOwnerAddress])
   }
 
   changeFileOwner = (did, newOwnerAddress: string): Promise<string> => {
@@ -244,15 +240,14 @@ export class FileAPI {
   async delete (did: string): Promise<string> {
     await this.setAppAddress(did)
     did = parseHex(did)
-    const didContract = await DIDContract(this.provider)
-    return await makeTx(didContract.address, this.api, this.provider, 'deleteFile', [did])
+    return makeTx(this.state, metaTxTargets.DID, 'deleteFile', [did])
   }
 
   @requiresLocking
   async removeFile (did: string): Promise<string> {
     await this.setAppAddress(did)
     did = parseHex(did)
-    return await makeTx(this.appAddress, this.api, this.provider, 'removeUserFile', [did])
+    return metaTxRaw(this.appContract, this.state.forwarderContract, this.state.api, this.state.provider, 'removeUserFile', [did])
   }
 
   removeFileFromApp = async (did: string): Promise<string> => {
@@ -265,34 +260,35 @@ export class FileAPI {
 
   @requiresLocking
   async deleteAccount () {
-    return await makeTx(this.appAddress, this.api, this.provider, 'deleteAccount', [])
+    return await makeTx(this.state, metaTxTargets.APPLICATION, 'deleteAccount', [])
   }
 
   getAccountStatus = async () => {
-    const arcana = Arcana(this.appAddress, this.provider)
-    return arcana.status(await this.provider.getAddress())
+    return this.state.appContract.status(this.state.provider.getSigner().getAddress())
   }
 
   getUploadLimit = async (): Promise<[number, number]> => {
-    const arcana = Arcana(this.appAddress, this.provider)
-    const con = await arcana.consumption((await this.provider.listAccounts())[0])
-    const limit = await arcana.limit((await this.provider.listAccounts())[0])
-    const defaultLimit = await arcana.defaultLimit()
+    const self = this.state.provider.getSigner().getAddress()
+    const con = await this.state.appContract.status(self)
+    const limit = await this.state.appContract.limit(self)
+    const defaultLimit = await this.state.appContract.defaultLimit()
+
     return [con.store.toNumber(), Math.max(limit.store.toNumber(), defaultLimit.store.toNumber())]
   }
 
   getDownloadLimit = async (): Promise<[number, number]> => {
-    const arcana = Arcana(this.appAddress, this.provider)
-    const con = await arcana.consumption((await this.provider.listAccounts())[0])
-    const limit = await arcana.limit((await this.provider.listAccounts())[0])
-    const defaultLimit = await arcana.defaultLimit()
+    const self = this.state.provider.getSigner().getAddress()
+    const con = await this.state.appContract.consumption(self)
+    const limit = await this.state.appContract.limit(self)
+    const defaultLimit = await this.state.appContract.defaultLimit()
+
     return [con.bandwidth.toNumber(), Math.max(limit.bandwidth.toNumber(), defaultLimit.bandwidth.toNumber())]
   }
 
   getSharedUsers = async (did: string): Promise<string[]> => {
     const realDID = parseHex(did)
     await this.setAppAddress(realDID)
-    let users = (await this.api.get('/api/v1/shared-users/', {
+    let users = (await this.state.api.get('/api/v1/shared-users/', {
       params: {
         did: realDID
       }
@@ -308,11 +304,11 @@ export class FileAPI {
       throw new Error('invalid_page_number')
     }
 
-    const res = await this.api.get('/api/v1/files/all-users/', {
+    const res = await this.state.api.get('/api/v1/files/all-users/', {
       params: {
         offset: (pageNumber - 1) * pageSize,
         count: pageSize,
-        address: this.appAddress
+        address: this.state.appAddr
       }
     })
     let data = []

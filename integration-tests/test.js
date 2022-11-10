@@ -88,7 +88,7 @@ describe('Upload File', () => {
     did = await arcanaInstance.upload(file);
     console.log('did', did);
     let my_file_new = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
-    chai.expect(my_file_new.length - my_file_old.length).equal(1); 
+    chai.expect(my_file_new.length - my_file_old.length).equal(1);
     console.log({my_file_new})
   });
 
@@ -113,26 +113,26 @@ describe('Upload File', () => {
     //   appId,
     //   provider: window.ethereum,
     //   email: makeEmail(),
-    //   chainId,
+    //   chainID,
     //   gateway,
     //   debug,
     // });
     // let files = await store.files.list(arcana.storage.AccessTypeEnum.SHARED_FILES)
     // console.log({files})
-    // await store.download(did)  
-    await arcanaInstance.download(did)  
+    // await store.download(did)
+    await arcanaInstance.download(did)
   })
 
   it.skip("Delete file", async () => {
     let my_file_old = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
     await arcanaInstance.files.delete(did)
     let my_file_new = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
-    chai.expect(my_file_old.length - my_file_new.length).equal(1); 
+    chai.expect(my_file_old.length - my_file_new.length).equal(1);
   })
   // it('Upload public file', async () => {
   //   let file = MockFile('aaaaaaaaaaaaa.txt', 4, 'text/plain');
   //   did = await arcanaInstance.upload(file, {publicFile: true});
   //   console.log('did', did);
   //   await arcanaInstance.download(did)
-  // });    
+  // });
 });

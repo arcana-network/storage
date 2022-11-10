@@ -1,14 +1,10 @@
 import Sha256 from './SHA256'
-import { Contract, providers, Wallet } from 'ethers'
-import arcana from './contracts/Arcana'
-import dkg from './contracts/DKG'
-import forwarder from './contracts/Forwarder'
+import { Contract, providers } from 'ethers'
 import { sign } from './signer'
 import { AxiosInstance } from 'axios'
-import DID from './contracts/DID'
-import { Web3Provider } from '@ethersproject/providers'
 import { errorCodes } from './errors'
 import { CustomError, ContractFile } from './types'
+import type { StateContainer } from './state'
 
 export type Config = {
   appId?: number;
@@ -19,6 +15,11 @@ export type Config = {
   debug: boolean;
   chainId: number;
 };
+
+export enum metaTxTargets {
+  APPLICATION,
+  DID
+}
 
 export class KeyGen {
   hasher: any
@@ -104,18 +105,6 @@ export const getProvider = (provider: providers.ExternalProvider) => {
   return new providers.Web3Provider(provider, 'any')
 }
 
-export const Arcana = (address: string, provider): Contract => {
-  return new Contract(address, arcana.abi, provider) as Contract
-}
-
-export const DKG = (address: string, provider): Contract => {
-  return new Contract(address, dkg.abi, provider) as Contract
-}
-
-export const Forwarder = (address: string, provider): Contract => {
-  return new Contract(address, forwarder.abi, provider) as Contract
-}
-
 const cleanMessage = (message: string): string => {
   if (!message) return ''
   return message
@@ -133,15 +122,8 @@ function hexToASCII (str1) {
   return str
 }
 
-export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet, method: string, params) => {
-  let contract: Contract
-  if (address !== localStorage.getItem('did')) {
-    contract = Arcana(address, wallet)
-  } else {
-    contract = DIDContract(wallet)
-  }
-  const forwarderContract: Contract = Forwarder(localStorage.getItem('forwarder'), wallet)
-  const req = await sign(wallet, contract, forwarderContract, method, params)
+export const metaTxRaw = async (targetContract: Contract, forwarderContract: Contract, api: AxiosInstance, wallet: providers.Web3Provider, method: string, params) => {
+  const req = await sign(wallet, targetContract, forwarderContract, method, params)
   const res = await api.post('/api/v1/meta-tx/', req)
   if (res.data.err) {
     const error = cleanMessage(res.data.err)
@@ -156,6 +138,17 @@ export const makeTx = async (address: string, api: AxiosInstance, wallet: Wallet
   await checkTxnStatus(wallet, res.data.txHash)
 
   return res.data
+}
+
+export const makeTx = (state: StateContainer, target: metaTxTargets, method: string, params: any[]) => {
+  switch (target) {
+    case metaTxTargets.APPLICATION:
+      return metaTxRaw(state.appContract, state.forwarderContract, state.api, state.provider, method, params)
+    case metaTxTargets.DID:
+      return metaTxRaw(state.didContract, state.forwarderContract, state.api, state.provider, method, params)
+    default:
+      throw customError('TRANSACTION', 'Invalid transaction target')
+  }
 }
 
 export const checkTxnStatus = async (provider, txHash: string) => {
@@ -238,12 +231,6 @@ export const AESDecrypt = async (key: CryptoKey, rawData: string) => {
   return dec.decode(new Uint8Array(encryptedContent))
 }
 
-export const isFileUploaded = async (address: string, fileId: string, provider: Web3Provider): Promise<boolean> => {
-  const arcana = Arcana(address, provider)
-  const file = await arcana.files(fileId)
-  return file.uploaded
-}
-
 export const parseHex = (hex) => {
   return hex.substring(0, 2) !== '0x' ? '0x' + hex : hex
 }
@@ -254,40 +241,16 @@ export const customError = (code: string, message: string): Error => {
   return error
 }
 
-export const getDKGNodes = async (provider: Web3Provider): Promise<any[]> => {
-  // Fetch DKG Node Details from dkg contract
-  const dkg = DKG(localStorage.getItem('dkg'), provider)
-  const nodes = await dkg.getCurrentEpochDetails()
-  return nodes
-}
-
-export const DIDContract = (provider: Web3Provider | Wallet): Contract => {
-  return new Contract(localStorage.getItem('did'), DID.abi, provider)
-}
-
-export const getFile = async (did: string, provider: Web3Provider): Promise<ContractFile> => {
-  const contract = DIDContract(provider)
-  const file = await contract.getFile(parseHex(did))
+// ???
+export const getFile = async (state: StateContainer, did: string): Promise<ContractFile> => {
+  const file = await state.didContract.getFile(parseHex(did))
   return { size: parseInt(file[0]), uploaded: file[1], name: file[2], hash: file[3], storageNode: file[4] }
 }
 
-export const getRuleSet = async (did: string, provider: Web3Provider): Promise<string> => {
-  const contract = DIDContract(provider)
-  const rule = await contract.getRuleSet(parseHex(did))
-  return rule
-}
-
-export const getAppAddress = async (did: string, provider: Web3Provider): Promise<string> => {
-  const contract = DIDContract(provider)
-  const appAddress = (await contract.getFile(parseHex(did))).app
-  return appAddress
-}
-
-export const isPermissionRequired = async (appAddress: string, provider: Web3Provider) => {
-  const arcana: Contract = Arcana(appAddress, provider)
-  const userAddress = await (await provider.getSigner()).getAddress()
-  const appLevelControl = await arcana.appLevelControl()
-  const userGrantedControl = await arcana.userAppPermission(userAddress)
+export const isPermissionRequired = async (state: StateContainer) => {
+  const userAddress = await (await state.provider.getSigner()).getAddress()
+  const appLevelControl = await state.appContract.appLevelControl()
+  const userGrantedControl = await state.appContract.userAppPermission(userAddress)
 
   return +appLevelControl !== +userGrantedControl
 }

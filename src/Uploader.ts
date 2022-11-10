@@ -1,16 +1,16 @@
-import { KeyGen, makeTx, AESEncryptHex, customError, getDKGNodes, AESEncrypt } from './Utils'
-import { BigNumber, Wallet, ethers } from 'ethers'
-import axios, { AxiosInstance } from 'axios'
+import { AESEncrypt, AESEncryptHex, customError, KeyGen, makeTx, metaTxTargets } from './Utils'
+import * as ethers from 'ethers'
+import { Wallet } from 'ethers'
+import axios from 'axios'
 import { split } from 'shamir'
 import { encrypt } from 'eciesjs'
 
 import { randomBytes } from 'crypto-browserify'
-import { Mutex } from 'async-mutex'
 
 import { wrapInstance } from './sentry'
 import { requiresLocking } from './locking'
 import type { UploadParams } from './types'
-import { id } from 'ethers/lib/utils'
+import type { StateContainer } from './state'
 
 function convertByteCounterToAESCounter (value: number) {
   if (value === 0) {
@@ -26,17 +26,10 @@ function convertByteCounterToAESCounter (value: number) {
 }
 
 export class Uploader {
-  private readonly provider: any
-  private readonly api: AxiosInstance
-  private readonly appAddress: string
-  private appId: number
-  private readonly lock: Mutex
+  private readonly state: StateContainer
 
-  constructor (appId: number, appAddress: string, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
-    this.provider = provider
-    this.api = api
-    this.appAddress = appAddress
-    this.lock = lock
+  constructor (state: StateContainer, debug: boolean) {
+    this.state = state
 
     if (debug) {
       wrapInstance(this)
@@ -70,19 +63,19 @@ export class Uploader {
     let key
     let JWTToken
     let nodeResp
-    if (this.appId) {
+    if (this.state.appID) {
       nodeResp = (
-        await this.api.get('/api/v1/get-node-address/', {
+        await this.state.api.get('/api/v1/get-node-address/', {
           params: {
-            appId: this.appId
+            appId: this.state.appID
           }
         })
       ).data
     } else {
       nodeResp = (
-        await this.api.get('/api/v1/get-node-address/', {
+        await this.state.api.get('/api/v1/get-node-address/', {
           params: {
-            address: this.appAddress
+            address: this.state.appAddr
           }
         })
       ).data
@@ -108,13 +101,13 @@ export class Uploader {
         name = '0x' + (await AESEncryptHex(key, nameHex))
       } catch (e) {
         gatewayName = await AESEncrypt(key, file.name)
-        name = id(gatewayName)
+        name = ethers.utils.id(gatewayName)
       }
 
-      const ephemeralWallet = await Wallet.createRandom()
-      const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
+      const ephemeralWallet = await ethers.Wallet.createRandom()
+      const res = await makeTx(this.state, metaTxTargets.APPLICATION, 'uploadInit', [
         did,
-        BigNumber.from(file.size),
+        ethers.BigNumber.from(file.size),
         name,
         '0x' + (await AESEncryptHex(key, hash)),
         nodeResp.address,
@@ -123,7 +116,7 @@ export class Uploader {
       JWTToken = res.token
       const txHash = res.txHash
       // Fetch DKG Node Details from dkg contract
-      const nodes = await getDKGNodes(this.provider)
+      const nodes = await this.state.dkgContract.getCurrentEpochDetails()
       // Doing shamir secrete sharing
       const parts = nodes.length
       // At least 2/3rd nodes is required for share recovery
@@ -139,7 +132,6 @@ export class Uploader {
         }
         const ciphertextRaw = encrypt(publicKey, shares[i + 1])
         const ciphertext = ciphertextRaw.toString('hex')
-        localStorage.setItem('pk', ephemeralWallet.privateKey)
         const url = 'https://' + nodes[i].declaredIp + '/rpc'
         await axios.post(url, {
           jsonrpc: '2.0',
@@ -156,7 +148,7 @@ export class Uploader {
       }
     } else {
       // Otherwise, generate a random address and create the uploadInit transaction
-      const ephemeralWallet = await Wallet.createRandom()
+      const ephemeralWallet = Wallet.createRandom()
 
       try {
         let nameHex = ethers.utils.formatBytes32String(file.name)
@@ -165,12 +157,12 @@ export class Uploader {
         name = '0x' + nameHex
       } catch (e) {
         gatewayName = file.name
-        name = id(gatewayName)
+        name = ethers.utils.id(gatewayName)
       }
 
-      const res = await makeTx(this.appAddress, this.api, this.provider, 'uploadInit', [
+      const res = await makeTx(this.state, metaTxTargets.APPLICATION, 'uploadInit', [
         did,
-        BigNumber.from(file.size),
+        ethers.BigNumber.from(file.size),
         name,
         '0x' + hash,
         nodeResp.address,
@@ -248,7 +240,7 @@ export class Uploader {
     }
 
     try {
-      const tx = await this.provider.getTransaction(
+      const tx = await this.state.provider.getTransaction(
         completeResp.hash.substring(0, 2) === '0x' ? completeResp.hash : '0x' + completeResp.hash
       )
       await tx.wait()
@@ -265,7 +257,7 @@ export class Uploader {
       }
     }
     if (gatewayName) {
-      await this.api.post('/api/v1/file-name/', {}, {
+      await this.state.api.post('/api/v1/file-name/', {}, {
         params: {
           did,
           name: gatewayName

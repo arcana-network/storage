@@ -1,12 +1,10 @@
-import axios, { AxiosInstance } from 'axios'
+import axios from 'axios'
 import { join } from 'shamir'
 import { id, parseBytes32String } from 'ethers/lib/utils'
-import { decodeHex } from 'eciesjs/dist/utils'
-import { decrypt } from 'eciesjs'
-import { Mutex } from 'async-mutex'
+import { decrypt, utils as eciesUtils } from 'eciesjs'
 
 import Decryptor from './decrypt'
-import { hasher2Hex, makeTx, customError, getDKGNodes, getFile, AESDecryptHex, AESDecrypt } from './Utils'
+import { AESDecrypt, AESDecryptHex, customError, getFile, hasher2Hex, makeTx, metaTxTargets } from './Utils'
 import { utils, Wallet } from 'ethers'
 import FileWriter from './FileWriter'
 import Sha256 from './SHA256'
@@ -14,6 +12,7 @@ import Sha256 from './SHA256'
 import { wrapInstance } from './sentry'
 import { requiresLocking } from './locking'
 import { errorCodes } from './errors'
+import type { StateContainer } from './state'
 
 const downloadBlob = (blob, fileName) => {
   // @ts-ignore
@@ -42,18 +41,12 @@ export function createAndDownloadBlobFile (body, filename) {
 }
 
 export class Downloader {
-  private readonly provider: any
-  private hasher
-  private readonly api: AxiosInstance
-  private readonly appAddress: string
-  private readonly lock: Mutex
+  private readonly hasher
+  private readonly state: StateContainer
 
-  constructor (appAddress: string, provider: any, api: AxiosInstance, lock: Mutex, debug: boolean) {
-    this.provider = provider
+  constructor (state: StateContainer, debug: boolean) {
     this.hasher = new Sha256()
-    this.api = api
-    this.appAddress = appAddress
-    this.lock = lock
+    this.state = state
 
     if (debug) {
       wrapInstance(this)
@@ -68,7 +61,7 @@ export class Downloader {
   private async _download (did, accessType: 'view' | 'download'): Promise<void | Blob> {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did
     const didBytes = utils.arrayify(did)
-    const file = await getFile(did, this.provider)
+    const file = await getFile(this.state, did)
 
     const chunkSize = 10 * 2 ** 20
     let fileWriter
@@ -79,7 +72,7 @@ export class Downloader {
         if (file.name[2] === '0') {
           file.name = parseBytes32String('0x' + file.name.substring(2) + '0')
         } else {
-          const { data: name } = await this.api.get('/api/v1/file-name/', {
+          const { data: name } = await this.state.api.get('/api/v1/file-name/', {
             params: {
               did
             }
@@ -87,14 +80,14 @@ export class Downloader {
           file.name = name
         }
         fileWriter = new FileWriter(file.name, accessType)
-        const { data: { host: storageHost } } = await this.api.get('/api/v1/get-region-endpoint/', {
+        const { data: { host: storageHost } } = await this.state.api.get('/api/v1/get-region-endpoint/', {
           params: {
-            address: this.appAddress
+            address: this.state.appAddr
           }
         })
 
         const u = new URL(storageHost)
-        u.pathname = '/api/v2/file/public/' + this.appAddress + '/' + did
+        u.pathname = '/api/v2/file/public/' + this.state.appAddr + '/' + did
         let downloaded = 0
         for (let i = 0; i < file.size; i += chunkSize) {
           const range = `bytes=${i}-${Math.min(i + chunkSize, file.size) - 1}`
@@ -116,14 +109,14 @@ export class Downloader {
       // Private file
       case 0x02: {
         const ephemeralWallet = await Wallet.createRandom()
-        const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'download', [
+        const checkPermissionResp = await makeTx(this.state, metaTxTargets.APPLICATION, 'download', [
           did,
           ephemeralWallet.address
         ])
         const txHash = checkPermissionResp.txHash
 
         const shares = {}
-        const nodes = await getDKGNodes(this.provider)
+        const nodes = await this.state.dkgContract.getCurrentEpochDetails()
         for (let i = 0; i < nodes.length; i++) {
           const sigParams = JSON.stringify({ tx_hash: txHash })
           const hash = id(sigParams)
@@ -142,7 +135,7 @@ export class Downloader {
             continue
           }
           const sh = res.data.result.share
-          shares[i + 1] = decrypt(ephemeralWallet.privateKey, decodeHex(sh))
+          shares[i + 1] = decrypt(ephemeralWallet.privateKey, eciesUtils.decodeHex(sh))
         }
         const decryptedKey = join(shares)
         const key = await window.crypto.subtle.importKey('raw', decryptedKey, 'AES-CTR', false, ['encrypt', 'decrypt'])
@@ -151,7 +144,7 @@ export class Downloader {
         if (file.name[0] === '0') {
           file.name = parseBytes32String('0x' + file.name.substring(1) + '0')
         } else {
-          const { data: fileNameEncrypted } = await this.api.get('/api/v1/file-name/', {
+          const { data: fileNameEncrypted } = await this.state.api.get('/api/v1/file-name/', {
             params: {
               did
             }
