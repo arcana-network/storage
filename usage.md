@@ -177,6 +177,17 @@ This method lists the files uploaded by the current user.
 import { AccessTypeEnum } from '@arcana/storage'; // required only once per .ts or .js file
 let files = await dAppStorageProvider.files.list(AccessTypeEnum.MY_FILES);
 ```
+
+### Shared User List
+
+Get a list of users that have shared access to a file.
+
+```ts
+//Get a list of users that have access to the file with the DID
+let users = await dAppStorageProvider.files.getSharedUsers(did)
+console.log({users})
+```
+
 ---
 ## Download File by DID
 
