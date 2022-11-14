@@ -29,7 +29,7 @@ Refer to the [Arcana Storage SDK Quick Start Guide](https://docs.beta.arcana.net
 1. Install Storage SDK
 2. Import `StorageProvider` from the Storage SDK package in the dApp. Call `init` method of `StorageProvider` and specify the Web3 wallet `provider` and the `appAddress` as input parameters. **Note:** Get the provider via the Auth SDK or third-party supported wallet. You can copy the appAddress from the [Arcana Developer Dashboard](https://docs.beta.arcana.network/docs/config_dapp) after registering your dApp
 3. Use `StorageProvider` to:
-   - `upload` and push file data into the Arcana Store. **Note:** Save file DID that is returned after file upload operation is successful.
+   - `upload` and push file data into the Arcana Store. **Note:** Save file DID that is returned after the file upload operation is successful.
    - `download` a file from the Arcana Store using DID as input.
 4. Use `StorageProvider.files` to:
    - `delete` a file by specifying its DID.
@@ -101,6 +101,21 @@ After a file is successfully uploaded to the Arcana Store, it is assigned a uniq
 ```ts
 let shareURL = await dAppStorageProvider.files.getPublicFileURL(did);
 ``` -->
+
+### Upload Chunk Size
+
+Arcana Storage SDK uses chunked uploading mode. Each file is split into chunks of default size 10MB and chunks are uploaded one by one. These chunks are further processed on the server, encrypted, and split into multiple parts before being stored in the Arcana Store. Chunked uploading helps to overcome the server's default upload size limitation and there is no server-side setting change required to upload a very large file size. Also, it helps in decentralizing data storage.
+
+You can change the default chunk size while uploading a file. Make sure the new chunk size is a multiple of 16 otherwise there may be issues in downloading the file.
+
+```ts
+// Upload a file and set the chunk size to 16 MB
+await dAppStorageProvider.upload(file, {chunkSize: 16 * 2 ** 20},{
+  onProgress: (bytesUploaded, bytesTotal) => {
+     console.log('Progress:', ((bytesUploaded / bytesTotal) * 100).toFixed(2), '%')
+  }
+}).then((did) => console.log('File successfully uploaded in 16 MB chunks. DID:', did)).catch(e => console.error(e));
+```
 
 ## Download File
 
