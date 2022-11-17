@@ -119,9 +119,7 @@ async function nockSetup () {
     .reply(200, {})
 }
 
-function mockCurrentEpochDetails(){
-
-
+function getCurrentEpochDetails () {
   return [
     {
       declaredIp: 'dkgnode1.arcana.network:443',
@@ -159,9 +157,7 @@ function mockCurrentEpochDetails(){
       pubKx: BigNumber.from('30438236858857419456992904193833033911277657186396590512267279659738218054034'),
       pubKy: BigNumber.from('27076479865999379327196017777333283283075678191787288284998453473449446886409')
     }
-  ];
-
-
+  ]
 }
 
 function sinonMockObjectSetup () {
@@ -224,29 +220,29 @@ test.serial.only('Upload file', async (t) => {
   meta_tx_nock(undefined)
 
   const arcanaInstance = await createStorageInstance(arcanaWallet, (req, res, next, end) => {
-    
     switch (req.method) {
-      case "eth_getTransactionByHash": res.result = {
-        blockHash: '0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e',
-        blockNumber: '0xf4240',
-        hash: '0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e',
-        chainId: '0x0',
-        from: '0x32be343b94f860124dc4fee278fdcbd38c102d88',
-        gas: '0xc350',
-        gasPrice: '0xdf8475800',
-        input: '0x',
-        nonce: '0x43eb',
-        r: '0x3b08715b4403c792b8c7567edea634088bedcd7f60d9352b1f16c69830f3afd5',
-        s: '0x10b9afb67d2ec8b956f0e1dbc07eb79152904f3a7bf789fc869db56320adfe09',
-        to: '0xdf190dc7190dfba737d7777a163445b7fff16133',
-        transactionIndex: '0x1',
-        type: '0x0',
-        v: '0x1c',
-        value: '0x6113a84987be800'
-      }
-        break;
+      case 'eth_getTransactionByHash':
+        res.result = {
+          blockHash: '0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e',
+          blockNumber: '0xf4240',
+          hash: '0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e',
+          chainId: '0x0',
+          from: '0x32be343b94f860124dc4fee278fdcbd38c102d88',
+          gas: '0xc350',
+          gasPrice: '0xdf8475800',
+          input: '0x',
+          nonce: '0x43eb',
+          r: '0x3b08715b4403c792b8c7567edea634088bedcd7f60d9352b1f16c69830f3afd5',
+          s: '0x10b9afb67d2ec8b956f0e1dbc07eb79152904f3a7bf789fc869db56320adfe09',
+          to: '0xdf190dc7190dfba737d7777a163445b7fff16133',
+          transactionIndex: '0x1',
+          type: '0x0',
+          v: '0x1c',
+          value: '0x6113a84987be800'
+        }
+        break
 
-      case "eth_getTransactionReceipt":
+      case 'eth_getTransactionReceipt':
         res.result = {
           transactionHash: '0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e',
           blockHash: '0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e',
@@ -264,10 +260,8 @@ test.serial.only('Upload file', async (t) => {
           transactionIndex: '0x1',
           type: '0x0'
         }
-        break;
-
-      case "eth_call":
-
+        break
+      case 'eth_call': {
         const data = parseData(
           {
             value: ethers.utils.parseEther('0'),
@@ -276,22 +270,22 @@ test.serial.only('Upload file', async (t) => {
           DKG.abi
         )
 
-        if (data.name === "getCurrentEpochDetails") {
-          res.result = mockCurrentEpochDetails();
+        if (data.name === 'getCurrentEpochDetails') {
+          res.result = getCurrentEpochDetails()
         }
-
+        break
+      }
     }
-
 
     end()
   })
 
   const upload = await arcanaInstance.getUploader()
-  // await t.notThrowsAsync(upload.upload(file))
-  await upload.upload(file)
+  await t.notThrowsAsync(upload.upload(file))
+  // await upload.upload(file)
 })
 
-test.skip('Download file', async (t) => {
+test.skip('Download file', async () => {
   // unable to fake key shares responses
 })
 
