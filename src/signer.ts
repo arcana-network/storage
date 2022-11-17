@@ -15,10 +15,13 @@ const ForwardRequest = [
 ]
 
 const RequestTemplate = [
-  { name: 'tx', type: 'ForwardRequest' },
+  { name: 'tx', type: 'ForwardRequest' }
   // will be decided dynamically based
-  null
 ]
+
+function capitalize (method: string): string {
+  return method.charAt(0).toUpperCase() + method.slice(1)
+}
 
 const typedData = (contract: Contract, method: string, complexType?: string[]) => {
   const fragment = contract.interface.getFunction(method)
@@ -50,8 +53,13 @@ const typedMessageInstance = (contract: Contract, method: string, params: any[])
 }
 
 function getMetaTxTypeData (chainId: number, verifyingContract: string, method: string, arcana: Contract) {
-  const Request = RequestTemplate
-  Request[1] = { name: 'details', type: method }
+  const Request = [...RequestTemplate]
+
+  // check need to push or unshift
+  // According to EIP712, Alphabetically arrange the type
+  const customType = capitalize(method)
+  if (Request[0].type.charAt(0) > customType.charAt(0)) Request.unshift({ name: 'details', type: customType })
+  else Request.push({ name: 'details', type: customType })
 
   const mtypedata: any = {
     types: {
@@ -68,7 +76,7 @@ function getMetaTxTypeData (chainId: number, verifyingContract: string, method: 
     primaryType: 'Request'
   }
 
-  mtypedata.types[method] = typedData(arcana, method)
+  mtypedata.types[capitalize(method)] = typedData(arcana, method)
 
   return mtypedata
 }
@@ -93,6 +101,8 @@ async function buildTypedData (forwarder: Contract, request: any, arcana: Contra
       ...request
     }
   }
+
+  typeData.message.tx.method = capitalize(request.method)
 
   typeData.message.details = typedMessageInstance(arcana, request.method, params)
 
@@ -126,7 +136,7 @@ export async function sign (
     method
   })
 
-  request.method = method
+  request.method = capitalize(method)
   request.data = arcana.interface.encodeFunctionData(method, params).replace('0x', '')
   request.signature = signature.replace('0x', '')
   request.from = request.from.replace('0x', '')
