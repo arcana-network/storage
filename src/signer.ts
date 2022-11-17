@@ -15,12 +15,12 @@ const ForwardRequest = [
 ]
 
 const RequestTemplate = [
-  { name: 'tx', type: 'ForwardRequest' },
+  { name: 'tx', type: 'ForwardRequest' }
   // will be decided dynamically based
 ]
 
-function capitalize(method: string): string {
-  return method.charAt(0).toUpperCase() + method.slice(1);
+function capitalize (method: string): string {
+  return method.charAt(0).toUpperCase() + method.slice(1)
 }
 
 const typedData = (contract: Contract, method: string, complexType?: string[]) => {
@@ -53,15 +53,14 @@ const typedMessageInstance = (contract: Contract, method: string, params: any[])
 }
 
 function getMetaTxTypeData (chainId: number, verifyingContract: string, method: string, arcana: Contract) {
- 
-  const Request = [...RequestTemplate];
+  const Request = [...RequestTemplate]
 
-  //check need to push or unshift
+  // check need to push or unshift
   // According to EIP712, Alphabetically arrange the type
-  const customType = capitalize(method);
-  if (Request[0].type.charAt(0) > customType.charAt(0)) Request.unshift({ name: "details", type: customType });
-  else Request.push({ name: "details", type: customType });
- 
+  const customType = capitalize(method)
+  if (Request[0].type.charAt(0) > customType.charAt(0)) Request.unshift({ name: 'details', type: customType })
+  else Request.push({ name: 'details', type: customType })
+
   const mtypedata: any = {
     types: {
       EIP712Domain,
@@ -103,7 +102,7 @@ async function buildTypedData (forwarder: Contract, request: any, arcana: Contra
     }
   }
 
-  typeData.message.tx.method = capitalize(request.method);
+  typeData.message.tx.method = capitalize(request.method)
 
   typeData.message.details = typedMessageInstance(arcana, request.method, params)
 
@@ -137,7 +136,7 @@ export async function sign (
     method
   })
 
-  request.method = capitalize(method);
+  request.method = capitalize(method)
   request.data = arcana.interface.encodeFunctionData(method, params).replace('0x', '')
   request.signature = signature.replace('0x', '')
   request.from = request.from.replace('0x', '')

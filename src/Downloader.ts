@@ -87,7 +87,9 @@ export class Downloader {
           file.name = name
         }
         fileWriter = new FileWriter(file.name, accessType)
-        const { data: { host: storageHost } } = await this.api.get('/api/v1/get-region-endpoint/', {
+        const {
+          data: { host: storageHost }
+        } = await this.api.get('/api/v1/get-region-endpoint/', {
           params: {
             address: this.appAddress
           }

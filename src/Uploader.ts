@@ -265,12 +265,16 @@ export class Uploader {
       }
     }
     if (gatewayName) {
-      await this.api.post('/api/v1/file-name/', {}, {
-        params: {
-          did,
-          name: gatewayName
+      await this.api.post(
+        '/api/v1/file-name/',
+        {},
+        {
+          params: {
+            did,
+            name: gatewayName
+          }
         }
-      })
+      )
     }
     return did.replace('0x', '')
   }
