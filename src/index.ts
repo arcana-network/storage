@@ -252,7 +252,7 @@ export class StorageProvider {
     this.state.forwarderContractAddr = res.Forwarder
 
     this.state.dkgContract = new ethers.Contract(res.DKG, DKGABI.abi, this.state.provider)
-    this.state.dkgContract = res.DKG
+    this.state.dkgContractAddr = res.DKG
 
     this.state.didContract = new ethers.Contract(res.DID, DIDABI.abi, this.state.provider)
     this.state.didContractAddr = res.DID
@@ -291,6 +291,8 @@ export class StorageProvider {
       } else {
         throw new Error('app_not_found')
       }
+    } else {
+      this.state.appContract = new ethers.Contract(this.state.appAddr, ArcanaABI.abi, this.state.provider)
     }
 
     this.files = new FileAPI(this.state, this.debug)
