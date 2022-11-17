@@ -16,6 +16,7 @@ import * as utils from '../src/Utils'
 import { parseData } from './utils'
 import { CustomError } from '../src/types'
 import DID from '../src/contracts/DID'
+import DKG from '../src/contracts/DKG'
 // Load contract addresses
 const sContracts: any = fs.readFileSync('./tests/contracts.json')
 const oContracts = JSON.parse(sContracts)
@@ -118,6 +119,51 @@ async function nockSetup () {
     .reply(200, {})
 }
 
+function mockCurrentEpochDetails(){
+
+
+  return [
+    {
+      declaredIp: 'dkgnode1.arcana.network:443',
+      position: '1',
+      pubKx: BigNumber.from('29023421385368379144749466045924017514934229958180852799451398628000593771667'),
+      pubKy: BigNumber.from('31632158778368581637676511185062566059198308712876704725543144993632262155464')
+    },
+    {
+      declaredIp: 'dkgnode1.arcana.network:443',
+      position: '2',
+      pubKx: BigNumber.from('105719267757522549686383951453889518570805320580847799971673920448991999863268'),
+      pubKy: BigNumber.from('12311889399951856112539425386359305279151271210811891657961588078446721210801')
+    },
+    {
+      declaredIp: 'dkgnode1.arcana.network:443',
+      position: '3',
+      pubKx: BigNumber.from('112513454780213693752054630002769173645973927254986348958538391710171734325064'),
+      pubKy: BigNumber.from('31826403948237730820406540123018982546704465196666925150128355254483964682271')
+    },
+    {
+      declaredIp: 'dkgnode1.arcana.network:443',
+      position: '4',
+      pubKx: BigNumber.from('103022124116237959935952092341458720857383888117879935947184525301185593633427'),
+      pubKy: BigNumber.from('83428276264331813311663241272832111383329363811859329412601611536906464022186')
+    },
+    {
+      declaredIp: 'dkgnode1.arcana.network:443',
+      position: '5',
+      pubKx: BigNumber.from('72082384183905358797739369765923546941331333550297636524350044306990429216270'),
+      pubKy: BigNumber.from('661783827736034504670612788123848346528644035307464845748154787461466575102')
+    },
+    {
+      declaredIp: 'dkgnode1.arcana.network:443',
+      position: '6',
+      pubKx: BigNumber.from('30438236858857419456992904193833033911277657186396590512267279659738218054034'),
+      pubKy: BigNumber.from('27076479865999379327196017777333283283075678191787288284998453473449446886409')
+    }
+  ];
+
+
+}
+
 function sinonMockObjectSetup () {
   sinon.replace(utils, 'checkTxnStatus', () => Promise.resolve())
   sinon.replace(utils, 'getFile', () => Promise.resolve({ app: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9' }))
@@ -174,12 +220,13 @@ async function createStorageInstance (wallet: Wallet, middleware?) {
   return Promise.resolve(instance)
 }
 
-test.serial('Upload file', async (t) => {
+test.serial.only('Upload file', async (t) => {
   meta_tx_nock(undefined)
 
   const arcanaInstance = await createStorageInstance(arcanaWallet, (req, res, next, end) => {
-    if (req.method === 'eth_getTransactionByHash') {
-      res.result = {
+    
+    switch (req.method) {
+      case "eth_getTransactionByHash": res.result = {
         blockHash: '0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e',
         blockNumber: '0xf4240',
         hash: '0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e',
@@ -197,30 +244,51 @@ test.serial('Upload file', async (t) => {
         v: '0x1c',
         value: '0x6113a84987be800'
       }
-    } else if (req.method === 'eth_getTransactionReceipt') {
-      res.result = {
-        transactionHash: '0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e',
-        blockHash: '0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e',
-        blockNumber: '0xf4240',
-        logs: [],
-        contractAddress: null,
-        effectiveGasPrice: '0xdf8475800',
-        cumulativeGasUsed: '0xc444',
-        from: '0x32be343b94f860124dc4fee278fdcbd38c102d88',
-        gasUsed: '0x5208',
-        logsBloom:
-          '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
-        status: '0x1',
-        to: '0xdf190dc7190dfba737d7777a163445b7fff16133',
-        transactionIndex: '0x1',
-        type: '0x0'
-      }
+        break;
+
+      case "eth_getTransactionReceipt":
+        res.result = {
+          transactionHash: '0xe9e91f1ee4b56c0df2e9f06c2b8c27c6076195a88a7b8537ba8313d80e6f124e',
+          blockHash: '0x8e38b4dbf6b11fcc3b9dee84fb7986e29ca0a02cecd8977c161ff7333329681e',
+          blockNumber: '0xf4240',
+          logs: [],
+          contractAddress: null,
+          effectiveGasPrice: '0xdf8475800',
+          cumulativeGasUsed: '0xc444',
+          from: '0x32be343b94f860124dc4fee278fdcbd38c102d88',
+          gasUsed: '0x5208',
+          logsBloom:
+            '0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000',
+          status: '0x1',
+          to: '0xdf190dc7190dfba737d7777a163445b7fff16133',
+          transactionIndex: '0x1',
+          type: '0x0'
+        }
+        break;
+
+      case "eth_call":
+
+        const data = parseData(
+          {
+            value: ethers.utils.parseEther('0'),
+            data: req.params[0].data
+          },
+          DKG.abi
+        )
+
+        if (data.name === "getCurrentEpochDetails") {
+          res.result = mockCurrentEpochDetails();
+        }
+
     }
+
+
     end()
   })
 
   const upload = await arcanaInstance.getUploader()
-  await t.notThrowsAsync(upload.upload(file))
+  // await t.notThrowsAsync(upload.upload(file))
+  await upload.upload(file)
 })
 
 test.skip('Download file', async (t) => {
