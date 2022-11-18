@@ -262,7 +262,7 @@ export class Uploader {
           did,
           name: gatewayName
         }
-      })
+      )
     }
     return did.replace('0x', '')
   }
