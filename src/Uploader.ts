@@ -49,9 +49,9 @@ export class Uploader {
   async upload (fileRaw: File, params: UploadParams = { chunkSize: 10 * 2 ** 20, publicFile: false }) {
     const file: File = fileRaw
     const chunkSize = params.chunkSize ? params.chunkSize : 10 * 2 ** 20
-    if (!(file instanceof Blob)) {
+    /* if (!(file instanceof Blob)) {
       throw customError('TRANSACTION', 'File must be a Blob or a descendant of a Blob such as a File.')
-    }
+    } */
 
     const hasher = new KeyGen(file, chunkSize)
     const hash = await hasher.getHash()
