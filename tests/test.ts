@@ -230,7 +230,7 @@ async function createStorageInstance (wallet: Wallet, middleware?) {
   return Promise.resolve(instance)
 }
 
-test.serial.only('Upload file', async (t) => {
+test.serial('Upload file', async (t) => {
   meta_tx_nock(undefined)
 
   const arcanaInstance = await createStorageInstance(arcanaWallet, (req, res, next, end) => {

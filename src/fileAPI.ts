@@ -269,7 +269,7 @@ export class FileAPI {
 
   getUploadLimit = async (): Promise<[number, number]> => {
     const self = this.state.provider.getSigner().getAddress()
-    const con = await this.state.appContract.status(self)
+    const con = await this.state.appContract.consumption(self)
     const limit = await this.state.appContract.limit(self)
     const defaultLimit = await this.state.appContract.defaultLimit()
 
