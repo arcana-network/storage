@@ -69,7 +69,6 @@ export class Downloader {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did
     const didBytes = utils.arrayify(did)
     const file = await getFile(did, this.provider)
-
     const chunkSize = 10 * 2 ** 20
     let fileWriter
 
@@ -118,7 +117,8 @@ export class Downloader {
       // Private file
       case 0x02: {
         const ephemeralWallet = await Wallet.createRandom()
-        const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, 'download', [
+        const functionName = localStorage.getItem('did') === this.appAddress ? 'downloadNFT' : 'download'
+        const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, functionName, [
           did,
           ephemeralWallet.address
         ])

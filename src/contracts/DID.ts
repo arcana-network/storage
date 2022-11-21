@@ -227,8 +227,13 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
+        },
+        {
+          internalType: 'address',
+          name: 'ephemeralWallet',
+          type: 'address'
         }
       ],
       name: 'downloadNFT',

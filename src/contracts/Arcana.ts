@@ -5,6 +5,19 @@ export default {
       inputs: [
         {
           indexed: false,
+          internalType: 'address',
+          name: 'owner',
+          type: 'address'
+        }
+      ],
+      name: 'DeleteApp',
+      type: 'event'
+    },
+    {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
           internalType: 'bytes32',
           name: 'did',
           type: 'bytes32'
@@ -105,12 +118,12 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         },
         {
           internalType: 'address',
-          name: '_newOwner',
+          name: 'newOwner',
           type: 'address'
         }
       ],
@@ -181,6 +194,13 @@ export default {
       type: 'function'
     },
     {
+      inputs: [],
+      name: 'deleteApp',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
       inputs: [
         {
           internalType: 'bytes32',
@@ -220,12 +240,12 @@ export default {
       inputs: [
         {
           internalType: 'uint8',
-          name: '_appPermission',
+          name: 'appPermission',
           type: 'uint8'
         },
         {
           internalType: 'bool',
-          name: '_add',
+          name: 'add',
           type: 'bool'
         }
       ],
@@ -258,27 +278,27 @@ export default {
       inputs: [
         {
           internalType: 'address',
-          name: '_factory',
+          name: 'factoryAddress',
           type: 'address'
         },
         {
           internalType: 'address',
-          name: '_relayer',
+          name: 'relayer',
           type: 'address'
         },
         {
           internalType: 'bool',
-          name: '_aggregateLogin',
+          name: 'aggregateLoginValue',
           type: 'bool'
         },
         {
           internalType: 'address',
-          name: '_did',
+          name: 'did',
           type: 'address'
         },
         {
           internalType: 'bytes32',
-          name: '_appConfigValue',
+          name: 'appConfigValue',
           type: 'bytes32'
         }
       ],
@@ -334,22 +354,22 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         },
         {
           internalType: 'uint256',
-          name: '_tokenId',
+          name: 'tokenId',
           type: 'uint256'
         },
         {
           internalType: 'address',
-          name: '_nftContract',
+          name: 'nftContract',
           type: 'address'
         },
         {
           internalType: 'uint256',
-          name: '_chainId',
+          name: 'chainId',
           type: 'uint256'
         }
       ],
@@ -375,7 +395,7 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         }
       ],
@@ -415,16 +435,16 @@ export default {
       inputs: [
         {
           internalType: 'uint256',
-          name: '_store',
+          name: 'store',
           type: 'uint256'
         },
         {
           internalType: 'uint256',
-          name: '_bandwidth',
+          name: 'bandwidth',
           type: 'uint256'
         }
       ],
-      name: 'setAppLevelLimit',
+      name: 'setAppLimit',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function'
@@ -433,12 +453,12 @@ export default {
       inputs: [
         {
           internalType: 'uint256',
-          name: '_store',
+          name: 'store',
           type: 'uint256'
         },
         {
           internalType: 'uint256',
-          name: '_bandwidth',
+          name: 'bandwidth',
           type: 'uint256'
         }
       ],
@@ -451,21 +471,28 @@ export default {
       inputs: [
         {
           internalType: 'address',
-          name: '_user',
+          name: 'user',
           type: 'address'
         },
         {
           internalType: 'uint256',
-          name: '_store',
+          name: 'store',
           type: 'uint256'
         },
         {
           internalType: 'uint256',
-          name: '_bandwidth',
+          name: 'bandwidth',
           type: 'uint256'
         }
       ],
       name: 'setUserLevelLimit',
+      outputs: [],
+      stateMutability: 'nonpayable',
+      type: 'function'
+    },
+    {
+      inputs: [],
+      name: 'toggleWalletType',
       outputs: [],
       stateMutability: 'nonpayable',
       type: 'function'
@@ -506,17 +533,17 @@ export default {
       inputs: [
         {
           internalType: 'address',
-          name: '_delegator',
+          name: 'delegator',
           type: 'address'
         },
         {
           internalType: 'uint8',
-          name: '_control',
+          name: 'control',
           type: 'uint8'
         },
         {
           internalType: 'bool',
-          name: '_add',
+          name: 'add',
           type: 'bool'
         }
       ],
@@ -529,12 +556,12 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         },
         {
           internalType: 'bytes32',
-          name: '_ruleHash',
+          name: 'ruleHash',
           type: 'bytes32'
         }
       ],
@@ -547,7 +574,7 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         }
       ],
@@ -627,6 +654,19 @@ export default {
           internalType: 'uint256',
           name: '',
           type: 'uint256'
+        }
+      ],
+      stateMutability: 'view',
+      type: 'function'
+    },
+    {
+      inputs: [],
+      name: 'walletType',
+      outputs: [
+        {
+          internalType: 'enum Arcana.WalletMode',
+          name: '',
+          type: 'uint8'
         }
       ],
       stateMutability: 'view',
