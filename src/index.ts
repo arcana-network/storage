@@ -115,14 +115,11 @@ export class StorageProvider {
     // window.location.reload()
   }
 
-  // TODO: Need to fix this function
-  // downloadDID = async (did: string) => {
-  //   await this.login()
-  //   const file = await getFile(did, this.provider)
-  //   this.appAddress = file.app
-  //   const downloader = new Downloader(this.appAddress, this.provider, this.api, this.lock, this.debug)
-  //   await downloader.download(did)
-  // }
+  downloadDID = async (did: string) => {
+    await this.login()
+    const downloader = new Downloader(localStorage.getItem('did'), this.provider, this.api, this.lock, this.debug)
+    await downloader.download(did)
+  }
 
   getUploader = async () => {
     await this.login()
