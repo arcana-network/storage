@@ -1,29 +1,29 @@
-import axios, { AxiosInstance } from 'axios'
+import axios from 'axios'
 import { init as SentryInit } from '@sentry/browser'
 import { Integrations } from '@sentry/tracing'
 import { Mutex } from 'async-mutex'
+import * as ethers from 'ethers'
 
 import { Uploader } from './Uploader'
 import { Downloader } from './Downloader'
 import { FileAPI } from './fileAPI'
 import type { UploadParams } from './types'
-import { Config, customError, getProvider, makeTx, parseHex, isPermissionRequired } from './Utils'
+import { Config, customError, getProvider, isPermissionRequired, makeTx, metaTxTargets, parseHex } from './Utils'
 import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant'
+import { StateContainer } from './state'
 import { wrapInstance } from './sentry'
 import { errorCodes } from './errors'
-import { id } from 'ethers/lib/utils'
+
+import ArcanaABI from './contracts/Arcana'
+import DKGABI from './contracts/DKG'
+import DIDABI from './contracts/DID'
+import ForwarderABI from './contracts/Forwarder'
 
 export class StorageProvider {
   // private provider: providers.Web3Provider;
-  private readonly provider: any
   private readonly email: string
-  private api: AxiosInstance
-  private appAddress: string
-  private readonly appId: number
-  private readonly gateway: string
-  private readonly chainId: number
   private readonly debug: boolean
-  private readonly lock: Mutex
+  private readonly state: StateContainer
   private initialisedPromise: Promise<void>
 
   public files: FileAPI
@@ -41,46 +41,47 @@ export class StorageProvider {
     } else {
       config = {}
     }
+    this.state = new StateContainer()
 
     // If provider is provided by the user, use that provider
     if (config.provider) {
-      this.provider = getProvider(config.provider)
+      this.state.provider = getProvider(config.provider)
       // @ts-ignore
     } else if (window.arcana?.provider != null) {
       // @ts-ignore
-      this.provider = getProvider(window.arcana.provider)
+      this.state.provider = getProvider(window.arcana.provider)
       // @ts-ignore
     } else if (window.ethereum != null) {
       // @ts-ignore
-      this.provider = getProvider(window.ethereum)
+      this.state.provider = getProvider(window.ethereum)
     } else {
       throw customError('INITIALIZATION', errorCodes.wallet_not_found)
     }
     this.email = config.email
-    this.appId = config.appId
+    this.state.appID = config.appId
     if (config.appAddress) {
-      this.appAddress = parseHex(config.appAddress)
+      this.state.appAddr = parseHex(config.appAddress)
     }
     if (!config.chainId) {
-      this.chainId = chainId
+      this.state.chainID = chainId
     } else {
-      this.chainId = config.chainId
+      this.state.chainID = config.chainId
     }
     if (!config.gateway) {
-      this.gateway = chainIdToGateway.get(this.chainId)
+      this.state.gatewayURL = chainIdToGateway.get(this.state.chainID)
     } else {
       // Normalize the URL
-      this.gateway = new URL(config.gateway).href
+      this.state.gatewayURL = new URL(config.gateway).href
     }
 
-    this.lock = new Mutex()
+    this.state.lock = new Mutex()
 
     if (config.debug) {
       SentryInit({
         dsn: 'https://1a411b6bfed244de8f6a7d64bb432bd4@o1011868.ingest.sentry.io/6081085',
         integrations: [
           new Integrations.BrowserTracing({
-            tracingOrigins: [this.gateway]
+            tracingOrigins: [this.state.gatewayURL]
           })
         ],
         tracesSampleRate: 0
@@ -91,15 +92,14 @@ export class StorageProvider {
       this.debug = false
     }
 
-    this.provider.on('network', (newNetwork, oldNetwork) => {
+    this.state.provider.on('network', (newNetwork, oldNetwork) => {
       if (oldNetwork) {
         this.onNetworkChange(newNetwork, oldNetwork)
       }
     })
 
     // call onAccountChange when the account changes
-    // @ts-ignore
-    this.provider.provider.on('accountsChanged', (accounts) => {
+    this.state.provider.on('accountsChanged', (accounts) => {
       this.onAccountChange(accounts)
     })
   }
@@ -115,15 +115,17 @@ export class StorageProvider {
     // window.location.reload()
   }
 
-  downloadDID = async (did: string) => {
+  downloadNFT = async (did: string) => {
     await this.login()
-    const downloader = new Downloader(localStorage.getItem('did'), this.provider, this.api, this.lock, this.debug)
+    const downloader = new Downloader(this.state, this.debug, {
+      isNFT: true
+    })
     await downloader.download(did)
   }
 
   getUploader = async () => {
     await this.login()
-    return new Uploader(this.appId, this.appAddress, this.provider, this.api, this.lock, this.debug)
+    return new Uploader(this.state, this.debug)
   }
 
   getAccess = async (): Promise<FileAPI> => {
@@ -133,7 +135,9 @@ export class StorageProvider {
 
   getDownloader = async (): Promise<Downloader> => {
     await this.login()
-    return new Downloader(this.appAddress, this.provider, this.api, this.lock, this.debug)
+    return new Downloader(this.state, this.debug, {
+      isNFT: false
+    })
   }
 
   makeMetadataURL = async (title: string, description: string, did: string, file: File) => {
@@ -143,11 +147,11 @@ export class StorageProvider {
       throw new Error('Please fill in all the fields')
     }
     // get signer from provider
-    const signer = this.provider.getSigner()
+    const signer = this.state.provider.getSigner()
     const signature = await signer.signMessage(`Sign this message to attach NFT metadata with your did ${did}`)
-    const node = await this.api.get('/api/v1/get-node-address/', {
+    const node = await this.state.api.get('/api/v1/get-node-address/', {
       params: {
-        appid: this.appId
+        appid: this.state.appID
       }
     })
     const api = axios.create({
@@ -164,7 +168,7 @@ export class StorageProvider {
     }
 
     let subDomain = '.'
-    switch (this.chainId) {
+    switch (this.state.chainID) {
       case 40405:
         subDomain += 'beta'
         break
@@ -194,7 +198,7 @@ export class StorageProvider {
   }
 
   private _login = async () => {
-    if (!this.provider) {
+    if (!this.state.provider) {
       // @ts-ignore
       if (window.ethereum) {
         throw customError
@@ -202,28 +206,28 @@ export class StorageProvider {
     }
 
     // Fetch chain id from provider
-    const network = await this.provider.getNetwork()
-    const hexChainID = '0x' + this.chainId.toString(16)
+    const network = await this.state.provider.getNetwork()
+    const hexChainID = '0x' + this.state.chainID.toString(16)
 
     // throw error if chain id is not equal to the chain id of the app
-    if (this.chainId !== network.chainId) {
+    if (this.state.chainID !== network.chainId) {
       try {
-        await this.provider.provider.request({
+        await this.state.provider.provider.request({
           method: 'wallet_switchEthereumChain',
           params: [{ chainId: hexChainID }]
         })
       } catch (e) {
         // This error code indicates that the chain has not been added to the wallet.
         if (e.code === 4902) {
-          const blockchainURL = chainIdToBlockchainExplorerURL.get(this.chainId)
-          await this.provider.provider.request({
+          const blockchainURL = chainIdToBlockchainExplorerURL.get(this.state.chainID)
+          await this.state.provider.provider.request({
             method: 'wallet_addEthereumChain',
             params: [
               {
                 chainId: hexChainID,
                 chainName: 'Arcana',
 
-                rpcUrls: [chainIdToRPCURL.get(this.chainId)],
+                rpcUrls: [chainIdToRPCURL.get(this.state.chainID)],
                 blockExplorerUrls: blockchainURL ? [blockchainURL] : [],
 
                 nativeCurrency: {
@@ -240,49 +244,59 @@ export class StorageProvider {
       }
     }
 
-    this.api = axios.create({
-      baseURL: this.gateway
+    this.state.api = axios.create({
+      baseURL: this.state.gatewayURL
     })
-    let { data: res } = await this.api.get('/api/v1/get-config/')
-    localStorage.setItem('forwarder', res.Forwarder)
-    localStorage.setItem('dkg', res.DKG)
-    localStorage.setItem('did', res.DID)
-    await this.provider.send('eth_requestAccounts', []) // triggers wallet to connect to current page
-    const signer = await this.provider.getSigner()
+    let { data: res } = await this.state.api.get('/api/v1/get-config/')
+
+    this.state.forwarderContract = new ethers.Contract(res.Forwarder, ForwarderABI.abi, this.state.provider)
+    this.state.forwarderContractAddr = res.Forwarder
+
+    this.state.dkgContract = new ethers.Contract(res.DKG, DKGABI.abi, this.state.provider)
+    this.state.dkgContractAddr = res.DKG
+
+    this.state.didContract = new ethers.Contract(res.DID, DIDABI.abi, this.state.provider)
+    this.state.didContractAddr = res.DID
+
+    await this.state.provider.send('eth_requestAccounts', []) // triggers wallet to connect to current page
+    const signer = await this.state.provider.getSigner()
     const addr = await signer.getAddress()
-    const { data: nonce } = await this.api.get('/api/v1/get-nonce/', {
+    const { data: nonce } = await this.state.api.get('/api/v1/get-nonce/', {
       params: {
         address: addr
       }
     })
     const sig = await signer.signMessage(
-      `Welcome to Arcana Network!\n\nYou are about to use the Storage SDK.\n\nClick to sign in and accept the Arcana Network Terms of Service (https://bit.ly/3gqh6I7) and Privacy Policy (https://bit.ly/3MMpCgM).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nWallet address:\n${addr}\nNonce:\n${id(
-        String(nonce)
-      ).substring(2, 42)}`
+      `Welcome to Arcana Network!\n\nYou are about to use the Storage SDK.\n\nClick to sign in and accept the Arcana Network Terms of Service (https://bit.ly/3gqh6I7) and Privacy Policy (https://bit.ly/3MMpCgM).\n\nThis request will not trigger a blockchain transaction or cost any gas fees.\n\nWallet address:\n${
+        addr
+      }\nNonce:\n${ethers.utils.id(String(nonce)).substring(2, 42)}`
     )
-    res = await this.api.post('/api/v1/login/', {
-      appAddress: this.appAddress,
+    res = await this.state.api.post('/api/v1/login/', {
+      appAddress: this.state.appAddr,
       signature: sig,
       email: this.email,
       address: addr
     })
-    this.api.defaults.headers.Authorization = `Bearer ${res.data.token}`
+    this.state.api.defaults.headers.Authorization = `Bearer ${res.data.token}`
 
-    if (this.appId && !this.appAddress) {
+    if (this.state.appID && !this.state.appAddr) {
       // fetch app address
-      res = await this.api.get('/api/v1/get-address/', {
+      res = await this.state.api.get('/api/v1/get-address/', {
         params: {
-          id: this.appId
+          id: this.state.appID
         }
       })
       if (res.data.address) {
-        this.appAddress = parseHex(res.data.address)
+        this.state.appAddr = parseHex(res.data.address)
+        this.state.appContract = new ethers.Contract(this.state.appAddr, ArcanaABI.abi, this.state.provider)
       } else {
         throw new Error('app_not_found')
       }
+    } else {
+      this.state.appContract = new ethers.Contract(this.state.appAddr, ArcanaABI.abi, this.state.provider)
     }
 
-    this.files = new FileAPI(this.appAddress, this.appId, this.provider, this.api, this.lock, this.debug)
+    this.files = new FileAPI(this.state, this.debug)
   }
 
   // TODO: remove when breaking backward compatibility
@@ -320,7 +334,8 @@ export class StorageProvider {
     await this.login()
     fileId = parseHex(fileId)
     nftContract = parseHex(nftContract)
-    return await makeTx(this.appAddress, this.api, this.provider, 'linkNFT', [
+
+    return makeTx(this.state, metaTxTargets.APPLICATION, 'linkNFT', [
       fileId,
       tokenId,
       nftContract,
@@ -380,13 +395,13 @@ export class StorageProvider {
     if (!(await this.checkPermission())) {
       throw new Error('Permission already granted for the app')
     }
-    return await makeTx(this.appAddress, this.api, this.provider, 'grantAppPermission', [])
+    return makeTx(this.state, metaTxTargets.APPLICATION, 'grantAppPermission', [])
   }
 
   // check app permissions
   checkPermission = async () => {
     await this.login()
-    return await isPermissionRequired(this.appAddress, this.provider)
+    return isPermissionRequired(this.state)
   }
 }
 export { AccessTypeEnum } from './fileAPI'

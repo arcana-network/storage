@@ -91,7 +91,6 @@ describe('Upload File', () => {
   });
 
 
-
   it.skip('DownloadNFT', async () => {
     // did1 = "02220d65fe78758cb650441217004b9fa79249f171918055af29b85fba947e37";
     await arcanaInstance.linkNft(did1, 1, "0x35B33203DcFd0933a773B28C9Fce13012B5a1434", 80001)
@@ -102,12 +101,12 @@ describe('Upload File', () => {
     let my_file_old = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
     await arcanaInstance.files.delete(did)
     let my_file_new = await arcanaInstance.files.list(arcana.storage.AccessTypeEnum.MY_FILES);
-    chai.expect(my_file_old.length - my_file_new.length).equal(1); 
+    chai.expect(my_file_old.length - my_file_new.length).equal(1);
   })
   // it('Upload public file', async () => {
   //   let file = MockFile('aaaaaaaaaaaaa.txt', 4, 'text/plain');
   //   did = await arcanaInstance.upload(file, {publicFile: true});
   //   console.log('did', did);
   //   await arcanaInstance.download(did)
-  // });    
+  // });
 });
