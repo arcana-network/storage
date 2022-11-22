@@ -115,9 +115,11 @@ export class StorageProvider {
     // window.location.reload()
   }
 
-  downloadDID = async (did: string) => {
+  downloadNFT = async (did: string) => {
     await this.login()
-    const downloader = new Downloader(this.state, this.debug)
+    const downloader = new Downloader(this.state, this.debug, {
+      isNFT: true
+    })
     await downloader.download(did)
   }
 
@@ -133,7 +135,9 @@ export class StorageProvider {
 
   getDownloader = async (): Promise<Downloader> => {
     await this.login()
-    return new Downloader(this.state, this.debug)
+    return new Downloader(this.state, this.debug, {
+      isNFT: false
+    })
   }
 
   makeMetadataURL = async (title: string, description: string, did: string, file: File) => {

@@ -1,12 +1,10 @@
-import { BigNumber, Contract, ethers } from 'ethers'
+import { BigNumber, ethers } from 'ethers'
 
-import { customError, ensureArray, makeTx, metaTxRaw, metaTxTargets, parseHex } from './Utils'
+import { customError, ensureArray, makeTx, metaTxTargets, parseHex } from './Utils'
 import { wrapInstance } from './sentry'
 import { requiresLocking } from './locking'
 import { Rule } from './types'
 import type { StateContainer } from './state'
-
-import ArcanaABI from './contracts/Arcana'
 
 export enum AccessTypeEnum {
   MY_FILES,
@@ -14,8 +12,6 @@ export enum AccessTypeEnum {
 }
 
 export class FileAPI {
-  // may be overridden
-  private appContract: Contract
   private readonly state: StateContainer
 
   constructor (state: StateContainer, debug: boolean) {
@@ -23,15 +19,6 @@ export class FileAPI {
 
     if (debug) {
       wrapInstance(this)
-    }
-  }
-
-  setAppAddress = async (did: string) => {
-    // if app address is not set then fetch it from the did and set it
-    if (!this.state.appContract) {
-      const a = await this.state.didContract.getFile(parseHex(did)).app
-
-      this.appContract = new ethers.Contract(a, ArcanaABI.abi, this.state.provider)
     }
   }
 
@@ -194,7 +181,6 @@ export class FileAPI {
   @requiresLocking
   async share (did: string, _address: string[] | string, validity: number[] | number | null): Promise<string> {
     did = parseHex(did)
-    await this.setAppAddress(did[0])
     const address: string[] = ensureArray(_address).map(parseHex)
 
     let actualValidity: number[] = []
@@ -227,9 +213,8 @@ export class FileAPI {
   @requiresLocking
   async changeOwner (did: string, newOwnerAddress: string): Promise<string> {
     did = parseHex(did)
-    await this.setAppAddress(did)
     newOwnerAddress = parseHex(newOwnerAddress)
-    return metaTxRaw(this.appContract, this.state.forwarderContract, this.state.api, this.state.provider, 'changeFileOwner', [did, newOwnerAddress])
+    return makeTx(this.state, metaTxTargets.APPLICATION, 'changeFileOwner', [did, newOwnerAddress])
   }
 
   changeFileOwner = (did, newOwnerAddress: string): Promise<string> => {
@@ -238,19 +223,17 @@ export class FileAPI {
 
   @requiresLocking
   async delete (did: string): Promise<string> {
-    await this.setAppAddress(did)
     did = parseHex(did)
     return makeTx(this.state, metaTxTargets.DID, 'deleteFile', [did])
   }
 
   @requiresLocking
   async removeFile (did: string): Promise<string> {
-    await this.setAppAddress(did)
     did = parseHex(did)
-    return metaTxRaw(this.appContract, this.state.forwarderContract, this.state.api, this.state.provider, 'removeUserFile', [did])
+    return makeTx(this.state, metaTxTargets.APPLICATION, 'removeUserFile', [did])
   }
 
-  removeFileFromApp = async (did: string): Promise<string> => {
+  removeFileFromApp = (did: string): Promise<string> => {
     return this.removeFile(did)
   }
 
@@ -287,7 +270,6 @@ export class FileAPI {
 
   getSharedUsers = async (did: string): Promise<string[]> => {
     const realDID = parseHex(did)
-    await this.setAppAddress(realDID)
     let users = (await this.state.api.get('/api/v1/shared-users/', {
       params: {
         did: realDID

@@ -43,10 +43,16 @@ export function createAndDownloadBlobFile (body, filename) {
 export class Downloader {
   private readonly hasher
   private readonly state: StateContainer
+  private readonly isNFT: boolean
 
-  constructor (state: StateContainer, debug: boolean) {
+  constructor (state: StateContainer, debug: boolean, {
+    isNFT
+  }: {
+    isNFT: boolean
+  }) {
     this.hasher = new Sha256()
     this.state = state
+    this.isNFT = isNFT
 
     if (debug) {
       wrapInstance(this)
@@ -108,8 +114,9 @@ export class Downloader {
       // Private file
       case 0x02: {
         const ephemeralWallet = await Wallet.createRandom()
-        const functionName = localStorage.getItem('did') === this.state.appAddr ? 'downloadNFT' : 'download'
-        const checkPermissionResp = await makeTx(this.state, metaTxTargets.APPLICATION, functionName, [
+        const tgt = this.isNFT ? metaTxTargets.DID : metaTxTargets.APPLICATION
+        const functionName = this.isNFT ? 'downloadNFT' : 'download'
+        const checkPermissionResp = await makeTx(this.state, tgt, functionName, [
           did,
           ephemeralWallet.address
         ])
