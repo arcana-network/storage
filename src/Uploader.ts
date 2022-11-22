@@ -67,7 +67,7 @@ export class Uploader {
       nodeResp = (
         await this.state.api.get('/api/v1/get-node-address/', {
           params: {
-            appId: this.state.appID
+            appid: this.state.appID
           }
         })
       ).data
