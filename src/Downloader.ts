@@ -61,7 +61,7 @@ export class Downloader {
   private async _download (did, accessType: 'view' | 'download'): Promise<void | Blob> {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did
     const didBytes = utils.arrayify(did)
-    const file = await getFile(did, this.provider)
+    const file = await getFile(this.state, did)
     const chunkSize = 10 * 2 ** 20
     let fileWriter
 
@@ -108,8 +108,8 @@ export class Downloader {
       // Private file
       case 0x02: {
         const ephemeralWallet = await Wallet.createRandom()
-        const functionName = localStorage.getItem('did') === this.appAddress ? 'downloadNFT' : 'download'
-        const checkPermissionResp = await makeTx(this.appAddress, this.api, this.provider, functionName, [
+        const functionName = localStorage.getItem('did') === this.state.appAddr ? 'downloadNFT' : 'download'
+        const checkPermissionResp = await makeTx(this.state, metaTxTargets.APPLICATION, functionName, [
           did,
           ephemeralWallet.address
         ])

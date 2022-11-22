@@ -117,7 +117,7 @@ export class StorageProvider {
 
   downloadDID = async (did: string) => {
     await this.login()
-    const downloader = new Downloader(localStorage.getItem('did'), this.provider, this.api, this.lock, this.debug)
+    const downloader = new Downloader(this.state, this.debug)
     await downloader.download(did)
   }
 
