@@ -302,7 +302,7 @@ export default {
       inputs: [
         {
           internalType: 'uint256',
-          name: '_epoch',
+          name: 'epoch',
           type: 'uint256'
         }
       ],
@@ -489,7 +489,7 @@ export default {
       inputs: [
         {
           internalType: 'uint256',
-          name: '_newEpoch',
+          name: 'newEpoch',
           type: 'uint256'
         }
       ],

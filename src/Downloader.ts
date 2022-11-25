@@ -45,11 +45,15 @@ export class Downloader {
   private readonly state: StateContainer
   private readonly isNFT: boolean
 
-  constructor (state: StateContainer, debug: boolean, {
-    isNFT
-  }: {
-    isNFT: boolean
-  }) {
+  constructor (
+    state: StateContainer,
+    debug: boolean,
+    {
+      isNFT
+    }: {
+      isNFT: boolean;
+    }
+  ) {
     this.hasher = new Sha256()
     this.state = state
     this.isNFT = isNFT
@@ -85,7 +89,9 @@ export class Downloader {
           file.name = name
         }
         fileWriter = new FileWriter(file.name, accessType)
-        const { data: { host: storageHost } } = await this.state.api.get('/api/v1/get-region-endpoint/', {
+        const {
+          data: { host: storageHost }
+        } = await this.state.api.get('/api/v1/get-region-endpoint/', {
           params: {
             address: this.state.appAddr
           }
@@ -116,10 +122,7 @@ export class Downloader {
         const ephemeralWallet = await Wallet.createRandom()
         const tgt = this.isNFT ? metaTxTargets.DID : metaTxTargets.APPLICATION
         const functionName = this.isNFT ? 'downloadNFT' : 'download'
-        const checkPermissionResp = await makeTx(this.state, tgt, functionName, [
-          did,
-          ephemeralWallet.address
-        ])
+        const checkPermissionResp = await makeTx(this.state, tgt, functionName, [did, ephemeralWallet.address])
         const txHash = checkPermissionResp.txHash
 
         const shares = {}

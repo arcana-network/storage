@@ -81,13 +81,13 @@ export default {
         {
           indexed: false,
           internalType: 'uint256',
-          name: 'chain_id',
+          name: 'chainId',
           type: 'uint256'
         },
         {
           indexed: false,
           internalType: 'uint256',
-          name: 'token_id',
+          name: 'tokenId',
           type: 'uint256'
         },
         {
@@ -133,6 +133,19 @@ export default {
       type: 'event'
     },
     {
+      anonymous: false,
+      inputs: [
+        {
+          indexed: false,
+          internalType: 'address',
+          name: '_factory',
+          type: 'address'
+        }
+      ],
+      name: 'setFactory',
+      type: 'event'
+    },
+    {
       inputs: [],
       name: 'APP_ROLE',
       outputs: [
@@ -149,12 +162,12 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         },
         {
           internalType: 'address',
-          name: '_owner',
+          name: 'newFileOwner',
           type: 'address'
         }
       ],
@@ -167,17 +180,17 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         },
         {
           internalType: 'uint8',
-          name: '_control',
+          name: 'control',
           type: 'uint8'
         },
         {
           internalType: 'address',
-          name: '_requester',
+          name: 'requester',
           type: 'address'
         }
       ],
@@ -201,7 +214,7 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         }
       ],
@@ -214,7 +227,7 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         }
       ],
@@ -229,11 +242,6 @@ export default {
           internalType: 'bytes32',
           name: 'did',
           type: 'bytes32'
-        },
-        {
-          internalType: 'address',
-          name: 'ephemeralWallet',
-          type: 'address'
         }
       ],
       name: 'downloadNFT',
@@ -245,7 +253,7 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         }
       ],
@@ -284,7 +292,7 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         }
       ],
@@ -303,7 +311,7 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         }
       ],
@@ -322,12 +330,12 @@ export default {
       inputs: [
         {
           internalType: 'address',
-          name: '_relayer',
+          name: 'relayer',
           type: 'address'
         },
         {
           internalType: 'address',
-          name: '_factory',
+          name: 'factoryAddress',
           type: 'address'
         }
       ],
@@ -359,22 +367,22 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         },
         {
           internalType: 'uint256',
-          name: '_tokenId',
+          name: 'tokenId',
           type: 'uint256'
         },
         {
           internalType: 'address',
-          name: '_nftContract',
+          name: 'nftContract',
           type: 'address'
         },
         {
           internalType: 'uint256',
-          name: '_chainId',
+          name: 'chainId',
           type: 'uint256'
         }
       ],
@@ -420,37 +428,37 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         },
         {
           internalType: 'address',
-          name: '_owner',
+          name: 'fileOwner',
           type: 'address'
         },
         {
           internalType: 'uint256',
-          name: '_fileSize',
+          name: 'fileSize',
           type: 'uint256'
         },
         {
           internalType: 'bool',
-          name: '_uploaded',
+          name: 'uploaded',
           type: 'bool'
         },
         {
           internalType: 'bytes32',
-          name: '_name',
+          name: 'name',
           type: 'bytes32'
         },
         {
           internalType: 'bytes32',
-          name: '_fileHash',
+          name: 'fileHash',
           type: 'bytes32'
         },
         {
           internalType: 'address',
-          name: '_storageNode',
+          name: 'storageNode',
           type: 'address'
         }
       ],
@@ -476,12 +484,12 @@ export default {
       inputs: [
         {
           internalType: 'bytes32',
-          name: '_did',
+          name: 'did',
           type: 'bytes32'
         },
         {
           internalType: 'bytes32',
-          name: '_ruleHash',
+          name: 'ruleHash',
           type: 'bytes32'
         }
       ],
