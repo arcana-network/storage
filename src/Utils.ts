@@ -18,7 +18,7 @@ export type Config = {
 
 export enum metaTxTargets {
   APPLICATION,
-  DID
+  DID,
 }
 
 export class KeyGen {
@@ -122,7 +122,14 @@ function hexToASCII (str1) {
   return str
 }
 
-export const metaTxRaw = async (targetContract: Contract, forwarderContract: Contract, api: AxiosInstance, wallet: providers.Web3Provider, method: string, params) => {
+export const metaTxRaw = async (
+  targetContract: Contract,
+  forwarderContract: Contract,
+  api: AxiosInstance,
+  wallet: providers.Web3Provider,
+  method: string,
+  params
+) => {
   const req = await sign(wallet, targetContract, forwarderContract, method, params)
   const res = await api.post('/api/v1/meta-tx/', req)
   if (res.data.err) {

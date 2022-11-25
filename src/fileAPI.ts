@@ -23,19 +23,23 @@ export class FileAPI {
   }
 
   numOfMyFiles = async () => {
-    return (await this.state.api('/api/v1/files/total/', {
-      params: {
-        address: this.state.appAddr
-      }
-    })).data
+    return (
+      await this.state.api('/api/v1/files/total/', {
+        params: {
+          address: this.state.appAddr
+        }
+      })
+    ).data
   }
 
   numOfAllFiles = async () => {
-    return (await this.state.api('/api/v1/files/all-users/total/', {
-      params: {
-        address: this.state.appAddr
-      }
-    })).data
+    return (
+      await this.state.api('/api/v1/files/all-users/total/', {
+        params: {
+          address: this.state.appAddr
+        }
+      })
+    ).data
   }
 
   numOfMyFilesPages = async (pageSize: number = 20) => {
@@ -94,7 +98,9 @@ export class FileAPI {
       throw customError('TRANSACTION', 'Public URLs are only available for Public Files.')
     }
 
-    const { data: { host: storageHost } } = await this.state.api.get('/api/v1/get-region-endpoint/', {
+    const {
+      data: { host: storageHost }
+    } = await this.state.api.get('/api/v1/get-region-endpoint/', {
       params: {
         address: this.state.appAddr
       }
@@ -129,11 +135,13 @@ export class FileAPI {
     let data: any[] =
       rule === ethers.constants.HashZero
         ? null
-        : (await this.state.api.get('/api/v1/get-hash-data/', {
-            params: {
-              hash: rule
-            }
-          })).data
+        : (
+            await this.state.api.get('/api/v1/get-hash-data/', {
+              params: {
+                hash: rule
+              }
+            })
+          ).data
     if (data === null) {
       data = []
     }
@@ -270,11 +278,13 @@ export class FileAPI {
 
   getSharedUsers = async (did: string): Promise<string[]> => {
     const realDID = parseHex(did)
-    let users = (await this.state.api.get('/api/v1/shared-users/', {
-      params: {
-        did: realDID
-      }
-    })).data
+    let users = (
+      await this.state.api.get('/api/v1/shared-users/', {
+        params: {
+          did: realDID
+        }
+      })
+    ).data
     if (users === null) {
       users = []
     }
