@@ -9,8 +9,9 @@ import { Downloader } from './Downloader'
 import { FileAPI } from './fileAPI'
 import type { UploadParams } from './types'
 import { Config, customError, getProvider, isPermissionRequired, makeTx, metaTxTargets, parseHex } from './Utils'
-import { chainId, chainIdToBlockchainExplorerURL, chainIdToGateway, chainIdToRPCURL } from './constant'
+import { chainId, chainIdToGateway } from './constant'
 import { StateContainer } from './state'
+import { requiresArcanaNetwork } from './decorators'
 import { wrapInstance } from './sentry'
 import { errorCodes } from './errors'
 
@@ -197,50 +198,12 @@ export class StorageProvider {
     return this.initialisedPromise
   }
 
-  private _login = async () => {
+  @requiresArcanaNetwork
+  private async _login () {
     if (!this.state.provider) {
       // @ts-ignore
       if (window.ethereum) {
         throw customError
-      }
-    }
-
-    // Fetch chain id from provider
-    const network = await this.state.provider.getNetwork()
-    const hexChainID = '0x' + this.state.chainID.toString(16)
-
-    // throw error if chain id is not equal to the chain id of the app
-    if (this.state.chainID !== network.chainId) {
-      try {
-        await this.state.provider.provider.request({
-          method: 'wallet_switchEthereumChain',
-          params: [{ chainId: hexChainID }]
-        })
-      } catch (e) {
-        // This error code indicates that the chain has not been added to the wallet.
-        if (e.code === 4902) {
-          const blockchainURL = chainIdToBlockchainExplorerURL.get(this.state.chainID)
-          await this.state.provider.provider.request({
-            method: 'wallet_addEthereumChain',
-            params: [
-              {
-                chainId: hexChainID,
-                chainName: 'Arcana',
-
-                rpcUrls: [chainIdToRPCURL.get(this.state.chainID)],
-                blockExplorerUrls: blockchainURL ? [blockchainURL] : [],
-
-                nativeCurrency: {
-                  symbol: 'XAR',
-                  // ?
-                  decimals: 18
-                }
-              }
-            ]
-          })
-        } else {
-          throw e
-        }
       }
     }
 

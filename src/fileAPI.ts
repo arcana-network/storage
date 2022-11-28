@@ -2,7 +2,7 @@ import { BigNumber, ethers } from 'ethers'
 
 import { customError, ensureArray, makeTx, metaTxTargets, parseHex } from './Utils'
 import { wrapInstance } from './sentry'
-import { requiresLocking } from './locking'
+import { requiresAllDecorators } from './decorators'
 import { Rule } from './types'
 import type { StateContainer } from './state'
 
@@ -186,7 +186,7 @@ export class FileAPI {
     return await makeTx(this.state, metaTxTargets.APPLICATION, 'updateRuleSet', [did, ruleHash])
   }
 
-  @requiresLocking
+  @requiresAllDecorators
   async share (did: string, _address: string[] | string, validity: number[] | number | null): Promise<string> {
     did = parseHex(did)
     const address: string[] = ensureArray(_address).map(parseHex)
@@ -211,14 +211,14 @@ export class FileAPI {
     return await this.updateRuleSet(did, address, actualValidity, true)
   }
 
-  @requiresLocking
+  @requiresAllDecorators
   async revoke (did: string, address: string | string[]): Promise<string> {
     did = parseHex(did)
     address = ensureArray(address).map(parseHex)
     return await this.updateRuleSet(did, address, null, false)
   }
 
-  @requiresLocking
+  @requiresAllDecorators
   async changeOwner (did: string, newOwnerAddress: string): Promise<string> {
     did = parseHex(did)
     newOwnerAddress = parseHex(newOwnerAddress)
@@ -229,13 +229,13 @@ export class FileAPI {
     return this.changeOwner(did, newOwnerAddress)
   }
 
-  @requiresLocking
+  @requiresAllDecorators
   async delete (did: string): Promise<string> {
     did = parseHex(did)
     return makeTx(this.state, metaTxTargets.DID, 'deleteFile', [did])
   }
 
-  @requiresLocking
+  @requiresAllDecorators
   async removeFile (did: string): Promise<string> {
     did = parseHex(did)
     return makeTx(this.state, metaTxTargets.APPLICATION, 'removeUserFile', [did])
@@ -249,7 +249,7 @@ export class FileAPI {
     return this.delete(did)
   }
 
-  @requiresLocking
+  @requiresAllDecorators
   async deleteAccount () {
     return await makeTx(this.state, metaTxTargets.APPLICATION, 'deleteAccount', [])
   }

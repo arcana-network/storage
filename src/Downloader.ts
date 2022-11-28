@@ -10,7 +10,7 @@ import FileWriter from './FileWriter'
 import Sha256 from './SHA256'
 
 import { wrapInstance } from './sentry'
-import { requiresLocking } from './locking'
+import { requiresAllDecorators } from './decorators'
 import { errorCodes } from './errors'
 import type { StateContainer } from './state'
 
@@ -67,7 +67,7 @@ export class Downloader {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   onProgress = async (bytesDownloaded: number, bytesTotal: number): Promise<void> => {}
 
-  @requiresLocking
+  @requiresAllDecorators
   private async _download (did, accessType: 'view' | 'download'): Promise<void | Blob> {
     did = did.substring(0, 2) !== '0x' ? '0x' + did : did
     const didBytes = utils.arrayify(did)
