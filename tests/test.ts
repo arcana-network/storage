@@ -4,16 +4,20 @@ import { BigNumber, ethers, Wallet } from 'ethers'
 import { createEngine } from './sub_provider'
 import fs from 'fs'
 import nock from 'nock'
-import { Blob as nBlob } from 'blob-polyfill'
+
 import axios from 'axios'
 import httpAdapter from 'axios/lib/adapters/http'
+import { encrypt, decrypt, PrivateKey } from 'eciesjs'
+import { id, parseBytes32String } from 'ethers/lib/utils'
+import { shares, did, dkgPrivateKeys } from './constants'
+
 
 import { providerFromEngine } from 'eth-json-rpc-middleware'
 
 // SDK imports
 import { StorageProvider } from '../src'
 import * as utils from '../src/Utils'
-import { parseData } from './utils'
+import { parseData, getCurrentEpochDetails, makeEmail, mockFile} from './utils'
 import { CustomError } from '../src/types'
 import DID from '../src/contracts/DID'
 import DKG from '../src/contracts/DKG'
@@ -43,23 +47,7 @@ function sleep (ms) {
   })
 }
 
-const makeEmail = () => {
-  const strValues = 'abcdefg12345'
-  let strEmail = ''
-  let strTmp
-  for (let i = 0; i < 10; i++) {
-    strTmp = strValues.charAt(Math.round(strValues.length * Math.random()))
-    strEmail = strEmail + strTmp
-  }
-  strTmp = ''
-  strEmail = strEmail + '@example.com'
-  return strEmail
-}
-
 let file
-// arcanaInstance,
-// receiverInstance,
-const did = '0x4de0e96b0a8886e42a2c35b57df8a9d58a93b5bff655bc37a30e2ab8e29dc066'
 
 function meta_tx_nock (reply_data) {
   const nockMetaReply = async (uri, body: any) => {
@@ -74,13 +62,13 @@ function meta_tx_nock (reply_data) {
     .reply(200, nockMetaReply, { 'access-control-allow-headers': 'Authorization' })
 }
 
-function mock_dkg (reply_data) {
-  nock('https://dkgnode1.arcana.network:443')
-    .defaultReplyHeaders(nockOptions)
-    .post('/rpc')
-    .times(6)
-    .reply(200, { jsonrpc: '2.0', result: { ok: true }, id: 10 })
-}
+// function mock_dkg (reply_data) {
+//   nock('https://dkgnode1.arcana.network:443')
+//     .defaultReplyHeaders(nockOptions)
+//     .post('/rpc')
+//     .times(6)
+//     .reply(200, { jsonrpc: '2.0', result: { ok: true }, id: 10 })
+// }
 
 async function nockSetup () {
   nock('http://localhost:9010')
@@ -109,6 +97,7 @@ async function nockSetup () {
     .query(true)
     .reply(200, { host: 'http://localhost:3000/', address: storage_node.address })
 
+
   nock('http://localhost:3000')
     .persist()
     .defaultReplyHeaders(nockOptions)
@@ -120,70 +109,41 @@ async function nockSetup () {
     .reply(200, {})
 }
 
-function getCurrentEpochDetails () {
-  return ethers.utils.defaultAbiCoder.encode(
-    ['tuple(string declaredIp, uint position, uint pubKx, uint pubKy,string tmP2PListenAddress,string p2pListenAddress)[]'],
-    [
-      [{
-        declaredIp: 'dkgnode1.arcana.network:443',
-        position: BigNumber.from(1),
-        pubKx: BigNumber.from('29023421385368379144749466045924017514934229958180852799451398628000593771667'),
-        pubKy: BigNumber.from('31632158778368581637676511185062566059198308712876704725543144993632262155464'),
-        p2pListenAddress: 'u',
-        tmP2PListenAddress: 't'
-      },
-      {
-        declaredIp: 'dkgnode1.arcana.network:443',
-        position: BigNumber.from(2),
-        pubKx: BigNumber.from('105719267757522549686383951453889518570805320580847799971673920448991999863268'),
-        pubKy: BigNumber.from('12311889399951856112539425386359305279151271210811891657961588078446721210801'),
-        p2pListenAddress: 'u',
-        tmP2PListenAddress: 't'
-      },
-      {
-        declaredIp: 'dkgnode1.arcana.network:443',
-        position: BigNumber.from(3),
-        pubKx: BigNumber.from('112513454780213693752054630002769173645973927254986348958538391710171734325064'),
-        pubKy: BigNumber.from('31826403948237730820406540123018982546704465196666925150128355254483964682271'),
-        p2pListenAddress: 'u',
-        tmP2PListenAddress: 't'
-      },
-      {
-        declaredIp: 'dkgnode1.arcana.network:443',
-        position: BigNumber.from(4),
-        pubKx: BigNumber.from('103022124116237959935952092341458720857383888117879935947184525301185593633427'),
-        pubKy: BigNumber.from('83428276264331813311663241272832111383329363811859329412601611536906464022186'),
-        p2pListenAddress: 'u',
-        tmP2PListenAddress: 't'
-      },
-      {
-        declaredIp: 'dkgnode1.arcana.network:443',
-        position: BigNumber.from(5),
-        pubKx: BigNumber.from('72082384183905358797739369765923546941331333550297636524350044306990429216270'),
-        pubKy: BigNumber.from('661783827736034504670612788123848346528644035307464845748154787461466575102'),
-        p2pListenAddress: 'u',
-        tmP2PListenAddress: 't'
-      },
-      {
-        declaredIp: 'dkgnode1.arcana.network:443',
-        position: BigNumber.from(6),
-        pubKx: BigNumber.from('30438236858857419456992904193833033911277657186396590512267279659738218054034'),
-        pubKy: BigNumber.from('27076479865999379327196017777333283283075678191787288284998453473449446886409'),
-        p2pListenAddress: 'u',
-        tmP2PListenAddress: 't'
-      }]
-    ])
+function getMiddlewareShare(dkgNodeId, txHash, sig) {
+  const sigParams = JSON.stringify({ tx_hash: txHash })
+  const hash = id(sigParams)
+  const msgHash = ethers.utils.hashMessage(hash);
+  const msgHashBytes = ethers.utils.arrayify(msgHash);
+  const recoveredPubKey = ethers.utils.recoverPublicKey(msgHashBytes, sig);
+  
+  // decrypt with privateKey of dkg node and encrypt with recovered publicKey
+  const finalShare = encrypt(recoveredPubKey, decrypt(dkgPrivateKeys[dkgNodeId-1], Buffer.from(shares[dkgNodeId-1], 'hex')))
+
+  return finalShare.toString('hex')
+}
+
+function mock_dkg(reply_data) {
+
+  for(let i=1; i<=6; i++) {
+    nock('https://dkgnode' + i.toString() + ".arcana.network:443")
+    .post('/rpc')
+    .reply(function(uri, req) {
+      let sig = req.params.signature;
+      let txHash = req.params.tx_hash;
+      const finalShare = getMiddlewareShare(i, txHash, sig);
+
+      return  [
+        200,
+        { jsonrpc: '2.0', result: { ok: true , share: finalShare }, id: 10 } , 
+        ]
+      }
+    )
+  }
 }
 
 function sinonMockObjectSetup () {
   sinon.replace(utils, 'checkTxnStatus', () => Promise.resolve())
-  sinon.replace(utils, 'getFile', () => Promise.resolve({ app: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9' }))
-}
-
-async function mockFile () {
-  // file = MockFile('aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.txt', 2 ** 10, 'image/txt');
-  // file = new File([file], "picsum_img", { type: file.type });
-  return new nBlob([await (await fetch('https://picsum.photos/id/872/200/300')).arrayBuffer()])
+  sinon.replace(utils, 'getFile', () => Promise.resolve({ app: '0xDc64a140Aa3E981100a9becA4E685f962f0cF6C9', name: "0test_file", hash: "b325881c7e3cb72055203af536e5a0618f624ac2b57b608037f359bfb56bbc88" }))
 }
 
 // Wallet Setup
@@ -209,6 +169,7 @@ test.serial.before(async (t) => {
   // File prep
   file = await mockFile()
   file.name = 'test_file'
+  file.hash = "0x20AB1C2EE19FC96A7C66E33917D191A24E3CE9DAC99DB7C786ACCE31E559144FEAFC695C58E508E2EBBC9D3C96F21FA3"
 })
 
 // TODO: get request handler in arrays
@@ -231,8 +192,17 @@ async function createStorageInstance (wallet: Wallet, middleware?) {
   return Promise.resolve(instance)
 }
 
-test.serial('Upload file', async (t) => {
+test.serial.only('Upload file', async (t) => {
   meta_tx_nock(undefined)
+
+  nock(gateway)
+  .defaultReplyHeaders(nockOptions)
+  .get('/api/v1/list-files/')
+  .query(true)
+  .reply(200, [{ did: did.substring(2), size: file.size }], { 'access-control-allow-headers': 'Authorization' })
+  .get('/api/v1/files/total/')
+  .query(true)
+  .reply(200, { data: 0 })
 
   const arcanaInstance = await createStorageInstance(arcanaWallet, (req, res, next, end) => {
     switch (req.method) {
@@ -296,11 +266,67 @@ test.serial('Upload file', async (t) => {
   })
 
   const upload = await arcanaInstance.getUploader()
-  await t.notThrowsAsync(upload.upload(file))
+
+  await (upload.upload(file))
+  const myFilesAfterUpload = await arcanaInstance.myFiles()
+  t.is(myFilesAfterUpload[0].did, did.substring(2))
+  t.is(myFilesAfterUpload.length, 1)
 })
 
-test.skip('Download file', async () => {
-  // unable to fake key shares responses
+test.serial.only('Download file', async (t) => {
+  t.plan(4);
+  meta_tx_nock(undefined);
+  mock_dkg("test_key");
+
+  nock('http://localhost:9010')
+  .defaultReplyHeaders(nockOptions)
+  //.persist()
+  .get('/api/v1/file-name/')
+  .query(true)
+  .reply(200, "test-file")
+  .get('/api/v2/file-name/')
+  .query(true)
+  .reply(200, "test-file")
+
+  const middleware = (req, res, next, end) => {
+    const data = parseData(
+      {
+        value: ethers.utils.parseEther('0'),
+        data: req.params[0].data,
+      },
+      DKG.abi,
+    );
+
+    switch (data.name) {
+      case 'download':
+        res.result = ethers.constants.HashZero;
+        break;
+      case 'getCurrentEpochDetails':
+        res.result = getCurrentEpochDetails()
+        break;
+    }
+    end();
+  };
+
+  const arcanaInstance = await createStorageInstance(arcanaWallet, middleware);
+
+  const downloader = await arcanaInstance.getDownloader();
+
+    // Now check whether it showing in receipt user list
+    nock(gateway)
+    .defaultReplyHeaders(nockOptions)
+    .get('/api/v1/list-files/')
+    .query(true)
+    .reply(200, [{ did: did.substring(2), size: file.size }], { 'access-control-allow-headers': 'Authorization' })
+    .get('/api/v1/files/total/')
+    .reply(200, { data: 0 })
+    .get('/api/v2/file/public/' + appAddress + "/" + did)
+    .reply(200, { name: 0x02 })
+
+  console.log(did);
+  const tx = await downloader.download(did.substring(2));
+  t.truthy(tx);
+
 })
 
 test.serial.skip('Metadata URL', async (t) => {
