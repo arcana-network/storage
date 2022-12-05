@@ -8,7 +8,7 @@ import { encrypt } from 'eciesjs'
 import { randomBytes } from 'crypto-browserify'
 
 import { wrapInstance } from './sentry'
-import { requiresLocking } from './locking'
+import { requiresAllDecorators } from './decorators'
 import type { UploadParams } from './types'
 import type { StateContainer } from './state'
 
@@ -45,7 +45,7 @@ export class Uploader {
     console.log('Error', err)
   }
 
-  @requiresLocking
+  @requiresAllDecorators
   async upload (fileRaw: File, params: UploadParams = { chunkSize: 10 * 2 ** 20, publicFile: false }) {
     const file: File = fileRaw
     const chunkSize = params.chunkSize ? params.chunkSize : 10 * 2 ** 20
