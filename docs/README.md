@@ -68,7 +68,7 @@ FileAPI.share(did, address);
 
 ```js
 // did: DID of file from which access is removed
-// address: Address of the user who's access is getting revoked
+// address: Address of the user whose access is getting revoked
 FileAPI.revoke(did, address);
 ```
 
@@ -132,7 +132,7 @@ await arcanaInstance.downloadDID('<did of the file>');
 
 ## NFT
 
-#### Create Metdata URL
+#### Create Metadata URL
 
 **Note:** This is typically used for NFT use case.
 
@@ -224,7 +224,7 @@ uploader.upload(fileToUpload)
 
 This advanced error handling section is only meant for file upload to address special dApp use cases. It is **recommended** that dApp developers using *Exception handling - catch* mechanism, for handling file upload errors.
 
-Every user action to upload a file internally results in the Storage SDK splitting the file into multiple parts according to the [tus](https://tus.io/) protocol. These parts are uploaded to the Arcana Store. If any of the file segment fails to transmit, it is automatically retried until all file segments are transferred. The automatic retry counter is hard coded to '5' in the beta release and the dApp developer cannot change this configuration.
+Every user action to upload a file internally results in the Storage SDK splitting the file into multiple parts according to the [tus](https://tus.io/) protocol. These parts are uploaded to the Arcana Store. If any of the file segment fails to transmit, it is automatically retried until all file segments are transferred. The automatic retry counter is hardcoded to '5' in the beta release and the dApp developer cannot change this configuration.
 
 If the dApp developer is required to handle file upload error in case the retries fail, use `onError()` mechanism. After retrying for four times, in case of any segment upload fails for the fifth time, the Storage SDK invokes `onError()` callback to enable dApp developer to take appropriate action or delay file transfer to deal with intermittent network failures.
 
@@ -256,7 +256,7 @@ arcanaInstance.onAccountChange = (accounts) => {
 | Error	| Description |
 | ----  | ------ |
 | unauthorized_user	| Trying to download a file which is neither owned by you nor shared with you. |
-| only_file_owner	|	Only the owner of the file have access to the function i.e, either to delete, revoke or transfer file etc. |
+| only_file_owner	|	Only the owner of the file has access to the function i.e, either to delete, revoke or transfer file etc. |
 | non_registered_user	|	Your account is not registered for the app. |
 | only_factory_contract	|	Only factory contract has access. The access can be to add new app or setup app level limit i.e, storage and bandwidth |
 | no_app_space	|	Your current app's storage or bandwidth limit has been consumed. |
@@ -282,7 +282,7 @@ arcanaInstance.onAccountChange = (accounts) => {
 
 ## Storage SDK Reference Docs
 
-You can auto-generate markdown and html documentation containing Storage SDK Reference Guide. Follow teh steps listed below:
+You can auto-generate markdown and html documentation containing Storage SDK Reference Guide. Follow the steps listed below:
 
 ### Markdown Documentation
 
